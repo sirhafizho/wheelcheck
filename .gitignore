@@ -1,0 +1,40 @@
+# Backend
+backend/build/
+backend/.gradle/
+backend/out/
+backend/*.iml
+backend/.idea/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Uploads (local dev)
+uploads/
+
+# Test outputs
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+backend/build/reports/

@@ -1,0 +1,425 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/accessibility/SKILL.md",
+      "computedHash": "10e83284d3395ab5ec2f2db602b663480a37a4ff404d16510eefe86b034fcc1a"
+    },
+    "accessibility-compliance": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/ui-design/skills/accessibility-compliance/SKILL.md",
+      "computedHash": "36d3b046163c42251732b3127c042f6b8eb7d91fcbf7ef9ae79fde79e9c99369"
+    },
+    "agent-browser": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/agent-browser/SKILL.md",
+      "computedHash": "5e5fc6ccc20e0b28906d2d27691c8a8d633d9343678fdf8a86790f3a01705f8a"
+    },
+    "ai-multimodal": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ai-multimodal/SKILL.md",
+      "computedHash": "f79c310a888d6c6134e503b2cbd9758dc6fbf13dab158e3000319d4b2ce9cde2"
+    },
+    "atlassian-rest": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/atlassian-rest/SKILL.md",
+      "computedHash": "8301565e9fdc9ee026caa2606e09437ec765c26ef0799551a1e10c7de51dc299"
+    },
+    "bmad-advanced-elicitation": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-advanced-elicitation/SKILL.md",
+      "computedHash": "de4f87e73768961939bcad3abceadcdaf8d6e8b9462938118ec48a819503551a"
+    },
+    "bmad-agent-analyst": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-agent-analyst/SKILL.md",
+      "computedHash": "c946cc9f71c69272afbd874a0bf9c5ae2401448ba549140e66cae199f2f601e1"
+    },
+    "bmad-agent-architect": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-agent-architect/SKILL.md",
+      "computedHash": "cd3a0083bc45f6f366d9b93c2617d235794c788bb4e155370ef31c97da86041c"
+    },
+    "bmad-agent-dev": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-agent-dev/SKILL.md",
+      "computedHash": "821e90f002bc6eb991bc80f25b62e8daae75e6c5a4e062c91487ef33633a67cf"
+    },
+    "bmad-agent-pm": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-agent-pm/SKILL.md",
+      "computedHash": "5a19d4d5071e07d7888bd8a5cd1df080fc67625cacf216b0f786f5fe04543483"
+    },
+    "bmad-agent-tech-writer": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-agent-tech-writer/SKILL.md",
+      "computedHash": "60bc7e64a6924fb677144dd0f91f31d7f787f6fc17d0adb99f4167abbc860765"
+    },
+    "bmad-agent-ux-designer": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-agent-ux-designer/SKILL.md",
+      "computedHash": "b816d8e451aa97cd2947a62cfd61677f3d2dd96ec7fb137d6d71db1b665ae2ca"
+    },
+    "bmad-auto": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/bmad-auto/SKILL.md",
+      "computedHash": "0a27f37fc06254c287997170d1c7a112e0ca0d80d68b6f2db801ce184f55bd26"
+    },
+    "bmad-brainstorming": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-brainstorming/SKILL.md",
+      "computedHash": "78d88b9ba203c2198892ca0e2559bca8dcaa9ef412333b81b95c8d0f9a333a15"
+    },
+    "bmad-check-implementation-readiness": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-check-implementation-readiness/SKILL.md",
+      "computedHash": "27a8302c049c2abb970801506f3dc6c1796c993020d35d11f9729ad2af377f07"
+    },
+    "bmad-checkpoint-preview": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-checkpoint-preview/SKILL.md",
+      "computedHash": "d94bef00e53563449e51826a17b22c0549a98e02c4e7bda3de72ad199f0517f9"
+    },
+    "bmad-code-review": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-code-review/SKILL.md",
+      "computedHash": "a67be27b1399d54b13fda723a9ce1c4e48e4942964a4509de0f1cc4c59e93e9b"
+    },
+    "bmad-correct-course": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-correct-course/SKILL.md",
+      "computedHash": "a722c6f09a7a2e511e52d2b2ad68831f6f6080b4f19561e5aebe93b5d52f9934"
+    },
+    "bmad-create-architecture": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-create-architecture/SKILL.md",
+      "computedHash": "374a261e57509651b5a78cfec163d348129eaaf0c8849f33f16ef8671df2fef2"
+    },
+    "bmad-create-epics-and-stories": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-create-epics-and-stories/SKILL.md",
+      "computedHash": "fa33ca3a0554268a335da2a85c11bc82121f2647803dc7c746f566eee731385f"
+    },
+    "bmad-create-prd": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-create-prd/SKILL.md",
+      "computedHash": "93f79ba99e534660413449dc6ee4b31f46e1d7c596ff16eca01f293b1cd2a311"
+    },
+    "bmad-create-story": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-create-story/SKILL.md",
+      "computedHash": "866251e35a3c67ea0f08940cdacf22716139aa5f5eba5459e6594d6594e7feae"
+    },
+    "bmad-create-ux-design": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-create-ux-design/SKILL.md",
+      "computedHash": "5f2a92398dcaa93dc08f10b900142f38afe1d053c21ee5f5d818cd355846904b"
+    },
+    "bmad-customize": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-customize/SKILL.md",
+      "computedHash": "ac2b5fd9953a9a0c14667a525d94401b21cf7517db908f8c5dc0a769397bb25c"
+    },
+    "bmad-dev-story": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-dev-story/SKILL.md",
+      "computedHash": "c87920ff65092e50131cc7347dadf5c19d944cad2173997818bc855dfda0cdb6"
+    },
+    "bmad-distillator": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-distillator/SKILL.md",
+      "computedHash": "81fc2f5131eff9ed060fde29ffc468a01ff78b5c8a085f690064ef7fbd9ddc1c"
+    },
+    "bmad-document-project": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-document-project/SKILL.md",
+      "computedHash": "8cbeea442af8e53a80d1f3d1c207413a0f550c83abb22b9c86c7b4fe8e09e872"
+    },
+    "bmad-domain-research": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-domain-research/SKILL.md",
+      "computedHash": "d848d32c19787f9d22df0e8a868d63e346d2a970d2485dfb7adeae7a986ba9e7"
+    },
+    "bmad-edit-prd": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-edit-prd/SKILL.md",
+      "computedHash": "ded4cb2148552449c39f7364ec8e969debff14e42c51a74343aa4bad51a0d21b"
+    },
+    "bmad-editorial-review-prose": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-editorial-review-prose/SKILL.md",
+      "computedHash": "76625946103c848ff9b3bdaaada60a5f945e420110dc1b0146404f94569f326d"
+    },
+    "bmad-editorial-review-structure": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-editorial-review-structure/SKILL.md",
+      "computedHash": "1f1190b5f45b32365cacc2695072ae8f9cb6d889bd7254b37332873f2ef5e8a6"
+    },
+    "bmad-generate-project-context": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-generate-project-context/SKILL.md",
+      "computedHash": "5dd8be81c69daaceaceb1275023e838aa12a5f7f924cf96ca06e00216ee018e0"
+    },
+    "bmad-help": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-help/SKILL.md",
+      "computedHash": "bf41d58244acee6b9eb110b9c9c2e7bac5d025dd961b8193356c1338e533c9d1"
+    },
+    "bmad-index-docs": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-index-docs/SKILL.md",
+      "computedHash": "843f60344a4938aa9a18ec6013c1dfeaea814722b7d00954d6bed3a7ee9fad35"
+    },
+    "bmad-market-research": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-market-research/SKILL.md",
+      "computedHash": "60f2a9db52dda4d2f9916954e529bcba84eda87ce739a71925479d63d6354ab7"
+    },
+    "bmad-party-mode": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-party-mode/SKILL.md",
+      "computedHash": "af70c90d8f4db8830cca859a81b5cc091568f554ecaeefbdbeb9581ec2765bfe"
+    },
+    "bmad-prfaq": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-prfaq/SKILL.md",
+      "computedHash": "174f41ffe48f32280c46f4805260780c1eb0db182a385e05a6e4f4c6598cecb0"
+    },
+    "bmad-product-brief": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-product-brief/SKILL.md",
+      "computedHash": "45618a842a5a8d67a0a6478d9d18c34bf706632da396cb326008804a3ca16707"
+    },
+    "bmad-qa-generate-e2e-tests": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-qa-generate-e2e-tests/SKILL.md",
+      "computedHash": "5177c3051e5f4809d7bf0725f8454d2f7090b601122a655853c09e22c549248d"
+    },
+    "bmad-quick-dev": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-quick-dev/SKILL.md",
+      "computedHash": "a07088dc08c0aa8df4ea8aef180e2fcca1cb24d1d659dc12f3bd87ec6b7f44f8"
+    },
+    "bmad-retrospective": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-retrospective/SKILL.md",
+      "computedHash": "ab8a60ead3c2e13bf07b321a8da4fb4f3e7b479118d5fb2725396976d677a4bc"
+    },
+    "bmad-review-adversarial-general": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-review-adversarial-general/SKILL.md",
+      "computedHash": "3c341d6f5ab5fddc124eef46ba5381573e1e13dad9695afe880997d23f8768f2"
+    },
+    "bmad-review-edge-case-hunter": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-review-edge-case-hunter/SKILL.md",
+      "computedHash": "047efb68781fa79b8ca6b4743fe5a43028fd937a51bcf6d7d90109adf8a757ee"
+    },
+    "bmad-shard-doc": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-shard-doc/SKILL.md",
+      "computedHash": "37a4546f9c53b51e6770dd9318da3394282bcf9b855868fd4e7dd9689cf2cedb"
+    },
+    "bmad-sprint-planning": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-sprint-planning/SKILL.md",
+      "computedHash": "ecf76038bb7909254cea9d2959d37dc4e91b18cfd4a104fdded8d8c7ba8200bc"
+    },
+    "bmad-sprint-status": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-sprint-status/SKILL.md",
+      "computedHash": "398b0b3d17c934bef0ca7e6f1d42dbb00257f4de0208fc3f40714f76cd3559b0"
+    },
+    "bmad-technical-research": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-technical-research/SKILL.md",
+      "computedHash": "e4d4b524d1425c5f8ef8dec939e0efb32f1de45fec88e2e43bee6b9098fd6c20"
+    },
+    "bmad-validate-prd": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/bmad-validate-prd/SKILL.md",
+      "computedHash": "8f742bcf8a78af2842b826ecab0d56f151421e8fef32c4cea563ce732190d670"
+    },
+    "book-converter": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/book-converter/SKILL.md",
+      "computedHash": "fcac1359e0dbaf0fb4ebcb21fc8b8c6352c1f0c03c9a86df547d85141178c6ed"
+    },
+    "create-spring-boot-kotlin-project": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/create-spring-boot-kotlin-project/SKILL.md",
+      "computedHash": "3700dedac4c989d6276dc3e8692135f5f2a90595c8f993c97bc51080af95a5cd"
+    },
+    "fixing-accessibility": {
+      "source": "ibelick/ui-skills",
+      "sourceType": "github",
+      "skillPath": "skills/fixing-accessibility/SKILL.md",
+      "computedHash": "4fa8f5a772b4eef3d28a54c136b507d070e54e2c326578f65eaf5e5a0118b38a"
+    },
+    "github-sync": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/github-sync/SKILL.md",
+      "computedHash": "3382c526aef8193d6b09e377d2bf85b351e27adab0fb440ff83a09673beb969b"
+    },
+    "kotlin-springboot": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/kotlin-springboot/SKILL.md",
+      "computedHash": "beaa34d307bfcce5dd026e3b03c357f98f471b0de1b9fc6a0b7a64d132b74e95"
+    },
+    "load-docs": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/load-docs/SKILL.md",
+      "computedHash": "b788eedefc89f2dcecf395d605098d9c7f2ab34199737dbdc0b70accf5a27df5"
+    },
+    "manual-testing": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/manual-testing/SKILL.md",
+      "computedHash": "e4c0573d4cb5007e00a956a7590064284a7828ad6455f46901cb8d849c898ccb"
+    },
+    "mcp-builder": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mcp-builder/SKILL.md",
+      "computedHash": "f022e40c2dd69112c7bff186e594d8d51e9c17c9b6680288f090c5e0a4b8129a"
+    },
+    "multi-repo-git-ops": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/multi-repo-git-ops/SKILL.md",
+      "computedHash": "e1fe63ac0e67463c184d1bc0c30f97f79a114461ce707bf9d9f36150f2cb0455"
+    },
+    "open-source-strategy": {
+      "source": "kostja94/marketing-skills",
+      "sourceType": "github",
+      "skillPath": "skills/strategies/commercial/open-source/SKILL.md",
+      "computedHash": "16b1d1e1aeed64f13b25b7ca59131ef20092aa3e232790840bf3b811c532c100"
+    },
+    "rca-report": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rca-report/SKILL.md",
+      "computedHash": "5cb7d5582d126c9d02fa60bf09c4885b8448023054a0ebd51b0872397a21f2c1"
+    },
+    "release-please": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/release-please/SKILL.md",
+      "computedHash": "d3ab08b8a02ca41da5f92c004b81c69fb3ddb384977846f28792c77db1e492e3"
+    },
+    "skill-from-book": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/skill-from-book/SKILL.md",
+      "computedHash": "b35c061facd696b295ba6b4219078f8940607350b199c4bd2686e5a1fd7b02fa"
+    },
+    "slides-generator": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/slides-generator/SKILL.md",
+      "computedHash": "f8d4594c84c51c72beac4bb85c741c5d513a2e4fdfaab3b62590835edd884395"
+    },
+    "template-skill": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "template/SKILL.md",
+      "computedHash": "38c88f722b574a922311d334a70c2008a2a5b896f06eaa75516d716e5725b26f"
+    },
+    "trade-off-analysis": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/trade-off-analysis/SKILL.md",
+      "computedHash": "b7eda72a36fbb0fa518cfed152953dc8523b5a021bf5f3cfa003f178cea35fd7"
+    },
+    "typescript-clean-code": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/typescript-clean-code/SKILL.md",
+      "computedHash": "32dd11d590211d7098dfefe206e10acf929d6fcea28151a3994a1823b04df239"
+    },
+    "typescript-e2e-testing": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/typescript-e2e-testing/SKILL.md",
+      "computedHash": "bfddd43517751607b6f1554994de562912286046848e76b194861cabdcf225a1"
+    },
+    "typescript-unit-testing": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/typescript-unit-testing/SKILL.md",
+      "computedHash": "e1c9f96fe0e0823ff3b4c4a077583737bf6fd8061daf67ee65bc9543b39b9624"
+    },
+    "ui-ux-pro-max": {
+      "source": "bmad-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "2175cef7ce4691327d7871666aced36350bc7aa8ad30d4adcd81924bbde71dc6"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
+    }
+  }
+}
