@@ -70,21 +70,45 @@ class ReviewService(
         placeRepository.save(updated)
     }
     
-    private fun calculateOverallAccessibility(reviews: List<AccessibilityReview>): AccessLevel {
+    /**
+     * Calculate overall accessibility level using a point-based scoring system.
+     * 
+     * For each review dimension (entrance, toilet, parking, internal):
+     *   FULL = 3 points
+     *   PARTIAL = 2 points
+     *   NOT_ACCESSIBLE = 1 point
+     *   UNKNOWN = excluded from calculation
+     *
+     * Overall score = average of all non-UNKNOWN dimensions across recent reviews.
+     *
+     * Verdict:
+     *   score >= 2.5 → FULL (Accessible)
+     *   score >= 1.5 → PARTIAL (Partially Accessible)
+     *   score < 1.5  → NOT_ACCESSIBLE
+     *   no data      → UNKNOWN
+     */
+    internal fun calculateOverallAccessibility(reviews: List<AccessibilityReview>): AccessLevel {
         if (reviews.isEmpty()) return AccessLevel.UNKNOWN
-        
-        val allLevels = reviews.flatMap { review ->
+
+        val scores = reviews.flatMap { review ->
             listOf(review.entrance, review.toilet, review.parking, review.internalNav)
-        }
-        
-        val notAccessibleCount = allLevels.count { it == AccessLevel.NOT_ACCESSIBLE }
-        val fullCount = allLevels.count { it == AccessLevel.FULL }
-        val totalCount = allLevels.size
-        
+        }.filter { it != AccessLevel.UNKNOWN }
+
+        if (scores.isEmpty()) return AccessLevel.UNKNOWN
+
+        val averageScore = scores.map { level ->
+            when (level) {
+                AccessLevel.FULL -> 3.0
+                AccessLevel.PARTIAL -> 2.0
+                AccessLevel.NOT_ACCESSIBLE -> 1.0
+                AccessLevel.UNKNOWN -> 0.0 // won't happen due to filter
+            }
+        }.average()
+
         return when {
-            notAccessibleCount > totalCount / 2 -> AccessLevel.NOT_ACCESSIBLE
-            fullCount > totalCount / 2 -> AccessLevel.FULL
-            else -> AccessLevel.PARTIAL
+            averageScore >= 2.5 -> AccessLevel.FULL
+            averageScore >= 1.5 -> AccessLevel.PARTIAL
+            else -> AccessLevel.NOT_ACCESSIBLE
         }
     }
     

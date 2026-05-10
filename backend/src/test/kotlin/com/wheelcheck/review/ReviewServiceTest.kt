@@ -123,4 +123,69 @@ class ReviewServiceTest {
             reviewService.create(request, null)
         }
     }
+
+    @Test
+    fun `calculateOverallAccessibility returns FULL when all dimensions are FULL`() {
+        val point = geometryFactory.createPoint(Coordinate(101.7, 3.15))
+        val place = Place(name = "Test", location = point, address = "Addr", category = Category.RESTAURANT)
+        val reviews = listOf(
+            AccessibilityReview(place = place, entrance = AccessLevel.FULL, toilet = AccessLevel.FULL, parking = AccessLevel.FULL, internalNav = AccessLevel.FULL)
+        )
+        val result = reviewService.calculateOverallAccessibility(reviews)
+        assertEquals(AccessLevel.FULL, result)
+    }
+
+    @Test
+    fun `calculateOverallAccessibility returns NOT_ACCESSIBLE when all dimensions are NOT_ACCESSIBLE`() {
+        val point = geometryFactory.createPoint(Coordinate(101.7, 3.15))
+        val place = Place(name = "Test", location = point, address = "Addr", category = Category.RESTAURANT)
+        val reviews = listOf(
+            AccessibilityReview(place = place, entrance = AccessLevel.NOT_ACCESSIBLE, toilet = AccessLevel.NOT_ACCESSIBLE, parking = AccessLevel.NOT_ACCESSIBLE, internalNav = AccessLevel.NOT_ACCESSIBLE)
+        )
+        val result = reviewService.calculateOverallAccessibility(reviews)
+        assertEquals(AccessLevel.NOT_ACCESSIBLE, result)
+    }
+
+    @Test
+    fun `calculateOverallAccessibility returns PARTIAL for mixed reviews`() {
+        val point = geometryFactory.createPoint(Coordinate(101.7, 3.15))
+        val place = Place(name = "Test", location = point, address = "Addr", category = Category.RESTAURANT)
+        val reviews = listOf(
+            AccessibilityReview(place = place, entrance = AccessLevel.FULL, toilet = AccessLevel.NOT_ACCESSIBLE, parking = AccessLevel.PARTIAL, internalNav = AccessLevel.FULL)
+        )
+        // Scores: 3 + 1 + 2 + 3 = 9 / 4 = 2.25 → PARTIAL (>= 1.5, < 2.5)
+        val result = reviewService.calculateOverallAccessibility(reviews)
+        assertEquals(AccessLevel.PARTIAL, result)
+    }
+
+    @Test
+    fun `calculateOverallAccessibility ignores UNKNOWN dimensions`() {
+        val point = geometryFactory.createPoint(Coordinate(101.7, 3.15))
+        val place = Place(name = "Test", location = point, address = "Addr", category = Category.RESTAURANT)
+        val reviews = listOf(
+            AccessibilityReview(place = place, entrance = AccessLevel.FULL, toilet = AccessLevel.UNKNOWN, parking = AccessLevel.FULL, internalNav = AccessLevel.UNKNOWN)
+        )
+        // Only FULL scores: 3 + 3 = 6 / 2 = 3.0 → FULL
+        val result = reviewService.calculateOverallAccessibility(reviews)
+        assertEquals(AccessLevel.FULL, result)
+    }
+
+    @Test
+    fun `calculateOverallAccessibility returns UNKNOWN for empty reviews`() {
+        val result = reviewService.calculateOverallAccessibility(emptyList())
+        assertEquals(AccessLevel.UNKNOWN, result)
+    }
+
+    @Test
+    fun `calculateOverallAccessibility averages across multiple reviews`() {
+        val point = geometryFactory.createPoint(Coordinate(101.7, 3.15))
+        val place = Place(name = "Test", location = point, address = "Addr", category = Category.RESTAURANT)
+        val reviews = listOf(
+            AccessibilityReview(place = place, entrance = AccessLevel.FULL, toilet = AccessLevel.FULL, parking = AccessLevel.FULL, internalNav = AccessLevel.FULL),
+            AccessibilityReview(place = place, entrance = AccessLevel.NOT_ACCESSIBLE, toilet = AccessLevel.NOT_ACCESSIBLE, parking = AccessLevel.NOT_ACCESSIBLE, internalNav = AccessLevel.NOT_ACCESSIBLE)
+        )
+        // Scores: (3+3+3+3 + 1+1+1+1) / 8 = 16/8 = 2.0 → PARTIAL
+        val result = reviewService.calculateOverallAccessibility(reviews)
+        assertEquals(AccessLevel.PARTIAL, result)
+    }
 }
