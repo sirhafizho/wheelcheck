@@ -1,0 +1,8 @@
+# BMad Module Manager Configuration
+# Project: WheelCheck
+
+user_name = "Hafiz"
+communication_language = "English"
+document_output_language = "English"
+project_name = "WheelCheck"
+planning_artifacts = "_bmad/docs"
