@@ -1,0 +1,48 @@
+package com.wheelcheck.place
+
+import com.wheelcheck.common.AccessLevel
+import com.wheelcheck.common.Category
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import java.time.Instant
+import java.util.*
+
+data class PlaceDto(
+    val id: UUID,
+    val name: String,
+    val nameMs: String?,
+    val latitude: Double,
+    val longitude: Double,
+    val address: String,
+    val city: String,
+    val category: Category,
+    val accessibilityLevel: AccessLevel,
+    val reviewCount: Int,
+    val createdAt: Instant,
+    val distance: Double? = null
+)
+
+data class CreatePlaceRequest(
+    @field:NotBlank(message = "Name is required")
+    val name: String,
+    val nameMs: String? = null,
+    @field:NotNull(message = "Latitude is required")
+    val latitude: Double,
+    @field:NotNull(message = "Longitude is required")
+    val longitude: Double,
+    @field:NotBlank(message = "Address is required")
+    val address: String,
+    val city: String = "Kuala Lumpur",
+    @field:NotNull(message = "Category is required")
+    val category: Category
+)
+
+data class NearbyPlacesRequest(
+    @field:NotNull(message = "Latitude is required")
+    val latitude: Double,
+    @field:NotNull(message = "Longitude is required")
+    val longitude: Double,
+    val radius: Int = 5000,
+    val limit: Int = 50,
+    val category: Category? = null
+)

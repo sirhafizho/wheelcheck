@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wheelcheck_test
+    username: test
+    password: test
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+app:
+  jwt:
+    secret: test-secret-key-for-testing-purpose-only-min-32-chars
+    expiration: 3600

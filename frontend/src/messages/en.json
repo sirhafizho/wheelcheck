@@ -1,0 +1,84 @@
+{
+  "common": {
+    "appName": "WheelCheck",
+    "search": "Search venues",
+    "map": "Map",
+    "list": "List",
+    "report": "Report Accessibility",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
+  "access": {
+    "full": "Accessible",
+    "partial": "Partially Accessible",
+    "notAccessible": "Not Accessible",
+    "unknown": "Unknown"
+  },
+  "home": {
+    "title": "Find Accessible Places",
+    "subtitle": "Discover wheelchair-friendly venues across Malaysia",
+    "searchPlaceholder": "Search for a place...",
+    "myLocation": "My Location",
+    "nearMe": "Places near me"
+  },
+  "places": {
+    "title": "Places",
+    "noResults": "No places found",
+    "details": "Details",
+    "viewOnMap": "View on Map"
+  },
+  "report": {
+    "title": "Report Accessibility",
+    "entrance": "How is the entrance?",
+    "entranceOptions": {
+      "ramped": "Ramped access",
+      "flat": "Flat/level entrance",
+      "stairs": "Stairs only",
+      "assisted": "Assisted access available"
+    },
+    "toilet": "Is there an accessible toilet?",
+    "toiletOptions": {
+      "yes": "Yes, fully accessible",
+      "partial": "Yes, but limited space",
+      "no": "No accessible toilet",
+      "unknown": "Not sure"
+    },
+    "parking": "Is there OKU parking?",
+    "parkingOptions": {
+      "yes": "Yes, designated OKU parking",
+      "nearby": "Yes, but not designated",
+      "no": "No parking available",
+      "unknown": "Not sure"
+    },
+    "internal": "How is navigation inside?",
+    "internalOptions": {
+      "easy": "Easy to navigate",
+      "moderate": "Some narrow areas",
+      "difficult": "Difficult/many obstacles",
+      "unknown": "Not sure"
+    },
+    "photos": "Add photos (optional)",
+    "photoHint": "Photos help others understand accessibility",
+    "additionalNotes": "Additional notes (optional)",
+    "thanks": "Thanks! Your report helps the community 🎉",
+    "submitted": "Report submitted successfully"
+  },
+  "nav": {
+    "home": "Home",
+    "places": "Places",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "languageToggle": "Switch language",
+    "loading": "Loading content"
+  }
+}
