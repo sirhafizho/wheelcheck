@@ -1,0 +1,61 @@
+'use client';
+
+import { use } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { usePlace } from '@/hooks/usePlaces';
+import { PlaceDetail } from '@/components/places/PlaceDetail';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Button } from '@/components/ui/Button';
+
+type Params = Promise<{ locale: string; id: string }>;
+
+interface PlaceDetailPageProps {
+  params: Params;
+}
+
+export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
+  const { locale, id } = use(params);
+  const router = useRouter();
+  const t = useTranslations();
+  const { place, loading, error } = usePlace(id);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !place) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4">
+          {error || 'Place not found'}
+        </div>
+        <Button onClick={() => router.back()}>
+          {t('common.back')}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      <Button 
+        variant="ghost" 
+        onClick={() => router.back()}
+        className="mb-4"
+      >
+        ← {t('common.back')}
+      </Button>
+
+      <PlaceDetail
+        place={place}
+        locale={locale}
+        onReportClick={() => router.push(`/${locale}/report/${place.id}`)}
+      />
+    </div>
+  );
+}

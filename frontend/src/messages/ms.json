@@ -1,0 +1,84 @@
+{
+  "common": {
+    "appName": "WheelCheck",
+    "search": "Cari tempat",
+    "map": "Peta",
+    "list": "Senarai",
+    "report": "Lapor Kebolehcapaian",
+    "loading": "Memuatkan...",
+    "error": "Ralat berlaku",
+    "retry": "Cuba lagi",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "submit": "Hantar",
+    "cancel": "Batal"
+  },
+  "access": {
+    "full": "Boleh Diakses",
+    "partial": "Separa Boleh Diakses",
+    "notAccessible": "Tidak Boleh Diakses",
+    "unknown": "Tidak Diketahui"
+  },
+  "home": {
+    "title": "Cari Tempat Boleh Diakses",
+    "subtitle": "Temui tempat mesra kerusi roda di seluruh Malaysia",
+    "searchPlaceholder": "Cari tempat...",
+    "myLocation": "Lokasi Saya",
+    "nearMe": "Tempat berhampiran"
+  },
+  "places": {
+    "title": "Tempat",
+    "noResults": "Tiada tempat dijumpai",
+    "details": "Butiran",
+    "viewOnMap": "Lihat di Peta"
+  },
+  "report": {
+    "title": "Lapor Kebolehcapaian",
+    "entrance": "Bagaimanakah pintu masuk?",
+    "entranceOptions": {
+      "ramped": "Ada tanjakan",
+      "flat": "Pintu rata/selaras",
+      "stairs": "Tangga sahaja",
+      "assisted": "Bantuan tersedia"
+    },
+    "toilet": "Adakah tandas OKU?",
+    "toiletOptions": {
+      "yes": "Ya, sepenuhnya boleh diakses",
+      "partial": "Ya, tetapi ruang terhad",
+      "no": "Tiada tandas OKU",
+      "unknown": "Tidak pasti"
+    },
+    "parking": "Adakah tempat letak kereta OKU?",
+    "parkingOptions": {
+      "yes": "Ya, tempat letak OKU khusus",
+      "nearby": "Ya, tetapi tidak khusus",
+      "no": "Tiada tempat letak kereta",
+      "unknown": "Tidak pasti"
+    },
+    "internal": "Bagaimanakah laluan di dalam?",
+    "internalOptions": {
+      "easy": "Mudah dilalui",
+      "moderate": "Ada kawasan sempit",
+      "difficult": "Sukar/banyak halangan",
+      "unknown": "Tidak pasti"
+    },
+    "photos": "Tambah foto (pilihan)",
+    "photoHint": "Foto membantu orang lain memahami kebolehcapaian",
+    "additionalNotes": "Nota tambahan (pilihan)",
+    "thanks": "Terima kasih! Laporan anda membantu komuniti 🎉",
+    "submitted": "Laporan berjaya dihantar"
+  },
+  "nav": {
+    "home": "Utama",
+    "places": "Tempat",
+    "profile": "Profil",
+    "settings": "Tetapan"
+  },
+  "accessibility": {
+    "skipToContent": "Langkau ke kandungan utama",
+    "openMenu": "Buka menu",
+    "closeMenu": "Tutup menu",
+    "languageToggle": "Tukar bahasa",
+    "loading": "Memuatkan kandungan"
+  }
+}
