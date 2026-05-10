@@ -35,6 +35,9 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.POST, "/api/photos/upload").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
                     
+                    // Admin endpoints (auth required)
+                    .requestMatchers("/api/admin/**").authenticated()
+                    
                     // Swagger/OpenAPI
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     
