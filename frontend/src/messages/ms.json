@@ -24,7 +24,8 @@
     "subtitle": "Temui tempat mesra kerusi roda di seluruh Malaysia",
     "searchPlaceholder": "Cari tempat...",
     "myLocation": "Lokasi Saya",
-    "nearMe": "Tempat berhampiran"
+    "nearMe": "Tempat berhampiran",
+    "addPlace": "Tambah tempat"
   },
   "places": {
     "title": "Tempat",
@@ -85,5 +86,81 @@
     "closeMenu": "Tutup menu",
     "languageToggle": "Tukar bahasa",
     "loading": "Memuatkan kandungan"
+  },
+  "addPlace": {
+    "title": "Tambah Tempat",
+    "name": "Nama Tempat",
+    "namePlaceholder": "cth. Pavilion KL",
+    "nameMs": "Nama (Bahasa Malaysia)",
+    "nameMsPlaceholder": "cth. Pavilion KL",
+    "address": "Alamat",
+    "addressPlaceholder": "cth. 168, Jalan Bukit Bintang",
+    "city": "Bandar",
+    "category": "Kategori",
+    "selectCategory": "Pilih kategori",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "photos": "Foto Bukti",
+    "photosRequired": "Sekurang-kurangnya 1 foto diperlukan",
+    "photosHint": "Muat naik foto menunjukkan ciri kebolehcapaian tempat (tanjakan, pintu masuk, tempat letak kereta, dll.)",
+    "photosRequiredError": "Sila muat naik sekurang-kurangnya satu foto sebagai bukti",
+    "photoDescription": "Foto bukti tempat",
+    "submit": "Tambah Tempat",
+    "success": "Tempat Ditambah!",
+    "successMessage": "Terima kasih atas sumbangan anda kepada komuniti. Mengalihkan...",
+    "errors": {
+      "createPlace": "Gagal mencipta tempat",
+      "uploadPhoto": "Gagal memuat naik foto bukti",
+      "submitFailed": "Gagal menambah tempat"
+    },
+    "categories": {
+      "MALL": "Pusat Beli-belah",
+      "RESTAURANT": "Restoran",
+      "HOSPITAL": "Hospital",
+      "MOSQUE": "Masjid",
+      "TRANSPORT": "Hab Pengangkutan",
+      "GOVERNMENT": "Pejabat Kerajaan",
+      "EDUCATION": "Pendidikan",
+      "PARK": "Taman",
+      "HOTEL": "Hotel",
+      "CAFE": "Kafe",
+      "OTHER": "Lain-lain"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "loginPrompt": "Log masuk untuk menjejaki sumbangan dan mengurus laporan anda",
+    "login": "Log Masuk",
+    "register": "Buat Akaun",
+    "email": "E-mel",
+    "password": "Kata Laluan",
+    "displayName": "Nama Paparan",
+    "cancel": "Batal",
+    "logout": "Log Keluar",
+    "reviewsSubmitted": "Ulasan Dihantar",
+    "contributions": "Jumlah Sumbangan",
+    "reviewHistory": "Ulasan Anda",
+    "noReviews": "Anda belum menghantar sebarang ulasan",
+    "startReporting": "Mula melaporkan kebolehcapaian →",
+    "errors": {
+      "invalidCredentials": "Maklumat log masuk tidak sah",
+      "loginFailed": "Log masuk gagal",
+      "registrationFailed": "Pendaftaran gagal"
+    }
+  },
+  "settings": {
+    "title": "Tetapan",
+    "language": "Bahasa",
+    "currentLanguage": "Bahasa semasa",
+    "switchTo": "Tukar ke",
+    "english": "Inggeris",
+    "bahasaMalaysia": "Bahasa Malaysia",
+    "accessibility": "Kebolehcapaian",
+    "highContrast": "Mod Kontras Tinggi",
+    "largeText": "Teks Besar",
+    "about": "Tentang WheelCheck",
+    "version": "Versi",
+    "license": "Lesen",
+    "viewOnGithub": "Lihat di GitHub →"
   }
 }

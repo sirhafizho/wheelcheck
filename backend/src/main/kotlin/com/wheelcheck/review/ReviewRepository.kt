@@ -8,4 +8,5 @@ import java.util.*
 interface ReviewRepository : JpaRepository<AccessibilityReview, UUID> {
     fun findByPlaceIdOrderByCreatedAtDesc(placeId: UUID): List<AccessibilityReview>
     fun findByUserId(userId: UUID): List<AccessibilityReview>
+    fun countByUserId(userId: UUID): Long
 }

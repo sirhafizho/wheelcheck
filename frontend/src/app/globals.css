@@ -55,6 +55,45 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+html.large-text {
+  font-size: 112.5%;
+}
+
+html.high-contrast {
+  color-scheme: dark;
+}
+
+html.high-contrast body {
+  background: #000;
+  color: #fff;
+}
+
+html.high-contrast .bg-white {
+  background-color: #000 !important;
+}
+
+html.high-contrast .bg-gray-50,
+html.high-contrast .bg-gray-100,
+html.high-contrast .bg-emerald-50,
+html.high-contrast .bg-blue-50,
+html.high-contrast .bg-red-50 {
+  background-color: #111827 !important;
+}
+
+html.high-contrast .text-gray-900,
+html.high-contrast .text-gray-700,
+html.high-contrast .text-gray-600,
+html.high-contrast .text-gray-500,
+html.high-contrast .text-gray-400 {
+  color: #fff !important;
+}
+
+html.high-contrast .border-gray-200,
+html.high-contrast .border-gray-300,
+html.high-contrast .border-red-200 {
+  border-color: #fff !important;
+}
+
 /* Line clamping utility */
 .line-clamp-2 {
   display: -webkit-box;

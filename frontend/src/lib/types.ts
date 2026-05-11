@@ -10,8 +10,10 @@ export interface Place {
   city?: string;
   category?: string;
   accessibilityLevel: AccessLevel | null;
+  description?: string;
   reviewCount: number;
   createdAt: string;
+  lastReportedAt?: string;
   distance?: number | null;
 }
 

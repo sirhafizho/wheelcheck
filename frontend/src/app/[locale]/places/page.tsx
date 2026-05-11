@@ -1,12 +1,14 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { usePlaces } from '@/hooks/usePlaces';
+import { useDebounce } from '@/hooks/useDebounce';
 import { PlaceCard } from '@/components/places/PlaceCard';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SearchInput } from '@/components/ui/SearchInput';
-import { useState } from 'react';
 
 type Params = Promise<{ locale: string }>;
 
@@ -17,8 +19,12 @@ interface PlacesPageProps {
 export default function PlacesPage({ params }: PlacesPageProps) {
   const { locale } = use(params);
   const t = useTranslations('places');
+  const tAddPlace = useTranslations('addPlace');
   const [searchQuery, setSearchQuery] = useState('');
-  const { places, loading, error } = usePlaces({ query: searchQuery });
+  const debouncedSearch = useDebounce(searchQuery.trim(), 300);
+  const { places, loading, error } = usePlaces(
+    debouncedSearch ? { query: debouncedSearch } : undefined
+  );
 
   if (loading) {
     return (
@@ -40,9 +46,16 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">
-        {t('title')}
-      </h1>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <Link
+          href={`/${locale}/add-place`}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
+        >
+          <PlusIcon className="w-5 h-5" aria-hidden="true" />
+          <span>{tAddPlace('title')}</span>
+        </Link>
+      </div>
 
       <div className="mb-6">
         <SearchInput
