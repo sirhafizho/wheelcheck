@@ -30,78 +30,170 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Spring Boot 3.x + Kotlin |
-| **Frontend** | Next.js (PWA) + TypeScript |
-| **Database** | PostgreSQL + PostGIS |
+| **Backend** | Spring Boot 3.3 + Kotlin |
+| **Frontend** | Next.js 16 (PWA) + TypeScript |
+| **Database** | PostgreSQL 16 + PostGIS 3.4 |
 | **Maps** | Leaflet.js + OpenStreetMap |
-| **Geocoding** | Nominatim (OSM) |
+| **Auth** | JWT (HS512) — optional, anonymous reports allowed |
+| **i18n** | next-intl (English + Bahasa Malaysia) |
+| **API Docs** | Swagger / OpenAPI 3.0 |
 
-## 🚀 Quick Start
+## 📋 Current Progress
 
-### Prerequisites
-- Java 21+
-- Node.js 20+
-- PostgreSQL 16+ with PostGIS extension
-- Docker & Docker Compose (recommended)
+### ✅ Implemented (Phase 1 — Core)
 
-### One-command setup (Docker)
+| Feature | Status |
+|---------|--------|
+| REST API with full CRUD for places | ✅ Done |
+| Spatial "nearby" search (PostGIS ST_DWithin) | ✅ Done |
+| Text-based venue search | ✅ Done |
+| Accessibility review submission | ✅ Done |
+| Accessibility scoring algorithm | ✅ Done |
+| Photo evidence upload (with validation) | ✅ Done |
+| JWT authentication (register/login) | ✅ Done |
+| Anonymous contributions (no sign-up required) | ✅ Done |
+| Rate limiting (per IP + per user) | ✅ Done |
+| Interactive map with Leaflet + OSM tiles | ✅ Done |
+| Bilingual UI (EN + BM) | ✅ Done |
+| Mobile-responsive PWA layout | ✅ Done |
+| Swagger API documentation | ✅ Done |
+| OpenStreetMap data import service | ✅ Done |
+| Database seeded with 5 KL venues | ✅ Done |
 
-```bash
-git clone https://github.com/sirhafizho/wheelcheck.git
-cd wheelcheck
-docker compose up
-```
+### ✅ Testing
 
-Backend: http://localhost:8080
-Frontend: http://localhost:3000
-API Docs: http://localhost:8080/swagger-ui.html
+| Type | Count | Status |
+|------|-------|--------|
+| Backend unit tests | 53 | ✅ All passing |
+| Frontend unit tests | 18 | ✅ All passing |
+| Playwright E2E tests | 5 | ✅ All passing |
+| Manual API verification | All endpoints | ✅ Verified |
 
-### Manual setup
+### 🔜 Roadmap
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed instructions.
-
-## 📱 Features
-
-### MVP (Phase 1)
-- [ ] Venue search with map + list view
-- [ ] Accessibility verdict display (Full / Partial / None / Unknown)
-- [ ] Granular breakdown (entrance, toilet, parking, internal navigation)
-- [ ] Waze-style quick report flow (< 30 seconds)
-- [ ] Photo evidence upload
-- [ ] Confirm/deny existing reports
-- [ ] Anonymous contributions (no sign-up required to report)
-- [ ] Offline access for saved venues
-- [ ] Bilingual (Bahasa Malaysia + English)
-
-### Phase 2
+- [ ] Offline access for saved venues (service worker caching)
 - [ ] User profiles with contribution history
 - [ ] Gamification (badges, contributor levels)
 - [ ] Venue owner self-certification
 - [ ] Route planning between accessible venues
-- [ ] OpenStreetMap data integration
+- [ ] Deeper OpenStreetMap integration
+- [ ] Additional languages (Mandarin, Tamil)
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Java 21+ (tested with Java 24)
+- Node.js 20+ (tested with Node 22)
+- Docker & Docker Compose
+
+### Run with Docker
+
+```bash
+git clone https://github.com/sirhafizho/wheelcheck.git
+cd wheelcheck
+docker compose up -d
+```
+
+This starts PostGIS on port 5432 with the database pre-configured.
+
+### Run Backend
+
+```bash
+cd backend
+./gradlew bootRun
+```
+
+Backend: http://localhost:8080
+API Docs: http://localhost:8080/swagger-ui.html
+
+### Run Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend: http://localhost:3000
+
+### Run Tests
+
+```bash
+# Backend tests
+cd backend && ./gradlew test
+
+# Frontend unit tests
+cd frontend && npm test
+
+# E2E tests (requires backend + frontend running)
+cd frontend && npx playwright test
+```
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/places` | List all places | No |
+| GET | `/api/places/{id}` | Get place details | No |
+| POST | `/api/places/nearby` | Find places within radius | No |
+| GET | `/api/places/search?q=` | Search by name/address | No |
+| POST | `/api/places` | Create a place | No |
+| POST | `/api/reviews` | Submit accessibility review | No |
+| POST | `/api/photos/upload` | Upload photo evidence | No |
+| POST | `/api/auth/register` | Register account | No |
+| POST | `/api/auth/login` | Login (returns JWT) | No |
 
 ## ♿ Accessibility
 
 This app is built **for** people with disabilities, so accessibility of the app itself is non-negotiable:
 
-- WCAG 2.2 Level AA compliance
+- WCAG 2.2 Level AA compliance target
 - 48x48dp minimum touch targets
-- TalkBack + VoiceOver tested
 - List view alternative to map (for screen reader users)
 - Single-finger operation for all interactions
 - Large text support (200% font scale)
 - High contrast mode support
 - No time limits on any interaction
+- Bilingual support (EN / BM)
+
+## 🧮 Scoring Algorithm
+
+Reviews rate venues across categories (entrance, toilet, parking, internal navigation):
+
+| Rating | Score |
+|--------|-------|
+| FULL (fully accessible) | 3 |
+| PARTIAL (partially accessible) | 2 |
+| NOT_ACCESSIBLE | 1 |
+| UNKNOWN | Excluded from calculation |
+
+**Verdict:**
+- Average ≥ 2.5 → ✅ FULL
+- Average ≥ 1.5 → ⚠️ PARTIAL
+- Average < 1.5 → ❌ NOT_ACCESSIBLE
 
 ## 🗂️ Project Structure
 
 ```
 wheelcheck/
-├── backend/          # Spring Boot Kotlin API
-├── frontend/         # Next.js PWA
-├── docs/             # Documentation
-├── docker-compose.yml
-└── .github/          # CI/CD, issue templates
+├── backend/                    # Spring Boot Kotlin API
+│   ├── src/main/kotlin/com/wheelcheck/
+│   │   ├── config/            # Security, rate limiting, exception handling
+│   │   ├── controller/        # REST controllers
+│   │   ├── model/             # JPA entities
+│   │   ├── repository/        # Spring Data + PostGIS queries
+│   │   └── service/           # Business logic, scoring, OSM import
+│   └── src/test/              # 53 unit tests
+├── frontend/                   # Next.js 16 PWA
+│   ├── src/
+│   │   ├── app/[locale]/      # i18n routing (EN + BM)
+│   │   ├── components/        # Map, places, reviews, layout
+│   │   ├── lib/               # API client, types, constants
+│   │   └── messages/          # Translation files
+│   └── tests/                 # 18 unit + 5 E2E tests
+├── docker-compose.yml          # PostGIS (ARM64-native)
+├── docs/                       # Architecture, PRD, development guide
+└── .github/                    # Issue templates, CI workflows
 ```
 
 ## 🤝 Contributing
@@ -131,6 +223,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - Key venues: Malls, hospitals, mosques, MRT/LRT stations, government offices
 - Aligned with Persons with Disabilities Act 2008 (Act 685)
 - Partnership-ready for OKU organizations
+- Seeded with real KL venues (Pavilion, KLCC, KL Sentral, Mid Valley, Nu Sentral)
 
 ## 📬 Contact
 
