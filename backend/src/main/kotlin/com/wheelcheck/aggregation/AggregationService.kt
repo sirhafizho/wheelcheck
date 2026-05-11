@@ -14,7 +14,8 @@ import java.time.Instant
 @Service
 class AggregationService(
     private val adapters: List<AccessibilityDataAdapter>,
-    private val placeRepository: PlaceRepository
+    private val placeRepository: PlaceRepository,
+    private val orsRoutingAdapter: OrsRoutingAdapter? = null
 ) {
     private val logger = LoggerFactory.getLogger(AggregationService::class.java)
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
@@ -157,8 +158,8 @@ class AggregationService(
 
     private enum class UpsertResult { CREATED, UPDATED, SKIPPED }
 
-    fun getAdapterInfo(): List<AdapterInfo> {
-        return adapters.map {
+    fun getAdaptersInfo(): AdaptersInfo {
+        val placeAdapters = adapters.map {
             AdapterInfo(
                 source = it.sourceType.name,
                 displayName = it.sourceType.displayName,
@@ -166,5 +167,16 @@ class AggregationService(
                 priority = it.sourceType.priority
             )
         }
+        val routingAdapters = listOfNotNull(
+            orsRoutingAdapter?.let {
+                AdapterInfo(
+                    source = "ORS",
+                    displayName = "OpenRouteService Wheelchair Routing",
+                    enabled = it.isEnabled,
+                    priority = 85
+                )
+            }
+        )
+        return AdaptersInfo(placeAdapters = placeAdapters, routingAdapters = routingAdapters)
     }
 }
