@@ -9,11 +9,13 @@ data class ReviewDto(
     val id: UUID,
     val placeId: UUID,
     val userId: UUID?,
+    val userName: String?,
     val entrance: AccessLevel,
     val toilet: AccessLevel,
     val parking: AccessLevel,
     val internalNav: AccessLevel,
     val notes: String?,
+    val photoUrls: List<String>,
     val isVerified: Boolean,
     val createdAt: Instant
 )
@@ -29,5 +31,6 @@ data class CreateReviewRequest(
     val parking: AccessLevel,
     @field:NotNull(message = "Internal navigation accessibility is required")
     val internalNav: AccessLevel,
-    val notes: String?
+    val notes: String?,
+    val comment: String? = null
 )

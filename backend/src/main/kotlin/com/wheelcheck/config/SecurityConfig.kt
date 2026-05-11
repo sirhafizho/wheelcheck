@@ -31,10 +31,13 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.POST, "/api/places/nearby").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/reviews", "/api/reviews/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/reviews").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/reviews/*/photos").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/photos", "/api/photos/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/photos/upload").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/users/*/stats").permitAll()
+                    .requestMatchers("/uploads/**").permitAll()
 
                     // Authenticated endpoints
                     .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()

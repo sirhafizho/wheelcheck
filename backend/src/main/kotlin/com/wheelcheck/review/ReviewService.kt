@@ -2,6 +2,7 @@ package com.wheelcheck.review
 
 import com.wheelcheck.common.AccessLevel
 import com.wheelcheck.place.PlaceRepository
+import com.wheelcheck.user.UserRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -10,8 +11,11 @@ import java.util.*
 @Service
 class ReviewService(
     private val reviewRepository: ReviewRepository,
-    private val placeRepository: PlaceRepository
+    private val placeRepository: PlaceRepository,
+    private val userRepository: UserRepository
 ) {
+
+    private val userNameCache = mutableMapOf<UUID, String>()
 
     @Transactional(readOnly = true)
     fun findById(id: UUID): ReviewDto? {
@@ -33,6 +37,8 @@ class ReviewService(
         val place = placeRepository.findByIdOrNull(request.placeId)
             ?: throw IllegalArgumentException("Place not found: ${request.placeId}")
 
+        val reviewNotes = request.notes ?: request.comment
+
         val review = AccessibilityReview(
             place = place,
             userId = userId,
@@ -40,16 +46,24 @@ class ReviewService(
             toilet = request.toilet,
             parking = request.parking,
             internalNav = request.internalNav,
-            notes = request.notes,
+            notes = reviewNotes,
             isVerified = false
         )
 
         val saved = reviewRepository.save(review)
-
-        // Update place review count and accessibility level
         updatePlaceAccessibility(request.placeId)
-
         return saved.toDto()
+    }
+
+    @Transactional
+    fun addPhotos(reviewId: UUID, photoUrls: List<String>, userId: UUID?): ReviewDto {
+        val review = reviewRepository.findByIdOrNull(reviewId)
+            ?: throw NoSuchElementException("Review not found: $reviewId")
+        if (userId != null && review.userId != userId) {
+            throw IllegalArgumentException("Not authorized to modify this review")
+        }
+        val updated = review.copy(photoUrls = review.photoUrls + photoUrls)
+        return reviewRepository.save(updated).toDto()
     }
 
     @Transactional
@@ -130,15 +144,24 @@ class ReviewService(
         }
     }
 
+    private fun lookupUserName(userId: UUID?): String? {
+        if (userId == null) return null
+        return userNameCache.getOrPut(userId) {
+            userRepository.findById(userId).map { it.name }.orElse("Unknown")
+        }
+    }
+
     private fun AccessibilityReview.toDto() = ReviewDto(
         id = id,
         placeId = place.id,
         userId = userId,
+        userName = lookupUserName(userId),
         entrance = entrance,
         toilet = toilet,
         parking = parking,
         internalNav = internalNav,
         notes = notes,
+        photoUrls = photoUrls,
         isVerified = isVerified,
         createdAt = createdAt
     )

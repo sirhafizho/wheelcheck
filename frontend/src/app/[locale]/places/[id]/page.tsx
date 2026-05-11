@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { usePlace } from '@/hooks/usePlaces';
 import { PlaceDetail } from '@/components/places/PlaceDetail';
+import { ReviewsList } from '@/components/places/ReviewsList';
+import { CommentSection } from '@/components/places/CommentSection';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
 
@@ -42,11 +44,11 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       <Button 
         variant="ghost" 
         onClick={() => router.back()}
-        className="mb-4"
+        className="mb-2"
       >
         ← {t('common.back')}
       </Button>
@@ -56,6 +58,14 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
         locale={locale}
         onReportClick={() => router.push(`/${locale}/report/${place.id}`)}
       />
+
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <ReviewsList placeId={place.id} locale={locale} />
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <CommentSection placeId={place.id} locale={locale} />
+      </div>
     </div>
   );
 }

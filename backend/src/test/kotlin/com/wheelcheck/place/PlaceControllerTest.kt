@@ -39,6 +39,9 @@ class PlaceControllerTest {
     @MockkBean
     private lateinit var userService: UserService
     
+    @MockkBean
+    private lateinit var reviewService: com.wheelcheck.review.ReviewService
+    
     @Test
     fun `GET all places returns list`() {
         val places = listOf(

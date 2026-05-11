@@ -21,13 +21,29 @@ export interface AccessReport {
   id: string;
   placeId: string;
   userId?: string | null;
+  userName?: string | null;
   entrance: AccessLevel;
   toilet: AccessLevel;
   parking: AccessLevel;
   internalNav: AccessLevel;
   notes?: string | null;
+  photoUrls: string[];
   isVerified: boolean;
   createdAt: string;
+}
+
+export interface Comment {
+  id: string;
+  placeId: string;
+  userId?: string | null;
+  userName?: string | null;
+  parentId?: string | null;
+  content: string;
+  upvotes: number;
+  downvotes: number;
+  replies: Comment[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateReportRequest {
@@ -38,6 +54,12 @@ export interface CreateReportRequest {
   internalNav: string;
   notes?: string;
   photos?: File[];
+}
+
+export interface CreateCommentRequest {
+  placeId: string;
+  parentId?: string | null;
+  content: string;
 }
 
 export interface PlaceSearchParams {

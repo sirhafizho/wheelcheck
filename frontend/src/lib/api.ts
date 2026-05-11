@@ -2,7 +2,9 @@ import { API_URL } from './constants';
 import type {
   Place,
   AccessReport,
+  Comment,
   CreateReportRequest,
+  CreateCommentRequest,
   PlaceSearchParams,
   ApiResponse,
   PaginatedResponse,
@@ -43,7 +45,6 @@ class ApiClient {
   }
 
   async searchPlaces(params: PlaceSearchParams): Promise<PaginatedResponse<Place>> {
-    // If lat/lng provided, use nearby endpoint
     if (params.lat !== undefined && params.lng !== undefined) {
       const places = await this.fetch<Place[]>('/places/nearby', {
         method: 'POST',
@@ -56,13 +57,11 @@ class ApiClient {
       return { data: places, total: places.length };
     }
 
-    // If query provided, use search endpoint
     if (params.query) {
       const places = await this.fetch<Place[]>(`/places/search?name=${encodeURIComponent(params.query)}`);
       return { data: places, total: places.length };
     }
 
-    // Default: get all places
     const places = await this.fetch<Place[]>('/places');
     return { data: places, total: places.length };
   }
@@ -76,12 +75,12 @@ class ApiClient {
     return this.searchPlaces({ lat, lng, radius });
   }
 
-  async getPlaceReports(placeId: string): Promise<PaginatedResponse<AccessReport>> {
-    return this.fetch<PaginatedResponse<AccessReport>>(`/places/${placeId}/reports`);
+  async getPlaceReports(placeId: string): Promise<AccessReport[]> {
+    return this.fetch<AccessReport[]>(`/places/${placeId}/reports`);
   }
 
-  async createReport(report: CreateReportRequest): Promise<ApiResponse<AccessReport>> {
-    return this.fetch<ApiResponse<AccessReport>>('/reviews', {
+  async createReport(report: CreateReportRequest): Promise<AccessReport> {
+    return this.fetch<AccessReport>('/reviews', {
       method: 'POST',
       body: JSON.stringify({
         placeId: report.placeId,
@@ -89,8 +88,31 @@ class ApiClient {
         toilet: report.toilet,
         parking: report.parking,
         internalNav: report.internalNav,
-        comment: report.notes || null,
+        notes: report.notes || null,
       }),
+    });
+  }
+
+  async getComments(placeId: string): Promise<Comment[]> {
+    return this.fetch<Comment[]>(`/comments/place/${placeId}`);
+  }
+
+  async createComment(request: CreateCommentRequest, token?: string): Promise<Comment> {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return this.fetch<Comment>('/comments', {
+      method: 'POST',
+      body: JSON.stringify(request),
+      headers,
+    });
+  }
+
+  async voteComment(commentId: string, type: 'up' | 'down', token?: string): Promise<void> {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    await this.fetch<void>(`/comments/${commentId}/vote?type=${type}`, {
+      method: 'POST',
+      headers,
     });
   }
 }

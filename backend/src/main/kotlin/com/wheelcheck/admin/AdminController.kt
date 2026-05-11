@@ -125,11 +125,13 @@ class AdminController(
         id = id,
         placeId = place.id,
         userId = userId,
+        userName = null,
         entrance = entrance,
         toilet = toilet,
         parking = parking,
         internalNav = internalNav,
         notes = notes,
+        photoUrls = photoUrls,
         isVerified = isVerified,
         createdAt = createdAt
     )

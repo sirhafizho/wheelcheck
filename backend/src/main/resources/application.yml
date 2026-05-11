@@ -49,6 +49,8 @@ springdoc:
 
 # Aggregation adapters configuration
 wheelcheck:
+  uploads:
+    dir: ${UPLOAD_DIRECTORY:uploads}
   adapters:
     osm:
       enabled: true
@@ -57,3 +59,6 @@ wheelcheck:
       enabled: false
       app-token: ${ACCESSIBILITY_CLOUD_TOKEN:}
       base-url: https://accessibility-cloud-v2.freetls.fastly.net
+    wikidata:
+      enabled: false
+      endpoint: https://query.wikidata.org/sparql
