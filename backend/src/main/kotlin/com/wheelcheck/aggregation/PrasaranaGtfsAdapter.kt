@@ -102,7 +102,7 @@ class PrasaranaGtfsAdapter(
 
         val row = headers.zip(values).toMap()
 
-        val stopId = row["stop_id"] ?: return null
+        val stopId = row["stop_id"]?.takeIf { it.isNotBlank() } ?: return null
         val stopName = row["stop_name"]?.takeIf { it.isNotBlank() } ?: return null
         val lat = row["stop_lat"]?.toDoubleOrNull() ?: return null
         val lng = row["stop_lon"]?.toDoubleOrNull() ?: return null
