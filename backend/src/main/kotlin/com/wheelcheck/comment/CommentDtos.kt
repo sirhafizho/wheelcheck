@@ -14,6 +14,7 @@ data class CommentDto(
     val content: String,
     val upvotes: Int,
     val downvotes: Int,
+    val userVote: String?,
     val replies: List<CommentDto>,
     val createdAt: Instant,
     val updatedAt: Instant

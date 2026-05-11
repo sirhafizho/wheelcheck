@@ -41,6 +41,7 @@ export interface Comment {
   content: string;
   upvotes: number;
   downvotes: number;
+  userVote?: string | null;
   replies: Comment[];
   createdAt: string;
   updatedAt: string;

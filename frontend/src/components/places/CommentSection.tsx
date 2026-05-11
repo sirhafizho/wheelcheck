@@ -1,24 +1,98 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Comment } from '@/lib/types';
 import { api } from '@/lib/api';
+
+type VoteState = 'up' | 'down' | null;
 
 interface CommentSectionProps {
   placeId: string;
   locale: string;
 }
 
+function getVoteState(userVote?: string | null): VoteState {
+  if (userVote === 'UP') return 'up';
+  if (userVote === 'DOWN') return 'down';
+  return null;
+}
+
+function extractUserVotes(commentList: Comment[]): Record<string, VoteState> {
+  const votes: Record<string, VoteState> = {};
+
+  const visit = (items: Comment[]) => {
+    items.forEach((comment) => {
+      votes[comment.id] = getVoteState(comment.userVote);
+      visit(comment.replies || []);
+    });
+  };
+
+  visit(commentList);
+  return votes;
+}
+
+function applyVoteUpdate(comment: Comment, nextVote: VoteState): Comment {
+  const previousVote = getVoteState(comment.userVote);
+  let upvotes = comment.upvotes;
+  let downvotes = comment.downvotes;
+
+  if (previousVote === 'up') {
+    upvotes -= 1;
+  } else if (previousVote === 'down') {
+    downvotes -= 1;
+  }
+
+  if (nextVote === 'up') {
+    upvotes += 1;
+  } else if (nextVote === 'down') {
+    downvotes += 1;
+  }
+
+  return {
+    ...comment,
+    upvotes: Math.max(upvotes, 0),
+    downvotes: Math.max(downvotes, 0),
+    userVote: nextVote === 'up' ? 'UP' : nextVote === 'down' ? 'DOWN' : null,
+  };
+}
+
+function mergeUpdatedComment(existing: Comment, updated: Comment): Comment {
+  return {
+    ...existing,
+    ...updated,
+    replies: updated.replies.length > 0 ? updated.replies : existing.replies,
+  };
+}
+
+function updateCommentInTree(
+  commentList: Comment[],
+  commentId: string,
+  updater: (comment: Comment) => Comment,
+): Comment[] {
+  return commentList.map((comment) => {
+    if (comment.id === commentId) {
+      return updater(comment);
+    }
+
+    return {
+      ...comment,
+      replies: updateCommentInTree(comment.replies || [], commentId, updater),
+    };
+  });
+}
+
 function CommentCard({
   comment,
   onReply,
   onVote,
+  userVotes,
   depth = 0,
   locale,
 }: {
   comment: Comment;
   onReply: (parentId: string) => void;
   onVote: (commentId: string, type: 'up' | 'down') => void;
+  userVotes: Record<string, VoteState>;
   depth?: number;
   locale: string;
 }) {
@@ -33,6 +107,7 @@ function CommentCard({
   };
 
   const score = comment.upvotes - comment.downvotes;
+  const activeVote = userVotes[comment.id] ?? null;
 
   return (
     <div
@@ -58,8 +133,9 @@ function CommentCard({
           <div className="flex items-center gap-1">
             <button
               onClick={() => onVote(comment.id, 'up')}
-              className="text-gray-400 hover:text-emerald-600 transition-colors p-1"
+              className={`rounded-md p-1 transition-colors ${activeVote === 'up' ? 'bg-emerald-50 text-emerald-600' : 'text-gray-400 hover:text-emerald-600'}`}
               aria-label="Upvote"
+              aria-pressed={activeVote === 'up'}
             >
               ▲
             </button>
@@ -68,8 +144,9 @@ function CommentCard({
             </span>
             <button
               onClick={() => onVote(comment.id, 'down')}
-              className="text-gray-400 hover:text-red-500 transition-colors p-1"
+              className={`rounded-md p-1 transition-colors ${activeVote === 'down' ? 'bg-red-50 text-red-500' : 'text-gray-400 hover:text-red-500'}`}
               aria-label="Downvote"
+              aria-pressed={activeVote === 'down'}
             >
               ▼
             </button>
@@ -93,6 +170,7 @@ function CommentCard({
               comment={reply}
               onReply={onReply}
               onVote={onVote}
+              userVotes={userVotes}
               depth={depth + 1}
               locale={locale}
             />
@@ -105,16 +183,24 @@ function CommentCard({
 
 export function CommentSection({ placeId, locale }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
+  const [userVotes, setUserVotes] = useState<Record<string, VoteState>>({});
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const getToken = () => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('wheelcheck_token');
+  };
+
   const fetchComments = useCallback(async () => {
     try {
-      const data = await api.getComments(placeId);
+      const token = getToken() ?? undefined;
+      const data = await api.getComments(placeId, token);
       setComments(data);
+      setUserVotes(extractUserVotes(data));
     } catch {
       // silently fail
     } finally {
@@ -123,13 +209,8 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   }, [placeId]);
 
   useEffect(() => {
-    fetchComments();
+    void fetchComments();
   }, [fetchComments]);
-
-  const getToken = () => {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('wheelcheck_token');
-  };
 
   const handleSubmit = async (parentId?: string | null) => {
     const content = parentId ? replyText : newComment;
@@ -145,7 +226,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
     try {
       await api.createComment(
         { placeId, parentId: parentId || null, content: content.trim() },
-        token
+        token,
       );
       if (parentId) {
         setReplyText('');
@@ -167,11 +248,23 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
       alert('Please log in to vote.');
       return;
     }
+
+    const previousComments = comments;
+    const previousVotes = userVotes;
+    const nextVote = previousVotes[commentId] === type ? null : type;
+
+    setComments((current) => updateCommentInTree(current, commentId, (comment) => applyVoteUpdate(comment, nextVote)));
+    setUserVotes((current) => ({ ...current, [commentId]: nextVote }));
+
     try {
-      await api.voteComment(commentId, type, token);
-      await fetchComments();
+      const updatedComment = await api.voteComment(commentId, type, token);
+      const updatedVote = getVoteState(updatedComment.userVote);
+
+      setComments((current) => updateCommentInTree(current, commentId, (comment) => mergeUpdatedComment(comment, updatedComment)));
+      setUserVotes((current) => ({ ...current, [commentId]: updatedVote }));
     } catch {
-      // silently fail
+      setComments(previousComments);
+      setUserVotes(previousVotes);
     }
   };
 
@@ -194,7 +287,6 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
         Discussion ({comments.length})
       </h2>
 
-      {/* New comment form */}
       <div className="mb-6">
         <textarea
           value={newComment}
@@ -218,7 +310,6 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
         </div>
       </div>
 
-      {/* Comments list */}
       {comments.length === 0 ? (
         <p className="text-gray-500 text-sm text-center py-4">
           No comments yet. Start the discussion!
@@ -231,6 +322,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
                 comment={comment}
                 onReply={handleReply}
                 onVote={handleVote}
+                userVotes={userVotes}
                 locale={locale}
               />
               {replyTo === comment.id && (

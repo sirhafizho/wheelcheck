@@ -15,8 +15,12 @@ class CommentController(
 ) {
 
     @GetMapping("/place/{placeId}")
-    fun getCommentsByPlace(@PathVariable placeId: UUID): ResponseEntity<List<CommentDto>> {
-        return ResponseEntity.ok(commentService.getCommentsForPlace(placeId))
+    fun getCommentsByPlace(
+        @PathVariable placeId: UUID,
+        authentication: Authentication?
+    ): ResponseEntity<List<CommentDto>> {
+        val userId = authentication?.principal as? UUID
+        return ResponseEntity.ok(commentService.getCommentsForPlace(placeId, userId))
     }
 
     @PostMapping
