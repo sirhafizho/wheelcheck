@@ -105,6 +105,24 @@ html.high-contrast .border-red-200 {
 /* Leaflet map fixes */
 .leaflet-container {
   font-family: inherit;
+  z-index: 0;
+}
+
+/* Leaflet popup styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px !important;
+}
+
+/* Leaflet attribution - subtle */
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(4px);
 }
 
 /* Ensure high contrast for accessibility */

@@ -14,15 +14,15 @@ export function Header({ locale }: HeaderProps) {
   const ta = useTranslations('accessibility');
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white/95 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14">
           <Link 
             href={`/${locale}`}
             className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-md px-2 py-1"
           >
-            <div className="text-2xl" aria-hidden="true">♿</div>
-            <span className="text-xl font-bold text-emerald-600">
+            <span className="text-2xl" aria-hidden="true">♿</span>
+            <span className="text-lg font-bold text-emerald-600 tracking-tight">
               {t('appName')}
             </span>
           </Link>

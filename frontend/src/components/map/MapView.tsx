@@ -62,7 +62,7 @@ export function MapView({
       center={[center.lat, center.lng]}
       zoom={zoom}
       className={className}
-      style={{ height: '100%', width: '100%', minHeight: '400px' }}
+      style={{ height: '100%', width: '100%' }}
     >
       <MapUpdater center={center} />
       <TileLayer
