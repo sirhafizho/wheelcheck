@@ -70,21 +70,33 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | Settings (language switch, high contrast, large text) | ✅ Done |
 | Floating Action Button for quick place adding | ✅ Done |
 | Map marker popup with place details link | ✅ Done |
-| Admin dashboard with datatable | 🚧 In Progress |
+
+### ✅ Implemented (Phase 3 — Admin & Polish)
+
+| Feature | Status |
+|---------|--------|
+| Admin dashboard with stats overview | ✅ Done |
+| Admin datatable for Places (inline edit, delete) | ✅ Done |
+| Admin datatable for Reviews (view, delete) | ✅ Done |
+| Admin datatable for Users (role toggle, delete) | ✅ Done |
+| Role-based access control (USER / ADMIN) | ✅ Done |
+| JWT role claims with Spring Security @PreAuthorize | ✅ Done |
+| Map popup "View Details →" link + review count | ✅ Done |
+| Admin link in Settings (admin-only visibility) | ✅ Done |
+| Pagination on all admin tables | ✅ Done |
 
 ### ✅ Testing
 
 | Type | Count | Status |
 |------|-------|--------|
-| Backend unit tests | 53 | ✅ All passing |
+| Backend unit tests | 53+ | ✅ All passing |
 | Frontend unit tests | 18 | ✅ All passing |
-| Playwright E2E tests | 62 | ✅ All passing |
+| Playwright E2E tests | 75 | ✅ All passing |
 | Manual API verification | All endpoints | ✅ Verified |
 
 ### 🔜 Roadmap
 
 - [ ] Offline access for saved venues (service worker caching)
-- [ ] Admin dashboard for data management
 - [ ] Gamification (badges, contributor levels)
 - [ ] Venue owner self-certification
 - [ ] Route planning between accessible venues
