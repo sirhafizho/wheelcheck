@@ -85,13 +85,41 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | Admin link in Settings (admin-only visibility) | ✅ Done |
 | Pagination on all admin tables | ✅ Done |
 
+### ✅ Implemented (Phase 4 — Reviews, Comments & Aggregation)
+
+| Feature | Status |
+|---------|--------|
+| Individual review display on place detail page | ✅ Done |
+| Emoji ratings for entrance/toilet/parking/navigation | ✅ Done |
+| Photo evidence gallery with lightbox viewer | ✅ Done |
+| Photo upload endpoint for reviews | ✅ Done |
+| Threaded comment system (Reddit-style) | ✅ Done |
+| Comment upvote/downvote voting | ✅ Done |
+| Reply-to-comment threading (1 level) | ✅ Done |
+| Wikidata SPARQL adapter (P2846 accessibility data) | ✅ Done |
+| Enhanced OSM adapter (kerb, ramp, surface, elevator tags) | ✅ Done |
+| Search bar UI polish | ✅ Done |
+| **10,832 KL/Selangor places imported from OpenStreetMap** | ✅ Done |
+
+### ✅ Aggregation Service (Adapter Pattern)
+
+WheelCheck's backend uses an **adapter pattern** to aggregate accessibility data from multiple free sources:
+
+| Adapter | Source | Data |
+|---------|--------|------|
+| **OsmOverpassAdapter** | OpenStreetMap Overpass API | Wheelchair tags, ramps, kerbs, surfaces, elevators |
+| **WikidataAdapter** | Wikidata SPARQL | P2846 accessibility property for landmarks |
+| **AccessibilityCloudAdapter** | accessibility.cloud | GeoJSON accessibility data (ready to activate) |
+
+Admin-only import endpoints: `/api/aggregation/import/kl`, `/selangor`, `/custom`
+
 ### ✅ Testing
 
 | Type | Count | Status |
 |------|-------|--------|
 | Backend unit tests | 53+ | ✅ All passing |
 | Frontend unit tests | 18 | ✅ All passing |
-| Playwright E2E tests | 75 | ✅ All passing |
+| Playwright E2E tests | 81 | ✅ All passing |
 | Manual API verification | All endpoints | ✅ Verified |
 
 ### 🔜 Roadmap
@@ -99,8 +127,8 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 - [ ] Offline access for saved venues (service worker caching)
 - [ ] Gamification (badges, contributor levels)
 - [ ] Venue owner self-certification
-- [ ] Route planning between accessible venues
-- [ ] Deeper OpenStreetMap integration
+- [ ] Route planning between accessible venues (OpenRouteService wheelchair profile)
+- [ ] Transitland GTFS integration (Malaysian transit wheelchair_boarding)
 - [ ] Additional languages (Mandarin, Tamil)
 
 ## 🚀 Quick Start
@@ -173,12 +201,19 @@ cd frontend && npx playwright test
 | POST | `/api/places/nearby` | Find places within radius | No |
 | GET | `/api/places/search?name=` | Search by name | No |
 | POST | `/api/places` | Create a place | No |
+| GET | `/api/places/{id}/reports` | Get reviews for a place | No |
 | POST | `/api/reviews` | Submit accessibility review | No |
+| POST | `/api/reviews/{id}/photos` | Upload review photos | Yes |
 | POST | `/api/photos/upload` | Upload photo evidence | No |
+| GET | `/api/comments/place/{id}` | Get comments for a place | No |
+| POST | `/api/comments` | Post a comment | Yes |
+| POST | `/api/comments/{id}/vote?type=` | Upvote/downvote a comment | Yes |
 | POST | `/api/auth/register` | Register account | No |
 | POST | `/api/auth/login` | Login (returns JWT) | No |
 | GET | `/api/users/me` | Get current user profile | Yes |
 | GET | `/api/users/{id}/stats` | Get user stats | No |
+| POST | `/api/aggregation/import/kl` | Import KL places from OSM | Admin |
+| POST | `/api/aggregation/import/selangor` | Import Selangor places from OSM | Admin |
 
 ## ♿ Accessibility
 
@@ -215,19 +250,22 @@ Reviews rate venues across categories (entrance, toilet, parking, internal navig
 wheelcheck/
 ├── backend/                    # Spring Boot Kotlin API
 │   ├── src/main/kotlin/com/wheelcheck/
+│   │   ├── admin/             # Admin dashboard controller
+│   │   ├── aggregation/       # Data aggregation (OSM, Wikidata adapters)
+│   │   ├── auth/              # JWT authentication
+│   │   ├── comment/           # Threaded comment system
 │   │   ├── config/            # Security, rate limiting, exception handling
-│   │   ├── controller/        # REST controllers
-│   │   ├── model/             # JPA entities
-│   │   ├── repository/        # Spring Data + PostGIS queries
-│   │   └── service/           # Business logic, scoring, OSM import
-│   └── src/test/              # 53 unit tests
+│   │   ├── place/             # Place CRUD + spatial queries
+│   │   ├── review/            # Accessibility review + photo uploads
+│   │   └── user/              # User management
+│   └── src/test/              # 53+ unit tests
 ├── frontend/                   # Next.js 16 PWA
 │   ├── src/
 │   │   ├── app/[locale]/      # i18n routing (EN + BM)
-│   │   ├── components/        # Map, places, reviews, layout
+│   │   ├── components/        # Map, places, reviews, comments, layout
 │   │   ├── lib/               # API client, types, constants
 │   │   └── messages/          # Translation files
-│   └── tests/                 # 18 unit + 62 E2E tests
+│   └── tests/                 # 18 unit + 81 E2E tests
 ├── docker-compose.yml          # PostGIS (ARM64-native)
 ├── docs/                       # Architecture, PRD, development guide
 └── .github/                    # Issue templates, CI workflows
