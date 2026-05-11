@@ -10,8 +10,10 @@ test.describe('Add Place Page', () => {
     await expect(page.getByLabel(/place name/i)).toBeVisible();
     await expect(page.getByLabel(/address/i)).toBeVisible();
     await expect(page.getByLabel(/category/i)).toBeVisible();
-    await expect(page.getByLabel(/latitude/i)).toBeVisible();
-    await expect(page.getByLabel(/longitude/i)).toBeVisible();
+
+    // Location picker (replaces manual lat/lng)
+    await expect(page.getByText(/location/i).first()).toBeVisible();
+    await expect(page.locator('.leaflet-container')).toBeVisible({ timeout: 15000 });
 
     // Photo section
     await expect(page.getByText(/evidence photos/i)).toBeVisible();
@@ -68,7 +70,7 @@ test.describe('Add Place Page', () => {
     // Check that inputs have min-h-[48px] class (48dp touch target)
     const inputs = page.locator('input.min-h-\\[48px\\], select.min-h-\\[48px\\]');
     const count = await inputs.count();
-    expect(count).toBeGreaterThanOrEqual(5);
+    expect(count).toBeGreaterThanOrEqual(3);
   });
 
   test('should navigate to add place via FAB from home page', async ({ page }) => {

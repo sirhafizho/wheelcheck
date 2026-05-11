@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -24,6 +25,15 @@ const CATEGORIES = [
   'OTHER',
 ] as const;
 
+const LocationPicker = dynamic(() => import('@/components/map/LocationPicker').then((mod) => ({ default: mod.LocationPicker })), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[360px] items-center justify-center rounded-xl border border-gray-200 bg-gray-50">
+      <LoadingSpinner size="lg" />
+    </div>
+  ),
+});
+
 export default function AddPlacePage({ params }: { params: Params }) {
   const { locale } = use(params);
   const router = useRouter();
@@ -44,6 +54,18 @@ export default function AddPlacePage({ params }: { params: Params }) {
 
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleLocationChange = (latitude: number, longitude: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6),
+    }));
+  };
+
+  const handleAddressSuggestion = (address: string) => {
+    setFormData((prev) => (prev.address.trim() ? prev : { ...prev, address }));
   };
 
   const canSubmit = Boolean(
@@ -217,37 +239,12 @@ export default function AddPlacePage({ params }: { params: Params }) {
           </select>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('latitude')} *
-            </label>
-            <input
-              id="latitude"
-              type="number"
-              step="any"
-              required
-              value={formData.latitude}
-              onChange={(e) => handleChange('latitude', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
-              placeholder="3.1578"
-            />
-          </div>
-          <div>
-            <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('longitude')} *
-            </label>
-            <input
-              id="longitude"
-              type="number"
-              step="any"
-              required
-              value={formData.longitude}
-              onChange={(e) => handleChange('longitude', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
-              placeholder="101.7117"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t('location')} *
+          </label>
+          <p className="mb-2 text-sm text-gray-500">{t('locationHint')}</p>
+          <LocationPicker onLocationChange={handleLocationChange} onAddressChange={handleAddressSuggestion} />
         </div>
 
         <div>

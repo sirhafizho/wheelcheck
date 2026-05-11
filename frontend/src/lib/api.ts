@@ -93,8 +93,12 @@ class ApiClient {
     });
   }
 
-  async getComments(placeId: string): Promise<Comment[]> {
-    return this.fetch<Comment[]>(`/comments/place/${placeId}`);
+  async getComments(placeId: string, token?: string): Promise<Comment[]> {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return this.fetch<Comment[]>(`/comments/place/${placeId}`, {
+      headers,
+    });
   }
 
   async createComment(request: CreateCommentRequest, token?: string): Promise<Comment> {
@@ -107,10 +111,10 @@ class ApiClient {
     });
   }
 
-  async voteComment(commentId: string, type: 'up' | 'down', token?: string): Promise<void> {
+  async voteComment(commentId: string, type: 'up' | 'down', token?: string): Promise<Comment> {
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    await this.fetch<void>(`/comments/${commentId}/vote?type=${type}`, {
+    return this.fetch<Comment>(`/comments/${commentId}/vote?type=${type}`, {
       method: 'POST',
       headers,
     });
