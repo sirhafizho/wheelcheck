@@ -60,19 +60,31 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | OpenStreetMap data import service | ✅ Done |
 | Database seeded with 5 KL venues | ✅ Done |
 
+### ✅ Implemented (Phase 2 — Features)
+
+| Feature | Status |
+|---------|--------|
+| Add Place with mandatory photo evidence | ✅ Done |
+| Debounced search (home + places pages) | ✅ Done |
+| User profile (register, login, stats, review history) | ✅ Done |
+| Settings (language switch, high contrast, large text) | ✅ Done |
+| Floating Action Button for quick place adding | ✅ Done |
+| Map marker popup with place details link | ✅ Done |
+| Admin dashboard with datatable | 🚧 In Progress |
+
 ### ✅ Testing
 
 | Type | Count | Status |
 |------|-------|--------|
 | Backend unit tests | 53 | ✅ All passing |
 | Frontend unit tests | 18 | ✅ All passing |
-| Playwright E2E tests | 5 | ✅ All passing |
+| Playwright E2E tests | 62 | ✅ All passing |
 | Manual API verification | All endpoints | ✅ Verified |
 
 ### 🔜 Roadmap
 
 - [ ] Offline access for saved venues (service worker caching)
-- [ ] User profiles with contribution history
+- [ ] Admin dashboard for data management
 - [ ] Gamification (badges, contributor levels)
 - [ ] Venue owner self-certification
 - [ ] Route planning between accessible venues
@@ -80,6 +92,17 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 - [ ] Additional languages (Mandarin, Tamil)
 
 ## 🚀 Quick Start
+
+### 🧪 Test Account
+
+For testing, use these credentials:
+
+| Field | Value |
+|-------|-------|
+| Email | `admin@wheelcheck.my` |
+| Password | `WheelCheck2026!` |
+
+Or register a new account from the Profile page.
 
 ### Prerequisites
 - Java 21+ (tested with Java 24)
@@ -136,12 +159,14 @@ cd frontend && npx playwright test
 | GET | `/api/places` | List all places | No |
 | GET | `/api/places/{id}` | Get place details | No |
 | POST | `/api/places/nearby` | Find places within radius | No |
-| GET | `/api/places/search?q=` | Search by name/address | No |
+| GET | `/api/places/search?name=` | Search by name | No |
 | POST | `/api/places` | Create a place | No |
 | POST | `/api/reviews` | Submit accessibility review | No |
 | POST | `/api/photos/upload` | Upload photo evidence | No |
 | POST | `/api/auth/register` | Register account | No |
 | POST | `/api/auth/login` | Login (returns JWT) | No |
+| GET | `/api/users/me` | Get current user profile | Yes |
+| GET | `/api/users/{id}/stats` | Get user stats | No |
 
 ## ♿ Accessibility
 
@@ -190,7 +215,7 @@ wheelcheck/
 │   │   ├── components/        # Map, places, reviews, layout
 │   │   ├── lib/               # API client, types, constants
 │   │   └── messages/          # Translation files
-│   └── tests/                 # 18 unit + 5 E2E tests
+│   └── tests/                 # 18 unit + 62 E2E tests
 ├── docker-compose.yml          # PostGIS (ARM64-native)
 ├── docs/                       # Architecture, PRD, development guide
 └── .github/                    # Issue templates, CI workflows

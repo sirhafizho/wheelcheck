@@ -161,6 +161,59 @@
     "about": "Tentang WheelCheck",
     "version": "Versi",
     "license": "Lesen",
-    "viewOnGithub": "Lihat di GitHub →"
+    "viewOnGithub": "Lihat di GitHub →",
+    "administration": "Pentadbiran",
+    "adminDashboard": "Papan Pemuka Admin"
+  },
+  "admin": {
+    "title": "Papan Pemuka Admin",
+    "accessDenied": "Akses Ditolak",
+    "accessDeniedMessage": "Anda memerlukan keistimewaan admin untuk mengakses halaman ini",
+    "backToHome": "Kembali ke Laman Utama",
+    "stats": {
+      "totalPlaces": "Jumlah Tempat",
+      "totalReviews": "Jumlah Ulasan",
+      "totalUsers": "Jumlah Pengguna"
+    },
+    "tabs": {
+      "places": "Tempat",
+      "reviews": "Ulasan",
+      "users": "Pengguna"
+    },
+    "table": {
+      "name": "Nama",
+      "placeId": "ID Tempat",
+      "address": "Alamat",
+      "city": "Bandar",
+      "category": "Kategori",
+      "accessibility": "Kebolehcapaian",
+      "reviews": "Ulasan",
+      "actions": "Tindakan",
+      "entrance": "Pintu Masuk",
+      "toilet": "Tandas",
+      "parking": "Tempat Letak Kereta",
+      "internalNav": "Nav Dalaman",
+      "notes": "Nota",
+      "date": "Tarikh",
+      "email": "E-mel",
+      "role": "Peranan",
+      "verified": "Disahkan",
+      "joined": "Disertai"
+    },
+    "actions": {
+      "edit": "Sunting",
+      "delete": "Padam",
+      "save": "Simpan",
+      "cancel": "Batal",
+      "makeAdmin": "Jadikan Admin",
+      "makeUser": "Jadikan Pengguna",
+      "confirmDelete": "Adakah anda pasti mahu memadamkan item ini?"
+    },
+    "pagination": {
+      "previous": "Sebelumnya",
+      "next": "Seterusnya",
+      "page": "Halaman",
+      "of": "daripada"
+    }
   }
 }

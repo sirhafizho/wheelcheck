@@ -12,27 +12,27 @@ class ReviewService(
     private val reviewRepository: ReviewRepository,
     private val placeRepository: PlaceRepository
 ) {
-    
+
     @Transactional(readOnly = true)
     fun findById(id: UUID): ReviewDto? {
         return reviewRepository.findByIdOrNull(id)?.toDto()
     }
-    
+
     @Transactional(readOnly = true)
     fun findByPlaceId(placeId: UUID): List<ReviewDto> {
         return reviewRepository.findByPlaceIdOrderByCreatedAtDesc(placeId).map { it.toDto() }
     }
-    
+
     @Transactional(readOnly = true)
     fun findByUserId(userId: UUID): List<ReviewDto> {
         return reviewRepository.findByUserId(userId).map { it.toDto() }
     }
-    
+
     @Transactional
     fun create(request: CreateReviewRequest, userId: UUID? = null): ReviewDto {
         val place = placeRepository.findByIdOrNull(request.placeId)
             ?: throw IllegalArgumentException("Place not found: ${request.placeId}")
-        
+
         val review = AccessibilityReview(
             place = place,
             userId = userId,
@@ -43,33 +43,51 @@ class ReviewService(
             notes = request.notes,
             isVerified = false
         )
-        
+
         val saved = reviewRepository.save(review)
-        
+
         // Update place review count and accessibility level
         updatePlaceAccessibility(request.placeId)
-        
+
         return saved.toDto()
     }
-    
+
+    @Transactional
+    fun delete(reviewId: UUID) {
+        val review = reviewRepository.findByIdOrNull(reviewId)
+            ?: throw NoSuchElementException("Review not found: $reviewId")
+        val placeId = review.place.id
+        reviewRepository.delete(review)
+        updatePlaceAccessibility(placeId)
+    }
+
     private fun updatePlaceAccessibility(placeId: UUID) {
         val reviews = reviewRepository.findByPlaceIdOrderByCreatedAtDesc(placeId)
         val place = placeRepository.findByIdOrNull(placeId) ?: return
-        
-        if (reviews.isEmpty()) return
-        
+
+        if (reviews.isEmpty()) {
+            placeRepository.save(
+                place.copy(
+                    reviewCount = 0,
+                    accessibilityLevel = AccessLevel.UNKNOWN,
+                    updatedAt = java.time.Instant.now()
+                )
+            )
+            return
+        }
+
         // Calculate overall accessibility based on latest reviews
         val overallLevel = calculateOverallAccessibility(reviews.take(5))
-        
+
         val updated = place.copy(
             reviewCount = reviews.size,
             accessibilityLevel = overallLevel,
             updatedAt = java.time.Instant.now()
         )
-        
+
         placeRepository.save(updated)
     }
-    
+
     /**
      * Calculate overall accessibility level using a point-based scoring system.
      * 
@@ -111,7 +129,7 @@ class ReviewService(
             else -> AccessLevel.NOT_ACCESSIBLE
         }
     }
-    
+
     private fun AccessibilityReview.toDto() = ReviewDto(
         id = id,
         placeId = place.id,

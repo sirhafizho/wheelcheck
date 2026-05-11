@@ -4,6 +4,7 @@ import com.wheelcheck.auth.JwtAuthFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -12,10 +13,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 class SecurityConfig(
     private val jwtAuthFilter: JwtAuthFilter
 ) {
-    
+
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
@@ -33,19 +35,19 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.POST, "/api/photos/upload").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/users/*/stats").permitAll()
-                    
+
                     // Authenticated endpoints
                     .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
                     .requestMatchers("/api/admin/**").authenticated()
-                    
+
                     // Swagger/OpenAPI
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                    
+
                     // All other endpoints require authentication
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
-        
+
         return http.build()
     }
 }

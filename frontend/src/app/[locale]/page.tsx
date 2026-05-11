@@ -91,6 +91,7 @@ export default function HomePage() {
         <MapView
           places={places}
           center={mapCenter}
+          locale={locale}
           onPlaceClick={handlePlaceClick}
           className="w-full h-full"
         />

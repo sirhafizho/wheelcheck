@@ -21,6 +21,7 @@ interface MapViewProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   onPlaceClick?: (place: Place) => void;
+  locale?: string;
   className?: string;
 }
 
@@ -39,6 +40,7 @@ export function MapView({
   center = MAP_CONFIG.defaultCenter, 
   zoom = MAP_CONFIG.defaultZoom,
   onPlaceClick,
+  locale = 'en',
   className = ''
 }: MapViewProps) {
   const [mounted, setMounted] = useState(false);
@@ -84,6 +86,15 @@ export function MapView({
               <p className="text-sm text-gray-600 mt-2">
                 {place.address}
               </p>
+              <p className="text-sm text-gray-600 mt-1">
+                {place.reviewCount} {place.reviewCount === 1 ? 'review' : 'reviews'}
+              </p>
+              <a
+                href={`/${locale}/places/${place.id}`}
+                className="mt-3 inline-flex min-h-[48px] items-center text-sm font-medium text-emerald-600 hover:underline"
+              >
+                View Details →
+              </a>
             </div>
           </Popup>
         </Marker>
