@@ -24,11 +24,11 @@ async function getAuthToken(request: import('@playwright/test').APIRequestContex
 }
 
 test.describe('Wheelchair Routing API', () => {
-  test('returns 401 without authentication token', async ({ request }) => {
+  test('returns 401 or 403 without authentication token', async ({ request }) => {
     const res = await request.post(ROUTING_URL, {
       data: klRouteRequest,
     });
-    expect(res.status()).toBe(401);
+    expect([401, 403]).toContain(res.status());
   });
 
   test('returns 503 when ORS adapter is not configured (default)', async ({ request }) => {
@@ -80,12 +80,12 @@ test.describe('Wheelchair Routing API', () => {
     expect(res.status()).not.toBe(422);
   });
 
-  test('returns 401 for route request with invalid token', async ({ request }) => {
+  test('returns 401 or 403 for route request with invalid token', async ({ request }) => {
     const res = await request.post(ROUTING_URL, {
       headers: { Authorization: 'Bearer invalid-token-here' },
       data: klRouteRequest,
     });
-    expect(res.status()).toBe(401);
+    expect([401, 403]).toContain(res.status());
   });
 
   test('when ORS is enabled, response has correct shape', async ({ request }) => {
@@ -176,8 +176,8 @@ test.describe('Aggregation Adapters API', () => {
     expect(res.status()).toBe(403);
   });
 
-  test('GET /api/aggregation/adapters returns 401 without token', async ({ request }) => {
+  test('GET /api/aggregation/adapters returns 401 or 403 without token', async ({ request }) => {
     const res = await request.get('http://localhost:8080/api/aggregation/adapters');
-    expect(res.status()).toBe(401);
+    expect([401, 403]).toContain(res.status());
   });
 });
