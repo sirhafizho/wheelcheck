@@ -40,4 +40,8 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
     ): List<Place>
     
     fun findByNameContainingIgnoreCase(name: String): List<Place>
+    
+    fun findByOsmId(osmId: String): Place?
+    
+    fun existsByOsmId(osmId: String): Boolean
 }

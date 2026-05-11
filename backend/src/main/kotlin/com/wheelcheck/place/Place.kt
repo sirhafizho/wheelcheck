@@ -39,6 +39,24 @@ data class Place(
     @Column(name = "review_count", nullable = false)
     val reviewCount: Int = 0,
     
+    @Column(name = "osm_id")
+    val osmId: String? = null,
+    
+    @Column(name = "data_source", nullable = false)
+    val dataSource: String = "COMMUNITY",
+    
+    @Column(name = "osm_wheelchair_tag")
+    val osmWheelchairTag: String? = null,
+    
+    @Column(name = "osm_toilet_accessible")
+    val osmToiletAccessible: Boolean? = null,
+    
+    @Column(name = "osm_tactile_paving")
+    val osmTactilePaving: Boolean? = null,
+    
+    @Column(name = "osm_description")
+    val osmDescription: String? = null,
+    
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant = Instant.now(),
     

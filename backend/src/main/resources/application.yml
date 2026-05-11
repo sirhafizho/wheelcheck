@@ -46,3 +46,14 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+
+# Aggregation adapters configuration
+wheelcheck:
+  adapters:
+    osm:
+      enabled: true
+      overpass-url: https://overpass-api.de/api/interpreter
+    accessibility-cloud:
+      enabled: false
+      app-token: ${ACCESSIBILITY_CLOUD_TOKEN:}
+      base-url: https://accessibility-cloud-v2.freetls.fastly.net
