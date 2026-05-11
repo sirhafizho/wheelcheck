@@ -10,23 +10,23 @@ class AuthService(
     private val userService: UserService,
     private val jwtTokenProvider: JwtTokenProvider
 ) {
-    
+
     @Transactional
     fun register(email: String, password: String, name: String): AuthResponse {
         val user = userService.createUser(email, password, name)
-        val token = jwtTokenProvider.generateToken(user.id, user.email)
+        val token = jwtTokenProvider.generateToken(user.id, user.email, user.role)
         return AuthResponse(token, user.id, user.email, user.name)
     }
-    
+
     @Transactional(readOnly = true)
     fun login(email: String, password: String): AuthResponse? {
         val user = userService.findByEmail(email) ?: return null
-        
+
         if (!userService.validatePassword(user, password)) {
             return null
         }
-        
-        val token = jwtTokenProvider.generateToken(user.id, user.email)
+
+        val token = jwtTokenProvider.generateToken(user.id, user.email, user.role)
         return AuthResponse(token, user.id, user.email, user.name)
     }
 }

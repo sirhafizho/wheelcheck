@@ -1,11 +1,29 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 
 type Params = Promise<{ locale: string }>;
+
+interface TokenPayload {
+  role?: string;
+}
+
+const parseToken = (token: string): TokenPayload | null => {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return JSON.parse(window.atob(padded)) as TokenPayload;
+  } catch {
+    return null;
+  }
+};
 
 export default function SettingsPage({ params }: { params: Params }) {
   const { locale } = use(params);
@@ -13,13 +31,17 @@ export default function SettingsPage({ params }: { params: Params }) {
   const t = useTranslations('settings');
   const [highContrast, setHighContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const storedHighContrast = localStorage.getItem('wheelcheck_high_contrast') === 'true';
     const storedLargeText = localStorage.getItem('wheelcheck_large_text') === 'true';
+    const token = localStorage.getItem('wheelcheck_token');
+    const tokenPayload = token ? parseToken(token) : null;
 
     setHighContrast(storedHighContrast);
     setLargeText(storedLargeText);
+    setIsAdmin(tokenPayload?.role?.toUpperCase() === 'ADMIN');
     document.documentElement.classList.toggle('high-contrast', storedHighContrast);
     document.documentElement.classList.toggle('large-text', storedLargeText);
   }, []);
@@ -105,6 +127,18 @@ export default function SettingsPage({ params }: { params: Params }) {
             </a>
           </div>
         </div>
+
+        {isAdmin && (
+          <div className="bg-white rounded-lg shadow p-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('administration')}</h2>
+            <Link
+              href={`/${locale}/admin`}
+              className="inline-flex min-h-[48px] items-center text-emerald-600 text-sm font-medium hover:underline"
+            >
+              {t('adminDashboard')} →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

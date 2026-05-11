@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -14,7 +15,7 @@ class JwtAuthFilter(
     private val jwtTokenProvider: JwtTokenProvider,
     private val userService: UserService
 ) : OncePerRequestFilter() {
-    
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -22,18 +23,19 @@ class JwtAuthFilter(
     ) {
         try {
             val token = extractTokenFromRequest(request)
-            
+
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 val userId = jwtTokenProvider.getUserIdFromToken(token)
-                
+
                 if (userId != null) {
                     val user = userService.findById(userId)
-                    
+
                     if (user != null) {
+                        val role = (jwtTokenProvider.extractRole(token) ?: user.role).uppercase()
                         val authentication = UsernamePasswordAuthenticationToken(
                             user.id,
                             null,
-                            emptyList()
+                            listOf(SimpleGrantedAuthority("ROLE_$role"))
                         )
                         SecurityContextHolder.getContext().authentication = authentication
                     }
@@ -42,10 +44,10 @@ class JwtAuthFilter(
         } catch (e: Exception) {
             logger.error("Could not set user authentication in security context", e)
         }
-        
+
         filterChain.doFilter(request, response)
     }
-    
+
     private fun extractTokenFromRequest(request: HttpServletRequest): String? {
         val bearerToken = request.getHeader("Authorization")
         return if (bearerToken?.startsWith("Bearer ") == true) {

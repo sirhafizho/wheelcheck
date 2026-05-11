@@ -23,7 +23,7 @@ class JwtTokenProviderTest {
         val userId = UUID.randomUUID()
         val email = "test@wheelcheck.com"
 
-        val token = jwtTokenProvider.generateToken(userId, email)
+        val token = jwtTokenProvider.generateToken(userId, email, "USER")
 
         assertNotNull(token)
         assertTrue(token.isNotBlank())
@@ -35,16 +35,23 @@ class JwtTokenProviderTest {
         val userId = UUID.randomUUID()
         val email = "test@wheelcheck.com"
 
-        val token = jwtTokenProvider.generateToken(userId, email)
+        val token = jwtTokenProvider.generateToken(userId, email, "USER")
         val extractedId = jwtTokenProvider.getUserIdFromToken(token)
 
         assertEquals(userId, extractedId)
     }
 
     @Test
+    fun `extractRole extracts correct role`() {
+        val token = jwtTokenProvider.generateToken(UUID.randomUUID(), "test@wheelcheck.com", "ADMIN")
+
+        assertEquals("ADMIN", jwtTokenProvider.extractRole(token))
+    }
+
+    @Test
     fun `validateToken returns true for valid token`() {
         val userId = UUID.randomUUID()
-        val token = jwtTokenProvider.generateToken(userId, "test@wheelcheck.com")
+        val token = jwtTokenProvider.generateToken(userId, "test@wheelcheck.com", "USER")
 
         assertTrue(jwtTokenProvider.validateToken(token))
     }
@@ -57,7 +64,7 @@ class JwtTokenProviderTest {
     @Test
     fun `validateToken returns false for tampered token`() {
         val userId = UUID.randomUUID()
-        val token = jwtTokenProvider.generateToken(userId, "test@wheelcheck.com")
+        val token = jwtTokenProvider.generateToken(userId, "test@wheelcheck.com", "USER")
         val tampered = token.dropLast(5) + "XXXXX"
 
         assertFalse(jwtTokenProvider.validateToken(tampered))
@@ -78,7 +85,7 @@ class JwtTokenProviderTest {
         )
 
         val userId = UUID.randomUUID()
-        val token = shortLivedProvider.generateToken(userId, "test@wheelcheck.com")
+        val token = shortLivedProvider.generateToken(userId, "test@wheelcheck.com", "USER")
 
         // Token with 0 expiration should be expired immediately
         // Give it a tiny moment to expire

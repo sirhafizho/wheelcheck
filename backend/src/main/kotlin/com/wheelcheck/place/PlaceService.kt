@@ -1,9 +1,12 @@
 package com.wheelcheck.place
 
+import com.wheelcheck.admin.UpdatePlaceRequest
 import com.wheelcheck.common.AccessLevel
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,17 +18,27 @@ class PlaceService(
     private val placeRepository: PlaceRepository
 ) {
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
-    
+
     @Transactional(readOnly = true)
     fun findById(id: UUID): PlaceDto? {
         return placeRepository.findByIdOrNull(id)?.toDto()
     }
-    
+
     @Transactional(readOnly = true)
     fun findAll(): List<PlaceDto> {
         return placeRepository.findAll().map { it.toDto() }
     }
-    
+
+    @Transactional(readOnly = true)
+    fun findAll(pageable: Pageable): Page<PlaceDto> {
+        return placeRepository.findAll(pageable).map { it.toDto() }
+    }
+
+    @Transactional(readOnly = true)
+    fun count(): Long {
+        return placeRepository.count()
+    }
+
     @Transactional(readOnly = true)
     fun findNearby(request: NearbyPlacesRequest): List<PlaceDto> {
         val places = if (request.category != null) {
@@ -46,18 +59,18 @@ class PlaceService(
         }
         return places.map { it.toDto() }
     }
-    
+
     @Transactional(readOnly = true)
     fun searchByName(name: String): List<PlaceDto> {
         return placeRepository.findByNameContainingIgnoreCase(name).map { it.toDto() }
     }
-    
+
     @Transactional
     fun create(request: CreatePlaceRequest): PlaceDto {
         val point = geometryFactory.createPoint(
             Coordinate(request.longitude, request.latitude)
         )
-        
+
         val place = Place(
             name = request.name,
             nameMs = request.nameMs,
@@ -70,10 +83,37 @@ class PlaceService(
             createdAt = Instant.now(),
             updatedAt = Instant.now()
         )
-        
+
         return placeRepository.save(place).toDto()
     }
-    
+
+    @Transactional
+    fun update(placeId: UUID, request: UpdatePlaceRequest): PlaceDto {
+        val place = placeRepository.findByIdOrNull(placeId)
+            ?: throw NoSuchElementException("Place not found: $placeId")
+
+        val updated = place.copy(
+            name = request.name,
+            nameMs = request.nameMs,
+            location = geometryFactory.createPoint(Coordinate(request.longitude, request.latitude)),
+            address = request.address,
+            city = request.city,
+            category = request.category,
+            accessibilityLevel = request.accessibilityLevel,
+            updatedAt = Instant.now()
+        )
+
+        return placeRepository.save(updated).toDto()
+    }
+
+    @Transactional
+    fun delete(placeId: UUID) {
+        if (!placeRepository.existsById(placeId)) {
+            throw NoSuchElementException("Place not found: $placeId")
+        }
+        placeRepository.deleteById(placeId)
+    }
+
     @Transactional
     fun updateAccessibilityLevel(placeId: UUID, level: AccessLevel) {
         val place = placeRepository.findByIdOrNull(placeId) ?: return
@@ -83,7 +123,7 @@ class PlaceService(
         )
         placeRepository.save(updated)
     }
-    
+
     @Transactional
     fun incrementReviewCount(placeId: UUID) {
         val place = placeRepository.findByIdOrNull(placeId) ?: return
@@ -93,7 +133,7 @@ class PlaceService(
         )
         placeRepository.save(updated)
     }
-    
+
     private fun Place.toDto() = PlaceDto(
         id = id,
         name = name,
