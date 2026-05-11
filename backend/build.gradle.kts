@@ -64,6 +64,10 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
 }
 
+springBoot {
+    mainClass.set("com.wheelcheck.WheelcheckApplicationKt")
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs += "-Xjsr305=strict"

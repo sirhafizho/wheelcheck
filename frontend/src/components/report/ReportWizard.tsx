@@ -14,7 +14,7 @@ interface ReportWizardProps {
   onCancel?: () => void;
 }
 
-type StepId = 'entrance' | 'toilet' | 'parking' | 'internal' | 'photos' | 'notes';
+type StepId = 'entrance' | 'toilet' | 'parking' | 'internalNav' | 'photos' | 'notes';
 
 export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportWizardProps) {
   const t = useTranslations('report');
@@ -24,7 +24,7 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
     placeId,
   });
 
-  const steps: StepId[] = ['entrance', 'toilet', 'parking', 'internal', 'photos', 'notes'];
+  const steps: StepId[] = ['entrance', 'toilet', 'parking', 'internalNav', 'photos', 'notes'];
   const currentStepIndex = steps.indexOf(currentStep);
 
   const handleAnswer = (field: string, value: string) => {
@@ -50,7 +50,7 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
   };
 
   const handleSubmit = async () => {
-    if (!formData.entrance || !formData.toilet || !formData.parking || !formData.internal) {
+    if (!formData.entrance || !formData.toilet || !formData.parking || !formData.internalNav) {
       return;
     }
 
@@ -102,10 +102,10 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
           <QuestionStep
             question={t('entrance')}
             options={[
-              { value: 'ramped', label: t('entranceOptions.ramped') },
-              { value: 'flat', label: t('entranceOptions.flat') },
-              { value: 'stairs', label: t('entranceOptions.stairs') },
-              { value: 'assisted', label: t('entranceOptions.assisted') },
+              { value: 'FULL', label: t('entranceOptions.full') },
+              { value: 'PARTIAL', label: t('entranceOptions.partial') },
+              { value: 'NOT_ACCESSIBLE', label: t('entranceOptions.notAccessible') },
+              { value: 'UNKNOWN', label: t('entranceOptions.unknown') },
             ]}
             value={formData.entrance}
             onChange={(value) => handleAnswer('entrance', value)}
@@ -115,10 +115,10 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
           <QuestionStep
             question={t('toilet')}
             options={[
-              { value: 'yes', label: t('toiletOptions.yes') },
-              { value: 'partial', label: t('toiletOptions.partial') },
-              { value: 'no', label: t('toiletOptions.no') },
-              { value: 'unknown', label: t('toiletOptions.unknown') },
+              { value: 'FULL', label: t('toiletOptions.full') },
+              { value: 'PARTIAL', label: t('toiletOptions.partial') },
+              { value: 'NOT_ACCESSIBLE', label: t('toiletOptions.notAccessible') },
+              { value: 'UNKNOWN', label: t('toiletOptions.unknown') },
             ]}
             value={formData.toilet}
             onChange={(value) => handleAnswer('toilet', value)}
@@ -128,26 +128,26 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
           <QuestionStep
             question={t('parking')}
             options={[
-              { value: 'yes', label: t('parkingOptions.yes') },
-              { value: 'nearby', label: t('parkingOptions.nearby') },
-              { value: 'no', label: t('parkingOptions.no') },
-              { value: 'unknown', label: t('parkingOptions.unknown') },
+              { value: 'FULL', label: t('parkingOptions.full') },
+              { value: 'PARTIAL', label: t('parkingOptions.partial') },
+              { value: 'NOT_ACCESSIBLE', label: t('parkingOptions.notAccessible') },
+              { value: 'UNKNOWN', label: t('parkingOptions.unknown') },
             ]}
             value={formData.parking}
             onChange={(value) => handleAnswer('parking', value)}
           />
         )}
-        {currentStep === 'internal' && (
+        {currentStep === 'internalNav' && (
           <QuestionStep
             question={t('internal')}
             options={[
-              { value: 'easy', label: t('internalOptions.easy') },
-              { value: 'moderate', label: t('internalOptions.moderate') },
-              { value: 'difficult', label: t('internalOptions.difficult') },
-              { value: 'unknown', label: t('internalOptions.unknown') },
+              { value: 'FULL', label: t('internalOptions.full') },
+              { value: 'PARTIAL', label: t('internalOptions.partial') },
+              { value: 'NOT_ACCESSIBLE', label: t('internalOptions.notAccessible') },
+              { value: 'UNKNOWN', label: t('internalOptions.unknown') },
             ]}
-            value={formData.internal}
-            onChange={(value) => handleAnswer('internal', value)}
+            value={formData.internalNav}
+            onChange={(value) => handleAnswer('internalNav', value)}
           />
         )}
         {currentStep === 'photos' && (

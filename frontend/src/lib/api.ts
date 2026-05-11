@@ -81,30 +81,16 @@ class ApiClient {
   }
 
   async createReport(report: CreateReportRequest): Promise<ApiResponse<AccessReport>> {
-    const formData = new FormData();
-    
-    formData.append('placeId', report.placeId);
-    formData.append('entrance', report.entrance);
-    formData.append('toilet', report.toilet);
-    formData.append('parking', report.parking);
-    formData.append('internal', report.internal);
-    
-    if (report.notes) {
-      formData.append('notes', report.notes);
-    }
-    
-    if (report.photos && report.photos.length > 0) {
-      report.photos.forEach((photo, index) => {
-        formData.append(`photos`, photo);
-      });
-    }
-
-    return this.fetch<ApiResponse<AccessReport>>('/reports', {
+    return this.fetch<ApiResponse<AccessReport>>('/reviews', {
       method: 'POST',
-      headers: {
-        // Don't set Content-Type for FormData - browser will set it with boundary
-      },
-      body: formData,
+      body: JSON.stringify({
+        placeId: report.placeId,
+        entrance: report.entrance,
+        toilet: report.toilet,
+        parking: report.parking,
+        internalNav: report.internalNav,
+        comment: report.notes || null,
+      }),
     });
   }
 }
