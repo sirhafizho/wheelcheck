@@ -17,14 +17,12 @@ describe('PlaceCard', () => {
     id: '1',
     name: 'Test Place',
     address: '123 Test St, Kuala Lumpur',
-    location: { latitude: 3.139, longitude: 101.6869 },
-    accessLevel: 'FULL',
+    latitude: 3.139,
+    longitude: 101.6869,
+    accessibilityLevel: 'FULL',
     category: 'Restaurant',
-    description: 'A test place',
-    reportCount: 5,
-    lastReportedAt: '2024-01-15T10:00:00Z',
+    reviewCount: 5,
     createdAt: '2024-01-01T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
   };
 
   it('renders place name', () => {
@@ -42,14 +40,9 @@ describe('PlaceCard', () => {
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
-  it('renders report count', () => {
+  it('renders review count', () => {
     render(<PlaceCard place={mockPlace} locale="en" />);
-    expect(screen.getByText(/5.*reports/)).toBeInTheDocument();
-  });
-
-  it('renders description when provided', () => {
-    render(<PlaceCard place={mockPlace} locale="en" />);
-    expect(screen.getByText('A test place')).toBeInTheDocument();
+    expect(screen.getByText(/5.*review/)).toBeInTheDocument();
   });
 
   it('links to place detail page', () => {

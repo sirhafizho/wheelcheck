@@ -18,11 +18,8 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Params;
 }) {
-  const { locale } = await params;
-
-  if (!locales.includes(locale as any)) {
-    notFound();
-  }
+  const { locale: rawLocale } = await params;
+  const locale = locales.includes(rawLocale as any) ? rawLocale : 'en';
 
   const messages = await getMessages();
 

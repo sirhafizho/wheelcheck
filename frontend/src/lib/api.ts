@@ -43,21 +43,33 @@ class ApiClient {
   }
 
   async searchPlaces(params: PlaceSearchParams): Promise<PaginatedResponse<Place>> {
-    const searchParams = new URLSearchParams();
-    
-    if (params.query) searchParams.set('query', params.query);
-    if (params.lat !== undefined) searchParams.set('lat', params.lat.toString());
-    if (params.lng !== undefined) searchParams.set('lng', params.lng.toString());
-    if (params.radius) searchParams.set('radius', params.radius.toString());
-    if (params.accessLevel) searchParams.set('accessLevel', params.accessLevel);
-    if (params.limit) searchParams.set('limit', params.limit.toString());
-    if (params.offset) searchParams.set('offset', params.offset.toString());
+    // If lat/lng provided, use nearby endpoint
+    if (params.lat !== undefined && params.lng !== undefined) {
+      const places = await this.fetch<Place[]>('/places/nearby', {
+        method: 'POST',
+        body: JSON.stringify({
+          latitude: params.lat,
+          longitude: params.lng,
+          radiusMeters: params.radius || 5000,
+        }),
+      });
+      return { data: places, total: places.length };
+    }
 
-    return this.fetch<PaginatedResponse<Place>>(`/places?${searchParams}`);
+    // If query provided, use search endpoint
+    if (params.query) {
+      const places = await this.fetch<Place[]>(`/places/search?name=${encodeURIComponent(params.query)}`);
+      return { data: places, total: places.length };
+    }
+
+    // Default: get all places
+    const places = await this.fetch<Place[]>('/places');
+    return { data: places, total: places.length };
   }
 
   async getPlace(id: string): Promise<ApiResponse<Place>> {
-    return this.fetch<ApiResponse<Place>>(`/places/${id}`);
+    const place = await this.fetch<Place>(`/places/${id}`);
+    return { data: place };
   }
 
   async getNearbyPlaces(lat: number, lng: number, radius = 5000): Promise<PaginatedResponse<Place>> {
