@@ -1,6 +1,7 @@
 services:
   db:
-    image: postgis/postgis:16-3.4
+    image: imresamu/postgis:16-3.4
+    platform: linux/arm64
     container_name: wheelcheck-db
     environment:
       POSTGRES_DB: wheelcheck
