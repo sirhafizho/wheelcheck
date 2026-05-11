@@ -28,7 +28,7 @@ test.describe('Home Page', () => {
   test('should show places count after loading', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
     
-    // Wait for places to load from API (shows "X places nearby")
+    // Wait for places to load — count pill shows "X places nearby"
     await expect(page.getByText(/\d+ places? nearby/)).toBeVisible({ timeout: 10000 });
   });
 
@@ -69,8 +69,8 @@ test.describe('Home Page', () => {
     await langToggle.click();
     await page.waitForURL(/\/ms/, { timeout: 15000 });
     
-    // Verify BM content
-    await expect(page.getByText('Cari Tempat Boleh Diakses')).toBeVisible({ timeout: 5000 });
+    // Verify BM content — search placeholder switches to BM
+    await expect(page.locator('input[placeholder="Cari tempat..."]')).toBeVisible({ timeout: 5000 });
   });
 
   test('should toggle language back to English', async ({ page }) => {
@@ -83,13 +83,13 @@ test.describe('Home Page', () => {
     await langToggle.click();
     await page.waitForURL(/\/en/, { timeout: 15000 });
     
-    await expect(page.getByText('Find Accessible Places')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('input[placeholder="Search for a place..."]')).toBeVisible({ timeout: 5000 });
   });
 
   test('should have My Location button', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
     
-    const myLocationBtn = page.getByText(/my location/i);
+    const myLocationBtn = page.getByLabel(/my location/i);
     await expect(myLocationBtn).toBeVisible();
   });
 });
