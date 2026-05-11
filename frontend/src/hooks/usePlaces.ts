@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import type { Place, PlaceSearchParams } from '@/lib/types';
 
@@ -10,12 +10,20 @@ export function usePlaces(initialParams?: PlaceSearchParams) {
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
 
+  // Stabilize initialParams to avoid infinite re-render loops
+  const paramsRef = useRef(initialParams);
+  const paramsKey = JSON.stringify(initialParams);
+
+  useEffect(() => {
+    paramsRef.current = initialParams;
+  }, [paramsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fetchPlaces = useCallback(async (params?: PlaceSearchParams) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await api.searchPlaces(params || initialParams || {});
+      const response = await api.searchPlaces(params || paramsRef.current || {});
       setPlaces(response.data);
       setTotal(response.total);
     } catch (err) {
@@ -24,11 +32,11 @@ export function usePlaces(initialParams?: PlaceSearchParams) {
     } finally {
       setLoading(false);
     }
-  }, [initialParams]);
+  }, []); // stable — reads from ref
 
   useEffect(() => {
     fetchPlaces();
-  }, [fetchPlaces]);
+  }, [fetchPlaces, paramsKey]); // re-fetch when params actually change
 
   return {
     places,

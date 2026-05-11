@@ -30,43 +30,48 @@
     "title": "Tempat",
     "noResults": "Tiada tempat dijumpai",
     "details": "Butiran",
-    "viewOnMap": "Lihat di Peta"
+    "viewOnMap": "Lihat di Peta",
+    "searchPlaceholder": "Cari tempat..."
   },
   "report": {
     "title": "Lapor Kebolehcapaian",
     "entrance": "Bagaimanakah pintu masuk?",
     "entranceOptions": {
-      "ramped": "Ada tanjakan",
-      "flat": "Pintu rata/selaras",
-      "stairs": "Tangga sahaja",
-      "assisted": "Bantuan tersedia"
+      "full": "Sepenuhnya boleh diakses (tanjakan atau pintu rata)",
+      "partial": "Separa boleh diakses (bantuan tersedia)",
+      "notAccessible": "Tidak boleh diakses (tangga sahaja)",
+      "unknown": "Tidak pasti"
     },
     "toilet": "Adakah tandas OKU?",
     "toiletOptions": {
-      "yes": "Ya, sepenuhnya boleh diakses",
+      "full": "Ya, sepenuhnya boleh diakses",
       "partial": "Ya, tetapi ruang terhad",
-      "no": "Tiada tandas OKU",
+      "notAccessible": "Tiada tandas OKU",
       "unknown": "Tidak pasti"
     },
     "parking": "Adakah tempat letak kereta OKU?",
     "parkingOptions": {
-      "yes": "Ya, tempat letak OKU khusus",
-      "nearby": "Ya, tetapi tidak khusus",
-      "no": "Tiada tempat letak kereta",
+      "full": "Ya, tempat letak OKU khusus",
+      "partial": "Ya, tetapi tidak khusus",
+      "notAccessible": "Tiada tempat letak kereta",
       "unknown": "Tidak pasti"
     },
     "internal": "Bagaimanakah laluan di dalam?",
     "internalOptions": {
-      "easy": "Mudah dilalui",
-      "moderate": "Ada kawasan sempit",
-      "difficult": "Sukar/banyak halangan",
+      "full": "Mudah dilalui",
+      "partial": "Ada kawasan sempit",
+      "notAccessible": "Sukar/banyak halangan",
       "unknown": "Tidak pasti"
     },
     "photos": "Tambah foto (pilihan)",
     "photoHint": "Foto membantu orang lain memahami kebolehcapaian",
     "additionalNotes": "Nota tambahan (pilihan)",
     "thanks": "Terima kasih! Laporan anda membantu komuniti 🎉",
-    "submitted": "Laporan berjaya dihantar"
+    "submitted": "Laporan berjaya dihantar",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "submit": "Hantar Laporan",
+    "submitting": "Menghantar..."
   },
   "nav": {
     "home": "Utama",
