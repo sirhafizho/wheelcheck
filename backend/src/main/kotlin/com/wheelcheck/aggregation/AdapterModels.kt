@@ -8,6 +8,8 @@ enum class DataSourceType(val displayName: String, val priority: Int) {
     ACCESSIBILITY_CLOUD("accessibility.cloud", 80),
     WIKIDATA("Wikidata", 75),
     GOOGLE_PLACES("Google Places", 70),
+    PRASARANA_GTFS("Prasarana GTFS (data.gov.my)", 85),
+    GEOAPIFY("Geoapify Places", 72),
     COMMUNITY("WheelCheck Community", 100),
     SEED("Seed Data", 50)
 }
@@ -68,4 +70,30 @@ interface AccessibilityDataAdapter {
     val isEnabled: Boolean
 
     fun fetchPlaces(bbox: BoundingBox): List<ExternalPlace>
+}
+
+data class LatLng(val lat: Double, val lng: Double)
+
+data class WheelchairRouteOptions(
+    val maximumInclinePercent: Int = 6,
+    val maximumSlopedKerbMeters: Double = 0.06,
+    val minimumWidthMeters: Double? = null,
+    val surfaceType: String = "cobblestone:flattened",
+    val smoothnessType: String = "good"
+)
+
+data class WheelchairRoute(
+    val distanceMeters: Double,
+    val durationSeconds: Double,
+    val geometry: String,
+    val warnings: List<String> = emptyList()
+)
+
+/**
+ * Separate adapter interface for wheelchair-accessible routing.
+ * Not a place data source — provides routing between coordinates.
+ */
+interface WheelchairRoutingAdapter {
+    val isEnabled: Boolean
+    fun getRoute(from: LatLng, to: LatLng, options: WheelchairRouteOptions = WheelchairRouteOptions()): WheelchairRoute?
 }

@@ -62,3 +62,17 @@ wheelcheck:
     wikidata:
       enabled: false
       endpoint: https://query.wikidata.org/sparql
+    prasarana:
+      enabled: false
+      base-url: https://api.data.gov.my/gtfs-static/prasarana
+      # Comma-separated list: rapid-rail-kl, rapid-bus-kl, rapid-bus-mrtfeeder, rapid-bus-penang
+      categories: rapid-rail-kl
+    geoapify:
+      enabled: false
+      api-key: ${GEOAPIFY_API_KEY:}
+      base-url: https://api.geoapify.com/v2/places
+      limit: 500
+    ors:
+      enabled: false
+      api-key: ${ORS_API_KEY:}
+      base-url: https://api.openrouteservice.org/v2
