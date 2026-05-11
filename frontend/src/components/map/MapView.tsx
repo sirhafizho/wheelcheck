@@ -45,6 +45,7 @@ interface MapViewProps {
   zoom?: number;
   flyTo?: FlyToCoordinates;
   onPlaceClick?: (place: Place) => void;
+  onViewportChange?: (viewport: MapViewport) => void;
   locale?: string;
   className?: string;
 }
@@ -112,6 +113,7 @@ export function MapView({
   zoom = MAP_CONFIG.defaultZoom,
   flyTo,
   onPlaceClick,
+  onViewportChange,
   locale = 'en',
   className = '',
 }: MapViewProps) {
@@ -121,6 +123,11 @@ export function MapView({
     lng: Number(center.lng.toFixed(5)),
     zoom,
   });
+
+  const handleViewportChange = useCallback((newViewport: MapViewport) => {
+    setViewport(newViewport);
+    onViewportChange?.(newViewport);
+  }, [onViewportChange]);
 
   useEffect(() => {
     setMounted(true);
@@ -144,7 +151,7 @@ export function MapView({
         style={{ height: '100%', width: '100%' }}
       >
         <MapUpdater center={center} flyTo={flyTo} />
-        <MapViewportReporter onChange={setViewport} />
+        <MapViewportReporter onChange={handleViewportChange} />
         <ZoomControl position="topright" />
         <TileLayer attribution={MAP_CONFIG.attribution} url={MAP_CONFIG.tileUrl} />
         <MarkerClusterGroup chunkedLoading showCoverageOnHover={false}>
