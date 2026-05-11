@@ -24,7 +24,8 @@
     "subtitle": "Discover wheelchair-friendly venues across Malaysia",
     "searchPlaceholder": "Search for a place...",
     "myLocation": "My Location",
-    "nearMe": "Places near me"
+    "nearMe": "Places near me",
+    "addPlace": "Add a place"
   },
   "places": {
     "title": "Places",
@@ -85,5 +86,81 @@
     "closeMenu": "Close menu",
     "languageToggle": "Switch language",
     "loading": "Loading content"
+  },
+  "addPlace": {
+    "title": "Add a Place",
+    "name": "Place Name",
+    "namePlaceholder": "e.g. Pavilion KL",
+    "nameMs": "Name (Bahasa Malaysia)",
+    "nameMsPlaceholder": "e.g. Pavilion KL",
+    "address": "Address",
+    "addressPlaceholder": "e.g. 168, Jalan Bukit Bintang",
+    "city": "City",
+    "category": "Category",
+    "selectCategory": "Select a category",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "photos": "Evidence Photos",
+    "photosRequired": "At least 1 photo required",
+    "photosHint": "Upload photos showing the venue's accessibility features (ramps, entrances, parking, etc.)",
+    "photosRequiredError": "Please upload at least one photo as evidence",
+    "photoDescription": "Place evidence photo",
+    "submit": "Add Place",
+    "success": "Place Added!",
+    "successMessage": "Thank you for contributing to the community. Redirecting...",
+    "errors": {
+      "createPlace": "Failed to create place",
+      "uploadPhoto": "Failed to upload photo evidence",
+      "submitFailed": "Failed to add place"
+    },
+    "categories": {
+      "MALL": "Shopping Mall",
+      "RESTAURANT": "Restaurant",
+      "HOSPITAL": "Hospital",
+      "MOSQUE": "Mosque",
+      "TRANSPORT": "Transport Hub",
+      "GOVERNMENT": "Government Office",
+      "EDUCATION": "Education",
+      "PARK": "Park",
+      "HOTEL": "Hotel",
+      "CAFE": "Cafe",
+      "OTHER": "Other"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "loginPrompt": "Sign in to track your contributions and manage your reports",
+    "login": "Log In",
+    "register": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "displayName": "Display Name",
+    "cancel": "Cancel",
+    "logout": "Log Out",
+    "reviewsSubmitted": "Reviews Submitted",
+    "contributions": "Total Contributions",
+    "reviewHistory": "Your Reviews",
+    "noReviews": "You haven't submitted any reviews yet",
+    "startReporting": "Start reporting accessibility →",
+    "errors": {
+      "invalidCredentials": "Invalid credentials",
+      "loginFailed": "Login failed",
+      "registrationFailed": "Registration failed"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "currentLanguage": "Current language",
+    "switchTo": "Switch to",
+    "english": "English",
+    "bahasaMalaysia": "Bahasa Malaysia",
+    "accessibility": "Accessibility",
+    "highContrast": "High Contrast Mode",
+    "largeText": "Large Text",
+    "about": "About WheelCheck",
+    "version": "Version",
+    "license": "License",
+    "viewOnGithub": "View on GitHub →"
   }
 }

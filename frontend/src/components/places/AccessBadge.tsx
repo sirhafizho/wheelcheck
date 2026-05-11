@@ -5,7 +5,7 @@ import type { AccessLevel } from '@/lib/types';
 import { ACCESSIBILITY_COLORS } from '@/lib/constants';
 
 interface AccessBadgeProps {
-  level: AccessLevel;
+  level: AccessLevel | null;
   showText?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -19,6 +19,7 @@ const icons = {
 
 export function AccessBadge({ level, showText = true, size = 'md' }: AccessBadgeProps) {
   const t = useTranslations('access');
+  const resolvedLevel: AccessLevel = level ?? 'UNKNOWN';
 
   const labels: Record<AccessLevel, string> = {
     FULL: t('full'),
@@ -46,17 +47,17 @@ export function AccessBadge({ level, showText = true, size = 'md' }: AccessBadge
         ${sizeClasses[size]}
       `}
       style={{
-        backgroundColor: `${ACCESSIBILITY_COLORS[level]}20`,
-        color: ACCESSIBILITY_COLORS[level],
-        border: `2px solid ${ACCESSIBILITY_COLORS[level]}`,
+        backgroundColor: `${ACCESSIBILITY_COLORS[resolvedLevel]}20`,
+        color: ACCESSIBILITY_COLORS[resolvedLevel],
+        border: `2px solid ${ACCESSIBILITY_COLORS[resolvedLevel]}`,
       }}
       role="status"
-      aria-label={`Accessibility: ${labels[level]}`}
+      aria-label={`Accessibility: ${labels[resolvedLevel]}`}
     >
       <span className={iconSizes[size]} aria-hidden="true">
-        {icons[level]}
+        {icons[resolvedLevel]}
       </span>
-      {showText && <span>{labels[level]}</span>}
+      {showText && <span>{labels[resolvedLevel]}</span>}
     </span>
   );
 }

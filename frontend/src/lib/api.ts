@@ -50,7 +50,7 @@ class ApiClient {
         body: JSON.stringify({
           latitude: params.lat,
           longitude: params.lng,
-          radiusMeters: params.radius || 5000,
+          radius: params.radius || 5000,
         }),
       });
       return { data: places, total: places.length };
