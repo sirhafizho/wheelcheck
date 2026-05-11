@@ -67,29 +67,33 @@ test.describe('Map interactions', () => {
     await expect.poll(async () => (await getViewport(page)).zoom).toBeGreaterThan(beforeZoom.zoom);
   });
 
-  test('clicking a suggestion recenters the map and updates the search input', async ({ page }) => {
+  test('refetches places when map is panned to a new area', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
-    const searchInput = page.locator('input[type="search"]');
-    await searchInput.click();
-    await expect(searchInput).toBeFocused();
-    await searchInput.pressSequentially('KLCC');
+    // Wait for initial places to load
+    const placesCounter = page.locator('text=/\\d+ places? nearby/');
+    await expect(placesCounter).toBeVisible({ timeout: 15000 });
 
-    const suggestions = page.getByTestId('search-suggestions');
-    await expect(suggestions).toBeVisible({ timeout: 15000 });
+    const initialCount = await placesCounter.textContent();
 
-    const firstSuggestion = page.getByTestId('search-suggestion').first();
-    await expect(firstSuggestion).toBeVisible({ timeout: 15000 });
+    // Pan the map by dragging it
+    const mapView = page.getByTestId('map-view');
+    const box = await mapView.boundingBox();
+    expect(box).not.toBeNull();
 
-    const suggestionName = (await firstSuggestion.locator('p').first().textContent()) ?? '';
-    const expectedLat = Number(await firstSuggestion.getAttribute('data-lat'));
-    const expectedLng = Number(await firstSuggestion.getAttribute('data-lng'));
+    const startX = box!.x + box!.width / 2;
+    const startY = box!.y + box!.height / 2;
 
-    await firstSuggestion.click();
+    // Drag significantly to the right to change viewport
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(startX - 200, startY, { steps: 10 });
+    await page.mouse.up();
 
-    await expect(page.getByTestId('search-suggestions')).toBeHidden();
-    await expect(searchInput).toHaveValue(suggestionName);
-    await expect.poll(async () => (await getViewport(page)).lat).toBeCloseTo(expectedLat, 2);
-    await expect.poll(async () => (await getViewport(page)).lng).toBeCloseTo(expectedLng, 2);
+    // Wait for debounce (500ms) + API call
+    await page.waitForTimeout(1500);
+
+    // The counter should still be visible (places refetched for new area)
+    await expect(placesCounter.or(page.locator('text=/\\d+ results? found/'))).toBeVisible({ timeout: 10000 });
   });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import { type ChangeEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -22,6 +22,12 @@ type FlyToCoordinates = {
   zoom?: number;
 };
 
+type MapViewport = {
+  lat: number;
+  lng: number;
+  zoom: number;
+};
+
 const MapView = dynamic(() => import('@/components/map/MapView').then(mod => ({ default: mod.MapView })), {
   ssr: false,
   loading: () => (
@@ -30,6 +36,16 @@ const MapView = dynamic(() => import('@/components/map/MapView').then(mod => ({ 
     </div>
   ),
 });
+
+function getRadiusForZoom(zoom: number): number {
+  // Approximate radius in meters based on zoom level
+  if (zoom >= 18) return 500;
+  if (zoom >= 16) return 1000;
+  if (zoom >= 14) return 2500;
+  if (zoom >= 12) return 5000;
+  if (zoom >= 10) return 15000;
+  return 30000;
+}
 
 function formatCategory(category?: string) {
   if (!category) {
@@ -50,6 +66,7 @@ export default function HomePage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [flyToCoords, setFlyToCoords] = useState<FlyToCoordinates>();
+  const [mapViewport, setMapViewport] = useState<MapViewport | null>(null);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { latitude, longitude, getCurrentPosition, loading: geoLoading } = useGeolocation();
 
@@ -62,9 +79,23 @@ export default function HomePage() {
 
   const normalizedQuery = searchQuery.trim();
   const debouncedSearch = useDebounce(normalizedQuery, 300);
-  const searchParams = debouncedSearch
-    ? { query: debouncedSearch }
-    : { lat: mapCenter.lat, lng: mapCenter.lng, radius: 5000 };
+  const debouncedViewport = useDebounce(mapViewport, 500);
+
+  // When searching, use query-based params; otherwise use viewport center for nearby
+  const searchParams = useMemo(() => {
+    if (debouncedSearch) {
+      return { query: debouncedSearch };
+    }
+    if (debouncedViewport) {
+      return {
+        lat: debouncedViewport.lat,
+        lng: debouncedViewport.lng,
+        radius: getRadiusForZoom(debouncedViewport.zoom),
+      };
+    }
+    return { lat: mapCenter.lat, lng: mapCenter.lng, radius: 5000 };
+  }, [debouncedSearch, debouncedViewport, mapCenter]);
+
   const { places, loading: placesLoading } = usePlaces(searchParams);
   const isSearching = debouncedSearch.length > 0;
   const suggestions = debouncedSearch.length >= 2 ? places.slice(0, MAX_SUGGESTIONS) : [];
@@ -115,6 +146,13 @@ export default function HomePage() {
     getCurrentPosition();
   };
 
+  const handleViewportChange = useCallback((viewport: MapViewport) => {
+    // Only update when not actively searching (let search results show independently)
+    if (!debouncedSearch) {
+      setMapViewport(viewport);
+    }
+  }, [debouncedSearch]);
+
   const handleSearchBlur = () => {
     blurTimeoutRef.current = setTimeout(() => {
       setSearchFocused(false);
@@ -138,9 +176,14 @@ export default function HomePage() {
       return;
     }
 
-    if (event.key === 'Enter' && normalizedQuery.length > 0 && !suggestionsPending && places.length > 0) {
+    if (event.key === 'Enter' && normalizedQuery.length > 0) {
       event.preventDefault();
-      handleSuggestionSelect(places[0]);
+      // If we have results, fly to the first one
+      if (places.length > 0) {
+        handleSuggestionSelect(places[0]);
+      }
+      // If still loading, close suggestions — the search will resolve and show markers
+      closeSuggestions();
     }
   };
 
@@ -176,6 +219,7 @@ export default function HomePage() {
           flyTo={flyToCoords}
           locale={locale}
           onPlaceClick={handlePlaceClick}
+          onViewportChange={handleViewportChange}
           className="w-full h-full"
         />
       </div>

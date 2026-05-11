@@ -12,9 +12,27 @@ async function openPopupForSuggestion(page: Page): Promise<Locator> {
   await expect(firstSuggestion).toBeVisible({ timeout: 15000 });
   await firstSuggestion.click();
 
+  // Wait for fly animation (1.5s) and marker rendering
+  await page.waitForTimeout(2500);
+
+  // At zoom 16, individual markers or cluster markers may be visible
   const marker = page.getByRole('button', { name: 'Marker' }).first();
-  await expect(marker).toBeVisible({ timeout: 15000 });
-  await marker.click();
+  const clusterMarker = page.locator('.marker-cluster').first();
+
+  // Wait for either type to appear
+  await expect(marker.or(clusterMarker)).toBeVisible({ timeout: 15000 });
+
+  // Prefer individual marker (opens popup), else zoom into cluster first
+  if (await marker.isVisible()) {
+    await marker.click({ force: true });
+  } else {
+    // Click cluster to zoom in and reveal individual markers
+    await clusterMarker.click({ force: true });
+    await page.waitForTimeout(1000);
+    const individualMarker = page.getByRole('button', { name: 'Marker' }).first();
+    await expect(individualMarker).toBeVisible({ timeout: 10000 });
+    await individualMarker.click({ force: true });
+  }
 
   const popup = page.locator('.leaflet-popup-content');
   await expect(popup).toBeVisible({ timeout: 10000 });
