@@ -33,7 +33,7 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
           <h1 className="text-2xl font-bold text-gray-900">
             {place.name}
           </h1>
-          <AccessBadge level={place.accessLevel} size="lg" />
+          <AccessBadge level={place.accessibilityLevel} size="lg" />
         </div>
 
         <div className="flex items-start gap-2 text-gray-700 mb-4">
@@ -65,7 +65,7 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
           <dl className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <dt className="font-medium text-gray-500 mb-1">Reports</dt>
-              <dd className="text-gray-900">{place.reportCount}</dd>
+              <dd className="text-gray-900">{place.reviewCount}</dd>
             </div>
             {place.lastReportedAt && (
               <div>

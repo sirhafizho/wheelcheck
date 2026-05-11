@@ -43,9 +43,9 @@ class RateLimitConfig : OncePerRequestFilter() {
         val isAuthenticated = request.getHeader("Authorization")?.startsWith("Bearer ") == true
         
         val limit = if (isAuthenticated) {
-            Bandwidth.classic(30, Refill.intervally(30, Duration.ofHours(1)))
+            Bandwidth.classic(200, Refill.intervally(200, Duration.ofHours(1)))
         } else {
-            Bandwidth.classic(10, Refill.intervally(10, Duration.ofHours(1)))
+            Bandwidth.classic(100, Refill.intervally(100, Duration.ofMinutes(10)))
         }
         
         return Bucket.builder()
@@ -55,8 +55,9 @@ class RateLimitConfig : OncePerRequestFilter() {
     
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.requestURI
-        // Don't rate limit GET requests or auth endpoints
+        // Don't rate limit GET requests, read-only search, or auth endpoints
         return request.method == "GET" || 
+               path == "/api/places/nearby" ||
                path.startsWith("/api/auth") ||
                path.startsWith("/swagger-ui") ||
                path.startsWith("/v3/api-docs")

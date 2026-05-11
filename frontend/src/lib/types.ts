@@ -1,34 +1,30 @@
 export type AccessLevel = 'FULL' | 'PARTIAL' | 'NOT_ACCESSIBLE' | 'UNKNOWN';
 
-export interface Location {
-  latitude: number;
-  longitude: number;
-}
-
 export interface Place {
   id: string;
   name: string;
+  nameMs?: string;
+  latitude: number;
+  longitude: number;
   address: string;
-  location: Location;
-  accessLevel: AccessLevel;
+  city?: string;
   category?: string;
-  description?: string;
-  reportCount: number;
-  lastReportedAt?: string;
+  accessibilityLevel: AccessLevel | null;
+  reviewCount: number;
   createdAt: string;
-  updatedAt: string;
+  distance?: number | null;
 }
 
 export interface AccessReport {
   id: string;
   placeId: string;
-  userId?: string;
-  entrance: 'ramped' | 'flat' | 'stairs' | 'assisted';
-  toilet: 'yes' | 'partial' | 'no' | 'unknown';
-  parking: 'yes' | 'nearby' | 'no' | 'unknown';
-  internal: 'easy' | 'moderate' | 'difficult' | 'unknown';
-  notes?: string;
-  photos?: string[];
+  userId?: string | null;
+  entrance: AccessLevel;
+  toilet: AccessLevel;
+  parking: AccessLevel;
+  internalNav: AccessLevel;
+  notes?: string | null;
+  isVerified: boolean;
   createdAt: string;
 }
 
@@ -37,7 +33,7 @@ export interface CreateReportRequest {
   entrance: string;
   toilet: string;
   parking: string;
-  internal: string;
+  internalNav: string;
   notes?: string;
   photos?: File[];
 }
@@ -60,6 +56,4 @@ export interface ApiResponse<T> {
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
-  limit: number;
-  offset: number;
 }

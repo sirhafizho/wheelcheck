@@ -1,10 +1,6 @@
 -- Enable PostGIS extension
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- Create custom types
-CREATE TYPE access_level_enum AS ENUM ('FULL', 'PARTIAL', 'NOT_ACCESSIBLE', 'UNKNOWN');
-CREATE TYPE category_enum AS ENUM ('RESTAURANT', 'MALL', 'HOSPITAL', 'MOSQUE', 'GOVERNMENT', 'TRANSPORT', 'HOTEL', 'PARK', 'EDUCATION', 'OTHER');
-
 -- Create users table
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -26,8 +22,8 @@ CREATE TABLE places (
     location GEOMETRY(Point, 4326) NOT NULL,
     address TEXT NOT NULL,
     city VARCHAR(100) NOT NULL DEFAULT 'Kuala Lumpur',
-    category category_enum NOT NULL,
-    accessibility_level access_level_enum NOT NULL DEFAULT 'UNKNOWN',
+    category VARCHAR(50) NOT NULL,
+    accessibility_level VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
     review_count INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
@@ -43,10 +39,10 @@ CREATE TABLE accessibility_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     place_id UUID NOT NULL REFERENCES places(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    entrance access_level_enum NOT NULL,
-    toilet access_level_enum NOT NULL,
-    parking access_level_enum NOT NULL,
-    internal_nav access_level_enum NOT NULL,
+    entrance VARCHAR(20) NOT NULL,
+    toilet VARCHAR(20) NOT NULL,
+    parking VARCHAR(20) NOT NULL,
+    internal_nav VARCHAR(20) NOT NULL,
     notes TEXT,
     is_verified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()

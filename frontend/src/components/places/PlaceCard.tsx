@@ -38,7 +38,7 @@ export function PlaceCard({ place, locale }: PlaceCardProps) {
           <h3 className="text-lg font-semibold text-gray-900 flex-1">
             {place.name}
           </h3>
-          <AccessBadge level={place.accessLevel} showText={false} size="sm" />
+          <AccessBadge level={place.accessibilityLevel} showText={false} size="sm" />
         </div>
 
         <div className="flex items-start gap-2 text-sm text-gray-600 mb-3">
@@ -46,24 +46,16 @@ export function PlaceCard({ place, locale }: PlaceCardProps) {
           <p className="flex-1">{place.address}</p>
         </div>
 
-        {place.description && (
+        {place.city && (
           <p className="text-sm text-gray-700 mb-3 line-clamp-2">
-            {place.description}
+            {place.city}
           </p>
         )}
 
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>
-            {place.reportCount} {place.reportCount === 1 ? 'report' : 'reports'}
+            {place.reviewCount} {place.reviewCount === 1 ? 'review' : 'reviews'}
           </span>
-          {place.lastReportedAt && (
-            <div className="flex items-center gap-1">
-              <ClockIcon className="w-3 h-3" aria-hidden="true" />
-              <time dateTime={place.lastReportedAt}>
-                {formatDate(place.lastReportedAt)}
-              </time>
-            </div>
-          )}
         </div>
       </article>
     </Link>

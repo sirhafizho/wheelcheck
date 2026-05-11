@@ -5,7 +5,7 @@ spring:
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/wheelcheck}
     username: ${DATABASE_USERNAME:wheelcheck}
-    password: ${DATABASE_PASSWORD:wheelcheck}
+    password: ${DATABASE_PASSWORD:wheelcheck_dev}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -13,9 +13,9 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
         format_sql: true
     show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   
   flyway:
     enabled: true

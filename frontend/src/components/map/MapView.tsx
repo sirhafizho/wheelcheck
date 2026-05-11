@@ -70,7 +70,7 @@ export function MapView({
       {places.map((place) => (
         <Marker
           key={place.id}
-          position={[place.location.latitude, place.location.longitude]}
+          position={[place.latitude, place.longitude]}
           eventHandlers={{
             click: () => onPlaceClick?.(place),
           }}
@@ -80,7 +80,7 @@ export function MapView({
               <h3 className="font-semibold text-gray-900 mb-2">
                 {place.name}
               </h3>
-              <AccessBadge level={place.accessLevel} size="sm" />
+              <AccessBadge level={place.accessibilityLevel} size="sm" />
               <p className="text-sm text-gray-600 mt-2">
                 {place.address}
               </p>

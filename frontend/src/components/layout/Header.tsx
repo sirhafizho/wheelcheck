@@ -11,6 +11,7 @@ interface HeaderProps {
 
 export function Header({ locale }: HeaderProps) {
   const t = useTranslations('common');
+  const ta = useTranslations('accessibility');
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -43,7 +44,7 @@ export function Header({ locale }: HeaderProps) {
           z-[100]
         "
       >
-        {t('accessibility.skipToContent')}
+        {ta('skipToContent')}
       </a>
     </header>
   );
