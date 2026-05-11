@@ -38,3 +38,4 @@ frontend/coverage/
 frontend/playwright-report/
 frontend/test-results/
 backend/build/reports/
+.claude/worktrees/
