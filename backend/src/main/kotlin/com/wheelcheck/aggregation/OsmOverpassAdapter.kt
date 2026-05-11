@@ -50,6 +50,12 @@ class OsmOverpassAdapter(
             (
               node["wheelchair"]($b);
               way["wheelchair"]($b);
+              node["tactile_paving"="yes"]($b);
+              way["tactile_paving"="yes"]($b);
+              node["kerb"~"lowered|flush"]($b);
+              node["ramp:wheelchair"="yes"]($b);
+              node["highway"="elevator"]($b);
+              node["lift"="yes"]($b);
               node["amenity"~"restaurant|cafe|hospital|clinic|pharmacy|bank|place_of_worship|library|cinema|theatre"]["name"]($b);
               node["shop"~"supermarket|mall|convenience|department_store"]["name"]($b);
               node["tourism"~"hotel|museum|attraction"]["name"]($b);
@@ -98,10 +104,11 @@ class OsmOverpassAdapter(
             city = tags["addr:city"] ?: determineCityFromCoords(lat, lng),
             category = determineCategory(tags),
             wheelchairAccess = parseWheelchairTag(tags["wheelchair"]),
-            hasAccessibleToilet = tags["toilets:wheelchair"]?.let { it == "yes" },
+            hasAccessibleToilet = tags["toilets:wheelchair"]?.let { it == "yes" }
+                ?: tags["toilet:wheelchair"]?.let { it == "yes" },
             hasTactilePaving = tags["tactile_paving"]?.let { it == "yes" },
             description = tags["wheelchair:description"] ?: tags["wheelchair:description:en"],
-            rawTags = tags
+            rawTags = tags + buildEnhancedTags(tags)
         )
     }
 
@@ -163,5 +170,20 @@ class OsmOverpassAdapter(
             lat in 2.90..3.05 && lng in 101.65..101.85 -> "Kajang"
             else -> "Selangor"
         }
+    }
+
+    private fun buildEnhancedTags(tags: Map<String, String>): Map<String, String> {
+        val enhanced = mutableMapOf<String, String>()
+        tags["kerb"]?.let { enhanced["_kerb"] = it }
+        tags["ramp:wheelchair"]?.let { enhanced["_ramp_wheelchair"] = it }
+        tags["handrail"]?.let { enhanced["_handrail"] = it }
+        tags["incline"]?.let { enhanced["_incline"] = it }
+        tags["surface"]?.let { enhanced["_surface"] = it }
+        tags["smoothness"]?.let { enhanced["_smoothness"] = it }
+        tags["door"]?.let { enhanced["_door"] = it }
+        tags["lift"]?.let { enhanced["_lift"] = it }
+        tags["highway"]?.takeIf { it == "elevator" }?.let { enhanced["_elevator"] = "yes" }
+        tags["entrance:wheelchair"]?.let { enhanced["_entrance_wheelchair"] = it }
+        return enhanced
     }
 }

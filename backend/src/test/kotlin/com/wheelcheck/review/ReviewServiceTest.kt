@@ -4,6 +4,7 @@ import com.wheelcheck.common.AccessLevel
 import com.wheelcheck.common.Category
 import com.wheelcheck.place.Place
 import com.wheelcheck.place.PlaceRepository
+import com.wheelcheck.user.UserRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -20,6 +21,7 @@ class ReviewServiceTest {
     
     private lateinit var reviewRepository: ReviewRepository
     private lateinit var placeRepository: PlaceRepository
+    private lateinit var userRepository: UserRepository
     private lateinit var reviewService: ReviewService
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
     
@@ -27,7 +29,8 @@ class ReviewServiceTest {
     fun setup() {
         reviewRepository = mockk()
         placeRepository = mockk()
-        reviewService = ReviewService(reviewRepository, placeRepository)
+        userRepository = mockk()
+        reviewService = ReviewService(reviewRepository, placeRepository, userRepository)
     }
     
     @Test
@@ -96,6 +99,7 @@ class ReviewServiceTest {
         every { reviewRepository.save(any()) } answers { firstArg() }
         every { reviewRepository.findByPlaceIdOrderByCreatedAtDesc(placeId) } returns emptyList()
         every { placeRepository.save(any()) } answers { firstArg() }
+        every { userRepository.findById(userId) } returns Optional.empty()
         
         val result = reviewService.create(request, userId)
         

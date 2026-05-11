@@ -37,6 +37,10 @@ data class AccessibilityReview(
     
     @Column(columnDefinition = "TEXT")
     val notes: String? = null,
+
+    @Column(name = "photo_urls", columnDefinition = "JSONB")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    val photoUrls: List<String> = emptyList(),
     
     @Column(name = "is_verified", nullable = false)
     val isVerified: Boolean = false,

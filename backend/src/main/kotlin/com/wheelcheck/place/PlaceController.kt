@@ -1,5 +1,7 @@
 package com.wheelcheck.place
 
+import com.wheelcheck.review.ReviewDto
+import com.wheelcheck.review.ReviewService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -10,7 +12,8 @@ import java.util.*
 @RequestMapping("/api/places")
 @CrossOrigin(origins = ["*"])
 class PlaceController(
-    private val placeService: PlaceService
+    private val placeService: PlaceService,
+    private val reviewService: ReviewService
 ) {
     
     @GetMapping
@@ -23,6 +26,12 @@ class PlaceController(
         val place = placeService.findById(id)
             ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(place)
+    }
+
+    @GetMapping("/{id}/reports")
+    fun getPlaceReports(@PathVariable id: UUID): ResponseEntity<List<ReviewDto>> {
+        val reviews = reviewService.findByPlaceId(id)
+        return ResponseEntity.ok(reviews)
     }
     
     @PostMapping("/nearby")

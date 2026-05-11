@@ -52,7 +52,9 @@ class ReviewControllerTest {
                 internalNav = AccessLevel.FULL,
                 notes = "Good accessibility",
                 isVerified = false,
-                createdAt = Instant.now()
+                createdAt = Instant.now(),
+                userName = null,
+                photoUrls = emptyList()
             )
         )
         
@@ -87,7 +89,9 @@ class ReviewControllerTest {
             internalNav = AccessLevel.FULL,
             notes = "Test review",
             isVerified = false,
-            createdAt = Instant.now()
+            createdAt = Instant.now(),
+            userName = null,
+            photoUrls = emptyList()
         )
         
         every { reviewService.create(any(), any()) } returns reviewDto

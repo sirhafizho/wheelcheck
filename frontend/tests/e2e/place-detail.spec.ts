@@ -17,7 +17,7 @@ test.describe('Place Detail Page', () => {
     expect(name?.length).toBeGreaterThan(0);
 
     // Should show address (all seeded venues have addresses)
-    const detailCard = page.locator('.bg-white.rounded-lg.shadow-lg');
+    const detailCard = page.locator('.bg-white.rounded-lg.shadow-lg').first();
     await expect(detailCard).toBeVisible({ timeout: 10000 });
   });
 
@@ -84,7 +84,9 @@ test.describe('Place Detail Page', () => {
     await page.locator('article').first().click();
     await expect(page).toHaveURL(/\/en\/places\/[a-f0-9-]+/);
 
-    // Should show Reports section
-    await expect(page.getByText('Reports')).toBeVisible({ timeout: 10000 });
+    // Should show reviews section (either with reports or empty state)
+    const hasReports = page.getByText(/accessibility reports/i);
+    const noReports = page.getByText(/no reports yet/i);
+    await expect(hasReports.or(noReports)).toBeVisible({ timeout: 10000 });
   });
 });

@@ -66,12 +66,12 @@ export default function HomePage() {
       {/* Floating search bar overlay */}
       <div className="absolute top-3 left-3 right-3 z-[1000]">
         <div className={`
-          bg-white/95 backdrop-blur-md rounded-2xl shadow-lg
+          bg-white/95 backdrop-blur-md rounded-xl shadow-lg
           transition-all duration-200
           ${searchFocused ? 'ring-2 ring-emerald-500 shadow-xl' : 'ring-1 ring-black/5'}
         `}>
-          <div className="flex items-center gap-2 px-4 py-3">
-            <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          <div className="flex items-center gap-2 px-3 py-2">
+            <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <input
               type="search"
               placeholder={t('home.searchPlaceholder')}
@@ -80,7 +80,7 @@ export default function HomePage() {
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
               aria-label={t('common.search')}
-              className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 text-base outline-none min-h-[28px]"
+              className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none min-h-[24px]"
             />
             {searchQuery && (
               <button

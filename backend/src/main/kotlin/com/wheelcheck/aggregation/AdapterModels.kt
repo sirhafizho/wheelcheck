@@ -6,6 +6,7 @@ import com.wheelcheck.common.Category
 enum class DataSourceType(val displayName: String, val priority: Int) {
     OSM("OpenStreetMap", 90),
     ACCESSIBILITY_CLOUD("accessibility.cloud", 80),
+    WIKIDATA("Wikidata", 75),
     GOOGLE_PLACES("Google Places", 70),
     COMMUNITY("WheelCheck Community", 100),
     SEED("Seed Data", 50)
