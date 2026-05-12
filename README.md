@@ -40,13 +40,13 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 
 ## 📋 Current Progress
 
-### ✅ Implemented (Phase 1 — Core)
+### ✅ Phase 1 — Core Platform
 
 | Feature | Status |
 |---------|--------|
 | REST API with full CRUD for places | ✅ Done |
 | Spatial "nearby" search (PostGIS ST_DWithin) | ✅ Done |
-| Text-based venue search | ✅ Done |
+| Text-based venue search with suggestions | ✅ Done |
 | Accessibility review submission | ✅ Done |
 | Accessibility scoring algorithm | ✅ Done |
 | Photo evidence upload (with validation) | ✅ Done |
@@ -57,78 +57,100 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | Bilingual UI (EN + BM) | ✅ Done |
 | Mobile-responsive PWA layout | ✅ Done |
 | Swagger API documentation | ✅ Done |
-| OpenStreetMap data import service | ✅ Done |
-| Database seeded with 5 KL venues | ✅ Done |
 
-### ✅ Implemented (Phase 2 — Features)
+### ✅ Phase 2 — Features & UX
 
 | Feature | Status |
 |---------|--------|
 | Add Place with mandatory photo evidence | ✅ Done |
-| Debounced search (home + places pages) | ✅ Done |
+| Interactive map picker for location (no manual lat/lng) | ✅ Done |
+| Debounced search with live suggestions | ✅ Done |
 | User profile (register, login, stats, review history) | ✅ Done |
 | Settings (language switch, high contrast, large text) | ✅ Done |
 | Floating Action Button for quick place adding | ✅ Done |
-| Map marker popup with place details link | ✅ Done |
 
-### ✅ Implemented (Phase 3 — Admin & Polish)
+### ✅ Phase 3 — Admin & Access Control
 
 | Feature | Status |
 |---------|--------|
 | Admin dashboard with stats overview | ✅ Done |
-| Admin datatable for Places (inline edit, delete) | ✅ Done |
-| Admin datatable for Reviews (view, delete) | ✅ Done |
-| Admin datatable for Users (role toggle, delete) | ✅ Done |
+| Admin datatable for Places/Reviews/Users | ✅ Done |
 | Role-based access control (USER / ADMIN) | ✅ Done |
 | JWT role claims with Spring Security @PreAuthorize | ✅ Done |
-| Map popup "View Details →" link + review count | ✅ Done |
-| Admin link in Settings (admin-only visibility) | ✅ Done |
-| Pagination on all admin tables | ✅ Done |
+| Admin-only import endpoints | ✅ Done |
 
-### ✅ Implemented (Phase 4 — Reviews, Comments & Aggregation)
+### ✅ Phase 4 — Reviews, Comments & Social
 
 | Feature | Status |
 |---------|--------|
-| Individual review display on place detail page | ✅ Done |
-| Emoji ratings for entrance/toilet/parking/navigation | ✅ Done |
-| Photo evidence gallery with lightbox viewer | ✅ Done |
-| Photo upload endpoint for reviews | ✅ Done |
+| Review display with emoji ratings + photo gallery | ✅ Done |
 | Threaded comment system (Reddit-style) | ✅ Done |
-| Comment upvote/downvote voting | ✅ Done |
-| Reply-to-comment threading (1 level) | ✅ Done |
-| Wikidata SPARQL adapter (P2846 accessibility data) | ✅ Done |
-| Enhanced OSM adapter (kerb, ramp, surface, elevator tags) | ✅ Done |
-| Search bar UI polish | ✅ Done |
-| **10,832 KL/Selangor places imported from OpenStreetMap** | ✅ Done |
+| Comment upvote/downvote with spam prevention | ✅ Done |
+| Vote toggle logic (per-user, one vote per comment) | ✅ Done |
+| Favorites/bookmarks for places | ✅ Done |
+
+### ✅ Phase 5 — Map UX & Accessibility
+
+| Feature | Status |
+|---------|--------|
+| Bottom sheet place details (swipe up/down, mobile-friendly) | ✅ Done |
+| Accessibility filter chips (wheelchair, toilet, parking, entrance) | ✅ Done |
+| Wheelchair distance display (~X min roll at 4km/h) | ✅ Done |
+| Marker clustering (10,000+ markers performant) | ✅ Done |
+| Viewport-based place refetch on pan/zoom | ✅ Done |
+| Search suggestions with fly-to on Enter | ✅ Done |
+| Zoom controls repositioned (no overlap) | ✅ Done |
+| High contrast mode with glass-morphism overrides | ✅ Done |
+
+### ✅ Phase 6 — Malaysia-Wide Coverage
+
+| Feature | Status |
+|---------|--------|
+| Malaysia-wide import (all 16 states/territories) | ✅ Done |
+| MalaysiaGeoUtils (city/state lookup for entire country) | ✅ Done |
+| DataGovMyFacilitiesAdapter (MOH hospitals + clinics) | ✅ Done |
+| State field on places (city + state display) | ✅ Done |
+| Data source provenance on place details | ✅ Done |
+| Region-based import endpoints | ✅ Done |
+| **10,832+ places imported from OpenStreetMap** | ✅ Done |
 
 ### ✅ Aggregation Service (Adapter Pattern)
 
 WheelCheck's backend uses an **adapter pattern** to aggregate accessibility data from multiple free sources:
 
-| Adapter | Source | Data |
-|---------|--------|------|
-| **OsmOverpassAdapter** | OpenStreetMap Overpass API | Wheelchair tags, ramps, kerbs, surfaces, elevators |
-| **WikidataAdapter** | Wikidata SPARQL | P2846 accessibility property for landmarks |
-| **AccessibilityCloudAdapter** | accessibility.cloud | GeoJSON accessibility data (ready to activate) |
+| Adapter | Source | Data | API Key |
+|---------|--------|------|---------|
+| **OsmOverpassAdapter** | OpenStreetMap Overpass API | Wheelchair tags, ramps, kerbs, surfaces, elevators | Free |
+| **WikidataAdapter** | Wikidata SPARQL | P2846 accessibility property for landmarks | Free |
+| **AccessibilityCloudAdapter** | accessibility.cloud | GeoJSON accessibility data | Free (optional) |
+| **GeoapifyAdapter** | Geoapify Places API | Points of interest with accessibility | Free tier |
+| **OrsRoutingAdapter** | OpenRouteService | Wheelchair-friendly route planning | Free tier |
+| **PrasaranaGtfsAdapter** | Prasarana GTFS (Malaysia) | KL rail/bus transit wheelchair boarding | Free |
+| **DataGovMyFacilitiesAdapter** | data.gov.my | MOH hospitals & clinics nationwide | Free |
 
-Admin-only import endpoints: `/api/aggregation/import/kl`, `/selangor`, `/custom`
+Admin import endpoints:
+- `/api/aggregation/import/kl` — KL area
+- `/api/aggregation/import/selangor` — Selangor state
+- `/api/aggregation/import/malaysia` — All 16 states
+- `/api/aggregation/import/peninsular` — Peninsular Malaysia
+- `/api/aggregation/import/{state}` — Any specific state (e.g., `penang`, `johor`)
 
 ### ✅ Testing
 
 | Type | Count | Status |
 |------|-------|--------|
 | Backend unit tests | 53+ | ✅ All passing |
-| Frontend unit tests | 18 | ✅ All passing |
-| Playwright E2E tests | 81 | ✅ All passing |
+| Frontend unit tests | 40 | ✅ All passing |
+| Playwright E2E tests | 102 | ✅ All passing |
+| CDP geolocation tests | 6 | ✅ All passing |
 | Manual API verification | All endpoints | ✅ Verified |
 
 ### 🔜 Roadmap
 
-- [ ] Offline access for saved venues (service worker caching)
+- [ ] Offline access for saved venues (service worker caching with smart invalidation)
+- [ ] "I'm Here" quick report (long-press FAB → auto-fill GPS)
 - [ ] Gamification (badges, contributor levels)
 - [ ] Venue owner self-certification
-- [ ] Route planning between accessible venues (OpenRouteService wheelchair profile)
-- [ ] Transitland GTFS integration (Malaysian transit wheelchair_boarding)
 - [ ] Additional languages (Mandarin, Tamil)
 
 ## 🚀 Quick Start
@@ -208,12 +230,20 @@ cd frontend && npx playwright test
 | GET | `/api/comments/place/{id}` | Get comments for a place | No |
 | POST | `/api/comments` | Post a comment | Yes |
 | POST | `/api/comments/{id}/vote?type=` | Upvote/downvote a comment | Yes |
+| GET | `/api/favorites` | Get user's favorite places | Yes |
+| POST | `/api/favorites/{placeId}` | Toggle favorite (add/remove) | Yes |
+| GET | `/api/favorites/{placeId}/status` | Check favorite status + count | No |
+| POST | `/api/routing/wheelchair` | Wheelchair route planning (ORS) | Yes |
 | POST | `/api/auth/register` | Register account | No |
 | POST | `/api/auth/login` | Login (returns JWT) | No |
 | GET | `/api/users/me` | Get current user profile | Yes |
 | GET | `/api/users/{id}/stats` | Get user stats | No |
-| POST | `/api/aggregation/import/kl` | Import KL places from OSM | Admin |
-| POST | `/api/aggregation/import/selangor` | Import Selangor places from OSM | Admin |
+| GET | `/api/aggregation/adapters` | List active adapters | Admin |
+| POST | `/api/aggregation/import/kl` | Import KL places | Admin |
+| POST | `/api/aggregation/import/selangor` | Import Selangor places | Admin |
+| POST | `/api/aggregation/import/malaysia` | Import all Malaysia | Admin |
+| POST | `/api/aggregation/import/peninsular` | Import Peninsular MY | Admin |
+| POST | `/api/aggregation/import/{state}` | Import by state (e.g. `penang`) | Admin |
 
 ## ♿ Accessibility
 
@@ -251,21 +281,36 @@ wheelcheck/
 ├── backend/                    # Spring Boot Kotlin API
 │   ├── src/main/kotlin/com/wheelcheck/
 │   │   ├── admin/             # Admin dashboard controller
-│   │   ├── aggregation/       # Data aggregation (OSM, Wikidata adapters)
+│   │   ├── aggregation/       # Data aggregation adapters
+│   │   │   ├── OsmOverpassAdapter       # OpenStreetMap wheelchair data
+│   │   │   ├── WikidataAdapter          # Wikidata SPARQL P2846
+│   │   │   ├── GeoapifyAdapter          # Geoapify POI data
+│   │   │   ├── OrsRoutingAdapter        # Wheelchair route planning
+│   │   │   ├── PrasaranaGtfsAdapter     # Malaysian transit GTFS
+│   │   │   ├── DataGovMyFacilitiesAdapter # MOH hospitals/clinics
+│   │   │   ├── AccessibilityCloudAdapter  # accessibility.cloud
+│   │   │   ├── MalaysiaGeoUtils         # State/city lookup (16 states)
+│   │   │   └── AggregationService       # Coordinator + deduplication
 │   │   ├── auth/              # JWT authentication
-│   │   ├── comment/           # Threaded comment system
-│   │   ├── config/            # Security, rate limiting, exception handling
+│   │   ├── comment/           # Threaded comments + voting
+│   │   ├── config/            # Security, rate limiting, CORS
+│   │   ├── favorite/          # Bookmark/favorite places
 │   │   ├── place/             # Place CRUD + spatial queries
-│   │   ├── review/            # Accessibility review + photo uploads
+│   │   ├── review/            # Accessibility reviews + photos
 │   │   └── user/              # User management
 │   └── src/test/              # 53+ unit tests
 ├── frontend/                   # Next.js 16 PWA
 │   ├── src/
 │   │   ├── app/[locale]/      # i18n routing (EN + BM)
-│   │   ├── components/        # Map, places, reviews, comments, layout
-│   │   ├── lib/               # API client, types, constants
-│   │   └── messages/          # Translation files
-│   └── tests/                 # 18 unit + 81 E2E tests
+│   │   ├── components/
+│   │   │   ├── map/           # MapView, LocationPicker
+│   │   │   ├── places/        # PlaceCard, AccessBadge, Reviews, Comments
+│   │   │   ├── ui/            # BottomSheet, LoadingSpinner, Button
+│   │   │   └── layout/        # BottomNav, Header
+│   │   ├── hooks/             # usePlaces, useGeolocation, useDebounce
+│   │   ├── lib/               # API client, types, constants, utils
+│   │   └── messages/          # Translation files (EN + BM)
+│   └── tests/                 # 40 unit + 102 E2E tests
 ├── docker-compose.yml          # PostGIS (ARM64-native)
 ├── docs/                       # Architecture, PRD, development guide
 └── .github/                    # Issue templates, CI workflows
@@ -286,11 +331,21 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - 📖 Improve documentation
 - ♿ Test with assistive technologies
 
-## 📊 Data
+## 📊 Data Sources & Licensing
+
+| Source | License | What we use |
+|--------|---------|-------------|
+| [OpenStreetMap](https://www.openstreetmap.org/) | ODbL | Wheelchair tags, ramps, kerbs, surfaces, elevators |
+| [Wikidata](https://www.wikidata.org/) | CC0 | P2846 accessibility property for landmarks |
+| [data.gov.my](https://data.gov.my/) | Open Data | MOH hospitals & government clinics nationwide |
+| [Prasarana GTFS](https://developer.data.gov.my/) | Open Data | KL Rapid Rail/Bus wheelchair boarding info |
+| [Geoapify](https://www.geoapify.com/) | Free tier | Points of interest with accessibility metadata |
+| [OpenRouteService](https://openrouteservice.org/) | Free tier | Wheelchair-friendly route planning |
+| [accessibility.cloud](https://www.accessibility.cloud/) | CC-BY | Global accessibility GeoJSON (optional) |
 
 - **Code License:** Apache 2.0
-- **Data License:** ODbL (Open Database License) — same as OpenStreetMap
-- All crowd-sourced accessibility data is open and exportable
+- **Crowd-sourced Data:** ODbL (Open Database License)
+- All accessibility data contributed by users is open and exportable
 
 ## 🇲🇾 Malaysia Focus
 
