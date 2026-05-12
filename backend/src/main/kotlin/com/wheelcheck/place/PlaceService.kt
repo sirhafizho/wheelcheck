@@ -151,6 +151,12 @@ class PlaceService(
         category = category,
         accessibilityLevel = accessibilityLevel,
         reviewCount = reviewCount,
-        createdAt = createdAt
+        createdAt = createdAt,
+        dataSource = dataSource,
+        description = osmDescription,
+        osmWheelchairTag = osmWheelchairTag,
+        osmToiletAccessible = osmToiletAccessible,
+        osmTactilePaving = osmTactilePaving,
+        lastReportedAt = updatedAt
     )
 }

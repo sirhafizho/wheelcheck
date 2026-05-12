@@ -45,8 +45,8 @@ test.describe('Map interactions', () => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
     const myLocationButton = page.getByLabel(/my location/i);
-    const zoomInButton = page.locator('.leaflet-control-zoom-in');
-    const zoomOutButton = page.locator('.leaflet-control-zoom-out');
+    const zoomInButton = page.getByLabel('Zoom in');
+    const zoomOutButton = page.getByLabel('Zoom out');
     const markerCluster = page.locator('.marker-cluster').first();
 
     await expect(myLocationButton).toBeVisible();
@@ -60,7 +60,7 @@ test.describe('Map interactions', () => {
     expect(myLocationBox).not.toBeNull();
     expect(zoomInBox).not.toBeNull();
     expect(zoomInBox!.x).toBeGreaterThan(myLocationBox!.x - 1);
-    expect(zoomInBox!.y).toBeGreaterThan(myLocationBox!.y);
+    expect(zoomInBox!.y).toBeGreaterThan(myLocationBox!.y + myLocationBox!.height - 1);
 
     const beforeZoom = await getViewport(page);
     await zoomInButton.click();
@@ -74,7 +74,7 @@ test.describe('Map interactions', () => {
     const placesCounter = page.locator('text=/\\d+ places? nearby/');
     await expect(placesCounter).toBeVisible({ timeout: 15000 });
 
-    const initialCount = await placesCounter.textContent();
+    await placesCounter.textContent();
 
     // Pan the map by dragging it
     const mapView = page.getByTestId('map-view');

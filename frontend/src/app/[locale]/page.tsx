@@ -18,6 +18,17 @@ import { formatDistance, formatWheelchairDistance } from '@/lib/utils';
 
 const MAX_SUGGESTIONS = 8;
 const SEARCH_FLY_TO_ZOOM = 16;
+const MAP_VIEWPORT_KEY = 'wheelcheck_map_viewport';
+const DATA_SOURCE_SHORT_LABELS: Record<string, string> = {
+  OSM: 'OpenStreetMap',
+  PRASARANA_GTFS: 'Prasarana GTFS',
+  DATA_GOV_MY: 'data.gov.my',
+  ACCESSIBILITY_CLOUD: 'accessibility.cloud',
+  WIKIDATA: 'Wikidata',
+  GEOAPIFY: 'Geoapify',
+  COMMUNITY: 'Community',
+  SEED: 'Seed data',
+};
 const ACCESSIBILITY_FILTERS: Array<{ id: AccessibilityFeature; label: string }> = [
   { id: 'wheelchairAccessible', label: '♿ Wheelchair Accessible' },
   { id: 'accessibleToilet', label: '🚻 Accessible Toilet' },
@@ -66,6 +77,14 @@ function formatCategory(category?: string) {
     .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
+function formatDataSourceShort(source?: string | null) {
+  if (!source) {
+    return 'Community';
+  }
+
+  return DATA_SOURCE_SHORT_LABELS[source] ?? source;
+}
+
 function matchesAccessibilityFilters(place: Place, activeFilters: AccessibilityFeature[]) {
   if (activeFilters.length === 0) {
     return true;
@@ -97,6 +116,36 @@ function getDistanceSummary(distance?: number | null) {
   return `${standardDistance} away • ${wheelchairDistance}`;
 }
 
+function getStoredViewport(): FlyToCoordinates | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  try {
+    const saved = sessionStorage.getItem(MAP_VIEWPORT_KEY);
+    if (!saved) {
+      return undefined;
+    }
+
+    const viewport = JSON.parse(saved) as Partial<MapViewport>;
+    if (
+      typeof viewport.lat === 'number'
+      && typeof viewport.lng === 'number'
+      && typeof viewport.zoom === 'number'
+    ) {
+      return {
+        lat: viewport.lat,
+        lng: viewport.lng,
+        zoom: viewport.zoom,
+      };
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
 export default function HomePage() {
   const locale = useLocale();
   const t = useTranslations();
@@ -106,8 +155,10 @@ export default function HomePage() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [activePlaceId, setActivePlaceId] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<AccessibilityFeature[]>([]);
-  const [flyToCoords, setFlyToCoords] = useState<FlyToCoordinates>();
+  const [flyToCoords, setFlyToCoords] = useState<FlyToCoordinates | undefined>(() => getStoredViewport());
   const [mapViewport, setMapViewport] = useState<MapViewport | null>(null);
+  const [zoomInCount, setZoomInCount] = useState(0);
+  const [zoomOutCount, setZoomOutCount] = useState(0);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { latitude, longitude, getCurrentPosition, loading: geoLoading } = useGeolocation();
 
@@ -211,6 +262,12 @@ export default function HomePage() {
   };
 
   const handleViewportChange = useCallback((viewport: MapViewport) => {
+    try {
+      sessionStorage.setItem(MAP_VIEWPORT_KEY, JSON.stringify(viewport));
+    } catch {
+      // ignore
+    }
+
     if (!debouncedSearch) {
       setMapViewport(viewport);
     }
@@ -296,6 +353,8 @@ export default function HomePage() {
           places={places}
           center={mapCenter}
           flyTo={flyToCoords}
+          zoomIn={zoomInCount}
+          zoomOut={zoomOutCount}
           onPlaceClick={handlePlaceClick}
           onViewportChange={handleViewportChange}
           className="w-full h-full"
@@ -414,14 +473,33 @@ export default function HomePage() {
         )}
       </div>
 
-      <button
-        onClick={handleMyLocation}
-        disabled={geoLoading}
-        className="absolute top-16 right-3 z-[1000] rounded-xl bg-white/95 p-3 shadow-lg ring-1 ring-black/5 backdrop-blur-md transition-colors hover:bg-white disabled:opacity-50"
-        aria-label={t('home.myLocation')}
-      >
-        {geoLoading ? <LoadingSpinner size="sm" /> : <MapPinIcon className="h-5 w-5 text-emerald-600" />}
-      </button>
+      <div className="absolute right-3 top-[120px] z-[1000] flex flex-col items-center gap-2">
+        <button
+          onClick={handleMyLocation}
+          disabled={geoLoading}
+          className="rounded-xl bg-white/95 p-3 shadow-lg ring-1 ring-black/5 backdrop-blur-md transition-colors hover:bg-white disabled:opacity-50"
+          aria-label={t('home.myLocation')}
+        >
+          {geoLoading ? <LoadingSpinner size="sm" /> : <MapPinIcon className="h-5 w-5 text-emerald-600" />}
+        </button>
+        <div className="flex flex-col overflow-hidden rounded-xl bg-white/95 shadow-lg ring-1 ring-black/5 backdrop-blur-md">
+          <button
+            onClick={() => setZoomInCount((count) => count + 1)}
+            className="p-2.5 transition-colors hover:bg-gray-100"
+            aria-label="Zoom in"
+          >
+            <span className="block text-lg font-bold leading-none text-gray-700">+</span>
+          </button>
+          <div className="h-px bg-gray-200" />
+          <button
+            onClick={() => setZoomOutCount((count) => count + 1)}
+            className="p-2.5 transition-colors hover:bg-gray-100"
+            aria-label="Zoom out"
+          >
+            <span className="block text-lg font-bold leading-none text-gray-700">−</span>
+          </button>
+        </div>
+      </div>
 
       {!placesLoading && (
         <div className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2">
@@ -472,7 +550,25 @@ export default function HomePage() {
                   {selectedPlaceDistanceSummary}
                 </span>
               )}
+              {selectedPlaceData.dataSource && (
+                <span className="rounded-full bg-blue-50 px-3 py-1.5 text-blue-700">
+                  📊 {formatDataSourceShort(selectedPlaceData.dataSource)}
+                </span>
+              )}
             </div>
+
+            {(selectedPlaceData.osmWheelchairTag || selectedPlaceData.osmToiletAccessible != null || selectedPlaceData.osmTactilePaving != null) && (
+              <div className="space-y-1 rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
+                <p className="font-medium text-gray-700">Accessibility Evidence:</p>
+                {selectedPlaceData.osmWheelchairTag && <p>♿ Wheelchair: {selectedPlaceData.osmWheelchairTag}</p>}
+                {selectedPlaceData.osmToiletAccessible != null && (
+                  <p>🚻 Accessible toilet: {selectedPlaceData.osmToiletAccessible ? 'Yes' : 'No'}</p>
+                )}
+                {selectedPlaceData.osmTactilePaving != null && (
+                  <p>🔲 Tactile paving: {selectedPlaceData.osmTactilePaving ? 'Yes' : 'No'}</p>
+                )}
+              </div>
+            )}
 
             <div className="grid gap-3 sm:grid-cols-2">
               <Link

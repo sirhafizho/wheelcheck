@@ -5,7 +5,6 @@ import {
   MapContainer,
   Marker,
   TileLayer,
-  ZoomControl,
   useMap,
   useMapEvents,
 } from 'react-leaflet';
@@ -42,6 +41,8 @@ interface MapViewProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   flyTo?: FlyToCoordinates;
+  zoomIn?: number;
+  zoomOut?: number;
   onPlaceClick?: (place: Place) => void;
   onViewportChange?: (viewport: MapViewport) => void;
   className?: string;
@@ -104,11 +105,35 @@ function MapViewportReporter({ onChange }: { onChange: (viewport: MapViewport) =
   return null;
 }
 
+function MapZoomExecutor({ zoomIn, zoomOut }: { zoomIn: number; zoomOut: number }) {
+  const map = useMap();
+  const prevIn = useRef(zoomIn);
+  const prevOut = useRef(zoomOut);
+
+  useEffect(() => {
+    if (zoomIn > prevIn.current) {
+      map.zoomIn();
+    }
+    prevIn.current = zoomIn;
+  }, [zoomIn, map]);
+
+  useEffect(() => {
+    if (zoomOut > prevOut.current) {
+      map.zoomOut();
+    }
+    prevOut.current = zoomOut;
+  }, [zoomOut, map]);
+
+  return null;
+}
+
 export function MapView({
   places,
   center = MAP_CONFIG.defaultCenter,
   zoom = MAP_CONFIG.defaultZoom,
   flyTo,
+  zoomIn,
+  zoomOut,
   onPlaceClick,
   onViewportChange,
   className = '',
@@ -135,7 +160,7 @@ export function MapView({
       >
         <MapUpdater center={center} flyTo={flyTo} />
         <MapViewportReporter onChange={handleViewportChange} />
-        <ZoomControl position="topright" />
+        <MapZoomExecutor zoomIn={zoomIn ?? 0} zoomOut={zoomOut ?? 0} />
         <TileLayer attribution={MAP_CONFIG.attribution} url={MAP_CONFIG.tileUrl} />
         <MarkerClusterGroup chunkedLoading showCoverageOnHover={false}>
           {places.map((place) => (

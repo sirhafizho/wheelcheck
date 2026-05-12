@@ -14,6 +14,9 @@ export interface Place {
   category?: string;
   accessibilityLevel: AccessLevel | null;
   description?: string;
+  osmWheelchairTag?: string | null;
+  osmToiletAccessible?: boolean | null;
+  osmTactilePaving?: boolean | null;
   reviewCount: number;
   createdAt: string;
   lastReportedAt?: string;

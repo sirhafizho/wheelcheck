@@ -20,7 +20,13 @@ data class PlaceDto(
     val accessibilityLevel: AccessLevel,
     val reviewCount: Int,
     val createdAt: Instant,
-    val distance: Double? = null
+    val distance: Double? = null,
+    val dataSource: String? = null,
+    val description: String? = null,
+    val osmWheelchairTag: String? = null,
+    val osmToiletAccessible: Boolean? = null,
+    val osmTactilePaving: Boolean? = null,
+    val lastReportedAt: Instant? = null
 )
 
 data class CreatePlaceRequest(
