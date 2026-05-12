@@ -1,4 +1,5 @@
 export type AccessLevel = 'FULL' | 'PARTIAL' | 'NOT_ACCESSIBLE' | 'UNKNOWN';
+export type AccessibilityFeature = 'wheelchairAccessible' | 'accessibleToilet' | 'accessibleParking' | 'wideEntrance';
 
 export interface Place {
   id: string;
@@ -69,6 +70,7 @@ export interface PlaceSearchParams {
   lng?: number;
   radius?: number;
   accessLevel?: AccessLevel;
+  accessibilityFeatures?: AccessibilityFeature[];
   limit?: number;
   offset?: number;
 }

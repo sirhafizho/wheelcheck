@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import type { Place } from '@/lib/types';
+import { formatDistance, formatWheelchairDistance } from '@/lib/utils';
 import { AccessBadge } from './AccessBadge';
 
 interface PlaceCardProps {
@@ -11,45 +11,48 @@ interface PlaceCardProps {
   locale: string;
 }
 
+function getDistanceSummary(distance?: number | null) {
+  if (distance == null) {
+    return null;
+  }
+
+  return `${formatDistance(distance)} away • ${formatWheelchairDistance(distance)}`;
+}
+
 export function PlaceCard({ place, locale }: PlaceCardProps) {
-  const t = useTranslations('places');
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
-  };
-
   return (
     <Link
       href={`/${locale}/places/${place.id}`}
       className="
-        block bg-white rounded-lg shadow-md
-        hover:shadow-lg transition-shadow duration-200
+        block overflow-hidden rounded-lg bg-white shadow-md
+        transition-shadow duration-200 hover:shadow-lg
         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2
-        overflow-hidden
       "
     >
       <article className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 flex-1">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <h3 className="flex-1 text-lg font-semibold text-gray-900">
             {place.name}
           </h3>
           <AccessBadge level={place.accessibilityLevel} showText={false} size="sm" />
         </div>
 
-        <div className="flex items-start gap-2 text-sm text-gray-600 mb-3">
-          <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+        <div className="mb-3 flex items-start gap-2 text-sm text-gray-600">
+          <MapPinIcon className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
           <p className="flex-1">{place.address}</p>
         </div>
 
         {place.city && (
-          <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+          <p className="mb-3 line-clamp-2 text-sm text-gray-700">
             {place.city}
           </p>
+        )}
+
+        {getDistanceSummary(place.distance) && (
+          <div className="mb-3 flex items-center gap-2 text-sm text-emerald-700">
+            <ClockIcon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+            <span>{getDistanceSummary(place.distance)}</span>
+          </div>
         )}
 
         <div className="flex items-center justify-between text-xs text-gray-500">

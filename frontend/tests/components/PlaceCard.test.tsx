@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { PlaceCard } from '@/components/places/PlaceCard';
 import type { Place } from '@/lib/types';
@@ -9,7 +10,9 @@ jest.mock('next-intl', () => ({
 
 // Mock next/link
 jest.mock('next/link', () => {
-  return ({ children, href }: any) => <a href={href}>{children}</a>;
+  const MockLink = ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>;
+  MockLink.displayName = 'MockLink';
+  return MockLink;
 });
 
 describe('PlaceCard', () => {
@@ -22,6 +25,7 @@ describe('PlaceCard', () => {
     accessibilityLevel: 'FULL',
     category: 'Restaurant',
     reviewCount: 5,
+    distance: 350,
     createdAt: '2024-01-01T10:00:00Z',
   };
 
@@ -43,6 +47,11 @@ describe('PlaceCard', () => {
   it('renders review count', () => {
     render(<PlaceCard place={mockPlace} locale="en" />);
     expect(screen.getByText(/5.*review/)).toBeInTheDocument();
+  });
+
+  it('renders wheelchair-friendly distance copy', () => {
+    render(<PlaceCard place={mockPlace} locale="en" />);
+    expect(screen.getByText('350 m away • ~5 min roll')).toBeInTheDocument();
   });
 
   it('links to place detail page', () => {
