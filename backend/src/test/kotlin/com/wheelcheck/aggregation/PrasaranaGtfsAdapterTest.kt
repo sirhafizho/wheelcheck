@@ -193,7 +193,7 @@ AG18,AMPANG,3.150318,101.760049,LRT,true"""
     }
 
     @Test
-    fun `assigns Penang for Penang coordinates`() {
+    fun `assigns Georgetown for Penang island coordinates`() {
         val penangBbox = BoundingBox(south = 5.30, west = 100.20, north = 5.50, east = 100.50)
         val zipBytes = buildGtfsZip(
             """stop_id,stop_name,stop_lat,stop_lon,category,isOKU
@@ -201,7 +201,21 @@ PG1,WELD QUAY,5.415000,100.340000,BUS,true"""
         )
         val places = invokeParseStopsFromZip(zipBytes, penangBbox, "rapid-bus-penang")
 
-        assertEquals("Penang", places[0].city)
+        assertEquals("Georgetown", places[0].city)
+        assertEquals("Pulau Pinang", places[0].state)
+    }
+
+    @Test
+    fun `assigns state via MalaysiaGeoUtils for Johor Bahru coordinates`() {
+        val jbBbox = BoundingBox(south = 1.40, west = 103.60, north = 1.60, east = 103.85)
+        val zipBytes = buildGtfsZip(
+            """stop_id,stop_name,stop_lat,stop_lon,category,isOKU
+JB1,JB SENTRAL,1.485000,103.729000,BUS,true"""
+        )
+        val places = invokeParseStopsFromZip(zipBytes, jbBbox, "rapid-bus-jb")
+
+        assertEquals("Johor Bahru", places[0].city)
+        assertEquals("Johor", places[0].state)
     }
 
     // ── multi-category config ──────────────────────────────────────────────────

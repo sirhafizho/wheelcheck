@@ -15,6 +15,7 @@ data class PlaceDto(
     val longitude: Double,
     val address: String,
     val city: String,
+    val state: String? = null,
     val category: Category,
     val accessibilityLevel: AccessLevel,
     val reviewCount: Int,

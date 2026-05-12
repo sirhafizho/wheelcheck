@@ -6,6 +6,22 @@ import type { Place } from '@/lib/types';
 import { AccessBadge } from './AccessBadge';
 import { Button } from '../ui/Button';
 
+const DATA_SOURCE_LABELS: Record<string, string> = {
+  OSM: 'OpenStreetMap',
+  PRASARANA_GTFS: 'Prasarana GTFS (data.gov.my)',
+  DATA_GOV_MY: 'data.gov.my',
+  ACCESSIBILITY_CLOUD: 'accessibility.cloud',
+  WIKIDATA: 'Wikidata',
+  GEOAPIFY: 'Geoapify',
+  COMMUNITY: 'Community report',
+  SEED: 'Seed data',
+};
+
+function formatDataSource(source: string | undefined): string {
+  if (!source) return 'Community report';
+  return DATA_SOURCE_LABELS[source] ?? source;
+}
+
 interface PlaceDetailProps {
   place: Place;
   locale: string;
@@ -26,6 +42,8 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
     }).format(date);
   };
 
+  const locationLine = [place.city, place.state].filter(Boolean).join(', ');
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="p-6">
@@ -36,17 +54,23 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
           <AccessBadge level={place.accessibilityLevel} size="lg" />
         </div>
 
-        <div className="flex items-start gap-2 text-gray-700 mb-4">
+        <div className="flex items-start gap-2 text-gray-700 mb-1">
           <MapPinIcon className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <p className="flex-1">{place.address}</p>
         </div>
 
+        {locationLine && (
+          <p className="text-sm text-gray-500 pl-7 mb-4" aria-label="State">
+            {locationLine}
+          </p>
+        )}
+
         {place.description && (
           <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-start gap-2">
-              <InformationCircleIcon 
-                className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" 
-                aria-hidden="true" 
+              <InformationCircleIcon
+                className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+                aria-hidden="true"
               />
               <p className="text-sm text-gray-700">{place.description}</p>
             </div>
@@ -77,6 +101,17 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
                 </dd>
               </div>
             )}
+            <div className="col-span-2">
+              <dt className="font-medium text-gray-500 mb-1">
+                Data source
+              </dt>
+              <dd
+                className="text-gray-700 text-xs"
+                data-testid="data-source-label"
+              >
+                {formatDataSource(place.dataSource)}
+              </dd>
+            </div>
           </dl>
         </div>
 

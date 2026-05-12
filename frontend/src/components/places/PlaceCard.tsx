@@ -46,9 +46,9 @@ export function PlaceCard({ place, locale }: PlaceCardProps) {
           <p className="flex-1">{place.address}</p>
         </div>
 
-        {place.city && (
-          <p className="text-sm text-gray-700 mb-3 line-clamp-2">
-            {place.city}
+        {(place.city || place.state) && (
+          <p className="text-sm text-gray-500 mb-3 line-clamp-1" aria-label="Location">
+            {[place.city, place.state].filter(Boolean).join(', ')}
           </p>
         )}
 

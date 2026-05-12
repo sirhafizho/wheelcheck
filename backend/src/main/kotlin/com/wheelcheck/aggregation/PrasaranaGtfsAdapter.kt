@@ -127,7 +127,8 @@ class PrasaranaGtfsAdapter(
             latitude = lat,
             longitude = lng,
             address = "Address not available",
-            city = determineCityFromCoords(lat, lng),
+            city = MalaysiaGeoUtils.city(lat, lng),
+            state = MalaysiaGeoUtils.state(lat, lng),
             category = Category.TRANSPORT,
             wheelchairAccess = wheelchairAccess,
             description = description,
@@ -192,15 +193,4 @@ class PrasaranaGtfsAdapter(
         return result
     }
 
-    private fun determineCityFromCoords(lat: Double, lng: Double): String = when {
-        lat in 3.05..3.25 && lng in 101.60..101.80 -> "Kuala Lumpur"
-        lat in 3.00..3.20 && lng in 101.55..101.70 -> "Petaling Jaya"
-        lat in 3.05..3.15 && lng in 101.45..101.60 -> "Shah Alam"
-        lat in 2.95..3.10 && lng in 101.35..101.55 -> "Klang"
-        lat in 3.10..3.25 && lng in 101.55..101.70 -> "Subang Jaya"
-        lat in 2.85..3.00 && lng in 101.60..101.80 -> "Putrajaya"
-        lat in 2.90..3.05 && lng in 101.65..101.85 -> "Kajang"
-        lat in 5.30..5.50 && lng in 100.20..100.50 -> "Penang"
-        else -> "Malaysia"
-    }
 }

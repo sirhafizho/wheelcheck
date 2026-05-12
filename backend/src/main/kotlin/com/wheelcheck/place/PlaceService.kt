@@ -1,6 +1,7 @@
 package com.wheelcheck.place
 
 import com.wheelcheck.admin.UpdatePlaceRequest
+import com.wheelcheck.aggregation.MalaysiaGeoUtils
 import com.wheelcheck.common.AccessLevel
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
@@ -71,12 +72,14 @@ class PlaceService(
             Coordinate(request.longitude, request.latitude)
         )
 
+        val geo = MalaysiaGeoUtils.lookup(request.latitude, request.longitude)
         val place = Place(
             name = request.name,
             nameMs = request.nameMs,
             location = point,
             address = request.address,
-            city = request.city,
+            city = request.city.ifBlank { geo.city },
+            state = geo.state,
             category = request.category,
             accessibilityLevel = AccessLevel.UNKNOWN,
             reviewCount = 0,
@@ -92,12 +95,14 @@ class PlaceService(
         val place = placeRepository.findByIdOrNull(placeId)
             ?: throw NoSuchElementException("Place not found: $placeId")
 
+        val geo = MalaysiaGeoUtils.lookup(request.latitude, request.longitude)
         val updated = place.copy(
             name = request.name,
             nameMs = request.nameMs,
             location = geometryFactory.createPoint(Coordinate(request.longitude, request.latitude)),
             address = request.address,
-            city = request.city,
+            city = request.city.ifBlank { geo.city },
+            state = geo.state,
             category = request.category,
             accessibilityLevel = request.accessibilityLevel,
             updatedAt = Instant.now()
@@ -142,6 +147,7 @@ class PlaceService(
         longitude = location.x,
         address = address,
         city = city,
+        state = state,
         category = category,
         accessibilityLevel = accessibilityLevel,
         reviewCount = reviewCount,

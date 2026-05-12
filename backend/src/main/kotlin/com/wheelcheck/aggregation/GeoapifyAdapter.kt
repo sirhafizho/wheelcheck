@@ -123,7 +123,8 @@ class GeoapifyAdapter(
             latitude = lat,
             longitude = lng,
             address = buildAddress(props),
-            city = props.city ?: props.county ?: "Malaysia",
+            city = props.city ?: props.county ?: MalaysiaGeoUtils.city(lat, lng),
+            state = props.state ?: MalaysiaGeoUtils.state(lat, lng),
             category = determineCategory(props.categories ?: emptyList()),
             wheelchairAccess = WheelchairAccess.UNKNOWN, // overridden by caller
             rawTags = buildRawTags(props)
@@ -196,6 +197,7 @@ data class GeoapifyProperties(
     val postcode: String? = null,
     val city: String? = null,
     val county: String? = null,
+    val state: String? = null,
     val country: String? = null,
     val categories: List<String>? = null,
     val datasource: GeoapifyDatasource? = null

@@ -101,7 +101,7 @@ class OsmOverpassAdapter(
             latitude = lat,
             longitude = lng,
             address = buildAddress(tags),
-            city = tags["addr:city"] ?: determineCityFromCoords(lat, lng),
+            city = tags["addr:city"] ?: MalaysiaGeoUtils.city(lat, lng),
             category = determineCategory(tags),
             wheelchairAccess = parseWheelchairTag(tags["wheelchair"]),
             hasAccessibleToilet = tags["toilets:wheelchair"]?.let { it == "yes" }
@@ -156,20 +156,6 @@ class OsmOverpassAdapter(
             tags["addr:city"]
         )
         return if (parts.isNotEmpty()) parts.joinToString(", ") else "Address not available"
-    }
-
-    private fun determineCityFromCoords(lat: Double, lng: Double): String {
-        // Rough bounding boxes for major MY cities
-        return when {
-            lat in 3.05..3.25 && lng in 101.60..101.80 -> "Kuala Lumpur"
-            lat in 3.00..3.20 && lng in 101.55..101.70 -> "Petaling Jaya"
-            lat in 3.05..3.15 && lng in 101.45..101.60 -> "Shah Alam"
-            lat in 2.95..3.10 && lng in 101.35..101.55 -> "Klang"
-            lat in 3.10..3.25 && lng in 101.55..101.70 -> "Subang Jaya"
-            lat in 2.85..3.00 && lng in 101.60..101.80 -> "Putrajaya"
-            lat in 2.90..3.05 && lng in 101.65..101.85 -> "Kajang"
-            else -> "Selangor"
-        }
     }
 
     private fun buildEnhancedTags(tags: Map<String, String>): Map<String, String> {
