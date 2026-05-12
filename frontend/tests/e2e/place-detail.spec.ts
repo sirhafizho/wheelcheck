@@ -89,4 +89,31 @@ test.describe('Place Detail Page', () => {
     const noReports = page.getByText(/no reports yet/i);
     await expect(hasReports.or(noReports)).toBeVisible({ timeout: 10000 });
   });
+
+  test('should show data source label on detail page', async ({ page }) => {
+    await page.goto('/en/places', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });
+
+    await page.locator('article').first().click();
+    await expect(page).toHaveURL(/\/en\/places\/[a-f0-9-]+/);
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 10000 });
+
+    // Data source section should be visible
+    const dataSourceLabel = page.getByTestId('data-source-label');
+    await expect(dataSourceLabel).toBeVisible({ timeout: 10000 });
+    const labelText = await dataSourceLabel.textContent();
+    expect(labelText?.trim().length).toBeGreaterThan(0);
+  });
+
+  test('should show "Data source" heading in place detail metadata', async ({ page }) => {
+    await page.goto('/en/places', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });
+
+    await page.locator('article').first().click();
+    await expect(page).toHaveURL(/\/en\/places\/[a-f0-9-]+/);
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Data source')).toBeVisible({ timeout: 10000 });
+  });
 });

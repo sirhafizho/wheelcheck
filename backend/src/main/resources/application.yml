@@ -65,8 +65,17 @@ wheelcheck:
     prasarana:
       enabled: false
       base-url: https://api.data.gov.my/gtfs-static/prasarana
-      # Comma-separated list: rapid-rail-kl, rapid-bus-kl, rapid-bus-mrtfeeder, rapid-bus-penang
-      categories: rapid-rail-kl
+      # All known Prasarana / data.gov.my GTFS feeds:
+      #   rapid-rail-kl       — LRT/MRT/Monorail (Klang Valley)
+      #   rapid-bus-kl        — Rapid KL bus (Klang Valley)
+      #   rapid-bus-mrtfeeder — MRT feeder buses
+      #   rapid-bus-sbk       — Rapid KL South bus (Subang/Klang)
+      #   rapid-bus-penang    — Rapid Penang bus
+      categories: rapid-rail-kl,rapid-bus-kl,rapid-bus-mrtfeeder,rapid-bus-sbk,rapid-bus-penang
+    data-gov-my:
+      enabled: true
+      base-url: https://api.data.gov.my
+      page-size: 1000
     geoapify:
       enabled: false
       api-key: ${GEOAPIFY_API_KEY:}

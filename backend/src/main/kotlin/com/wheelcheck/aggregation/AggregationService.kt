@@ -20,10 +20,32 @@ class AggregationService(
     private val logger = LoggerFactory.getLogger(AggregationService::class.java)
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
 
-    companion object {
-        val KL_BBOX = BoundingBox(south = 3.05, west = 101.60, north = 3.25, east = 101.80)
-        val SELANGOR_BBOX = BoundingBox(south = 2.80, west = 101.20, north = 3.50, east = 101.90)
+    enum class MalaysiaRegion(val bbox: BoundingBox) {
+        KL(BoundingBox(south = 3.05, west = 101.60, north = 3.25, east = 101.80)),
+        SELANGOR(BoundingBox(south = 2.70, west = 101.15, north = 3.55, east = 102.00)),
+        JOHOR(BoundingBox(south = 1.20, west = 103.40, north = 2.10, east = 104.35)),
+        KEDAH(BoundingBox(south = 5.60, west = 100.00, north = 6.73, east = 101.20)),
+        KELANTAN(BoundingBox(south = 4.75, west = 101.65, north = 6.30, east = 102.35)),
+        MELAKA(BoundingBox(south = 1.90, west = 102.00, north = 2.60, east = 102.85)),
+        NEGERI_SEMBILAN(BoundingBox(south = 2.40, west = 101.70, north = 3.20, east = 102.65)),
+        PAHANG(BoundingBox(south = 2.50, west = 101.30, north = 4.75, east = 103.55)),
+        PENANG(BoundingBox(south = 5.10, west = 100.15, north = 5.65, east = 100.80)),
+        PERAK(BoundingBox(south = 3.80, west = 100.40, north = 5.80, east = 101.85)),
+        PERLIS(BoundingBox(south = 6.40, west = 100.07, north = 6.73, east = 100.45)),
+        SABAH(BoundingBox(south = 4.00, west = 115.20, north = 7.40, east = 119.30)),
+        SARAWAK(BoundingBox(south = 0.85, west = 109.55, north = 5.05, east = 115.65)),
+        TERENGGANU(BoundingBox(south = 4.57, west = 102.55, north = 5.90, east = 103.60)),
+        PENINSULAR(BoundingBox(south = 1.20, west = 99.60, north = 6.73, east = 104.35)),
+        FULL_MALAYSIA(BoundingBox(south = 0.85, west = 99.60, north = 7.40, east = 119.30));
     }
+
+    companion object {
+        val KL_BBOX = MalaysiaRegion.KL.bbox
+        val SELANGOR_BBOX = MalaysiaRegion.SELANGOR.bbox
+    }
+
+    fun importFromRegion(region: MalaysiaRegion): List<ImportStats> =
+        importFromAllSources(region.bbox)
 
     /**
      * Import places from all enabled adapters for a given bounding box.
@@ -105,13 +127,15 @@ class AggregationService(
         // Create new place
         val point = geometryFactory.createPoint(Coordinate(ep.longitude, ep.latitude))
         val accessLevel = ep.wheelchairAccess.toAccessLevel()
+        val geo = MalaysiaGeoUtils.lookup(ep.latitude, ep.longitude)
 
         val place = Place(
             name = ep.name,
             nameMs = ep.nameMs,
             location = point,
             address = ep.address,
-            city = ep.city,
+            city = ep.city.ifBlank { geo.city },
+            state = ep.state ?: geo.state,
             category = ep.category,
             accessibilityLevel = accessLevel,
             osmId = ep.externalId,
@@ -142,6 +166,7 @@ class AggregationService(
             existing.accessibilityLevel
         }
 
+        val geo = MalaysiaGeoUtils.lookup(ep.latitude, ep.longitude)
         val updated = existing.copy(
             osmId = existing.osmId ?: ep.externalId,
             dataSource = if (existing.dataSource == "SEED") ep.sourceType.name else existing.dataSource,
@@ -149,6 +174,7 @@ class AggregationService(
             osmToiletAccessible = ep.hasAccessibleToilet ?: existing.osmToiletAccessible,
             osmTactilePaving = ep.hasTactilePaving ?: existing.osmTactilePaving,
             osmDescription = ep.description ?: existing.osmDescription,
+            state = existing.state ?: ep.state ?: geo.state,
             accessibilityLevel = if (existing.reviewCount == 0) updatedLevel else existing.accessibilityLevel,
             updatedAt = Instant.now()
         )
