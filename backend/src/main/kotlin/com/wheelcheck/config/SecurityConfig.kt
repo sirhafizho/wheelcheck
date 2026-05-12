@@ -37,6 +37,7 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.POST, "/api/photos/upload").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/users/*/stats").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/favorites/*/status").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
 
                     // Authenticated endpoints

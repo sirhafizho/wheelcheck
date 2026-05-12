@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   MapContainer,
   Marker,
-  Popup,
   TileLayer,
   ZoomControl,
   useMap,
@@ -17,7 +16,6 @@ import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 import type { Place } from '@/lib/types';
 import { MAP_CONFIG } from '@/lib/constants';
-import { AccessBadge } from '../places/AccessBadge';
 
 // Fix for default marker icon
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
@@ -46,7 +44,6 @@ interface MapViewProps {
   flyTo?: FlyToCoordinates;
   onPlaceClick?: (place: Place) => void;
   onViewportChange?: (viewport: MapViewport) => void;
-  locale?: string;
   className?: string;
 }
 
@@ -114,10 +111,8 @@ export function MapView({
   flyTo,
   onPlaceClick,
   onViewportChange,
-  locale = 'en',
   className = '',
 }: MapViewProps) {
-  const [mounted, setMounted] = useState(false);
   const [viewport, setViewport] = useState<MapViewport>({
     lat: Number(center.lat.toFixed(5)),
     lng: Number(center.lng.toFixed(5)),
@@ -128,18 +123,6 @@ export function MapView({
     setViewport(newViewport);
     onViewportChange?.(newViewport);
   }, [onViewportChange]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
-        <p className="text-gray-500">Loading map...</p>
-      </div>
-    );
-  }
 
   return (
     <div className={`relative ${className}`} data-testid="map-view">
@@ -162,24 +145,7 @@ export function MapView({
               eventHandlers={{
                 click: () => onPlaceClick?.(place),
               }}
-            >
-              <Popup>
-                <div className="p-2 min-w-[200px]">
-                  <h3 className="font-semibold text-gray-900 mb-2">{place.name}</h3>
-                  <AccessBadge level={place.accessibilityLevel} size="sm" />
-                  <p className="text-sm text-gray-600 mt-2">{place.address}</p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {place.reviewCount} {place.reviewCount === 1 ? 'review' : 'reviews'}
-                  </p>
-                  <a
-                    href={`/${locale}/places/${place.id}`}
-                    className="mt-3 inline-flex min-h-[48px] items-center text-sm font-medium text-emerald-600 hover:underline"
-                  >
-                    View Details →
-                  </a>
-                </div>
-              </Popup>
-            </Marker>
+            />
           ))}
         </MarkerClusterGroup>
       </MapContainer>
