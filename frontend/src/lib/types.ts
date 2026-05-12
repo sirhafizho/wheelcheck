@@ -9,6 +9,8 @@ export interface Place {
   longitude: number;
   address: string;
   city?: string;
+  state?: string;
+  dataSource?: string;
   category?: string;
   accessibilityLevel: AccessLevel | null;
   description?: string;

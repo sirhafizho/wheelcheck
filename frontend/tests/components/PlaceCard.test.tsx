@@ -59,4 +59,27 @@ describe('PlaceCard', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/en/places/1');
   });
+
+  it('renders city and state when both are provided', () => {
+    const placeWithState = { ...mockPlace, city: 'Kuala Lumpur', state: 'Wilayah Persekutuan Kuala Lumpur' };
+    render(<PlaceCard place={placeWithState} locale="en" />);
+    expect(screen.getByText('Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur')).toBeInTheDocument();
+  });
+
+  it('renders only city when state is absent', () => {
+    const placeWithCity = { ...mockPlace, city: 'Ipoh' };
+    render(<PlaceCard place={placeWithCity} locale="en" />);
+    expect(screen.getByText('Ipoh')).toBeInTheDocument();
+  });
+
+  it('renders only state when city is absent', () => {
+    const placeWithState = { ...mockPlace, state: 'Perak' };
+    render(<PlaceCard place={placeWithState} locale="en" />);
+    expect(screen.getByText('Perak')).toBeInTheDocument();
+  });
+
+  it('renders nothing for location when both city and state are absent', () => {
+    render(<PlaceCard place={mockPlace} locale="en" />);
+    expect(screen.queryByLabelText('Location')).not.toBeInTheDocument();
+  });
 });

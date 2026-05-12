@@ -9,6 +9,7 @@ enum class DataSourceType(val displayName: String, val priority: Int) {
     WIKIDATA("Wikidata", 75),
     GOOGLE_PLACES("Google Places", 70),
     PRASARANA_GTFS("Prasarana GTFS (data.gov.my)", 85),
+    DATA_GOV_MY("data.gov.my Facilities", 78),
     GEOAPIFY("Geoapify Places", 72),
     COMMUNITY("WheelCheck Community", 100),
     SEED("Seed Data", 50)
@@ -33,7 +34,8 @@ data class ExternalPlace(
     val latitude: Double,
     val longitude: Double,
     val address: String,
-    val city: String = "Kuala Lumpur",
+    val city: String = "",
+    val state: String? = null,
     val category: Category,
     val wheelchairAccess: WheelchairAccess = WheelchairAccess.UNKNOWN,
     val hasAccessibleToilet: Boolean? = null,

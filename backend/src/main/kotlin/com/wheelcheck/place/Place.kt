@@ -26,8 +26,11 @@ data class Place(
     val address: String,
     
     @Column(nullable = false)
-    val city: String = "Kuala Lumpur",
-    
+    val city: String = "",
+
+    @Column
+    val state: String? = null,
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val category: Category,
