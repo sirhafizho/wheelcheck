@@ -112,7 +112,7 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | State field on places (city + state display) | ✅ Done |
 | Data source provenance on place details | ✅ Done |
 | Region-based import endpoints | ✅ Done |
-| **10,832+ places imported from OpenStreetMap** | ✅ Done |
+| **67,679 places imported from OpenStreetMap** | ✅ Done |
 
 ### ✅ Aggregation Service (Adapter Pattern)
 
@@ -183,7 +183,7 @@ This starts PostGIS on port 5432 with the database pre-configured.
 
 ### Load Seed Data (Optional but Recommended)
 
-The repo includes a compressed seed dump of **~63,000 accessibility places** across all 16 Malaysian states. Load it after starting the database:
+The repo includes a compressed seed dump of **~67,000 accessibility places** across all 16 Malaysian states. Load it after starting the database:
 
 ```bash
 # After docker compose up -d and backend has run migrations once:
@@ -371,7 +371,7 @@ curl -X POST http://localhost:8080/api/aggregation/import/selangor \
   -H "Authorization: Bearer <admin-token>"
 ```
 
-A pre-built seed dump of ~63,000 places is available at [`data/places-seed.sql.gz`](data/places-seed.sql.gz) for immediate use. See [`data/README.md`](data/README.md).
+A pre-built seed dump of ~67,000 places is available at [`data/places-seed.sql.gz`](data/places-seed.sql.gz) for immediate use. See [`data/README.md`](data/README.md).
 
 ---
 

@@ -38,12 +38,12 @@ gunzip -c data/places-seed.sql.gz | psql -U wheelcheck -d wheelcheck
 | Negeri Sembilan | 1,753 |
 | W.P. Putrajaya | 1,145 |
 | Kedah | 630 |
-| Kelantan | 543 |
+| Kelantan | 2,036 |
 | Terengganu | 485 |
 | W.P. Kuala Lumpur | 153 |
 | W.P. Labuan | 127 |
 | Perlis | 74 |
-| Pahang | 69 |
+| Pahang | 1,730 |
 
 ## Refreshing data
 
