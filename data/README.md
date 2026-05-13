@@ -37,7 +37,7 @@ gunzip -c data/places-seed.sql.gz | psql -U wheelcheck -d wheelcheck
 | Sabah | 2,119 |
 | Negeri Sembilan | 1,753 |
 | W.P. Putrajaya | 1,145 |
-| Kedah | 630 |
+| Kedah | 3,085 |
 | Kelantan | 2,036 |
 | Terengganu | 485 |
 | W.P. Kuala Lumpur | 153 |

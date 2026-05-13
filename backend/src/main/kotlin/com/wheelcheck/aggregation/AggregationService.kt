@@ -23,8 +23,8 @@ class AggregationService(
     enum class MalaysiaRegion(val bbox: BoundingBox) {
         KL(BoundingBox(south = 3.05, west = 101.60, north = 3.25, east = 101.80)),
         SELANGOR(BoundingBox(south = 2.70, west = 101.15, north = 3.55, east = 102.00)),
-        JOHOR(BoundingBox(south = 1.20, west = 103.40, north = 2.10, east = 104.35)),
-        KEDAH(BoundingBox(south = 5.60, west = 100.00, north = 6.73, east = 101.20)),
+        JOHOR(BoundingBox(south = 1.20, west = 102.40, north = 2.10, east = 104.35)),
+        KEDAH(BoundingBox(south = 5.60, west = 99.50, north = 6.73, east = 101.20)),
         KELANTAN(BoundingBox(south = 4.75, west = 101.65, north = 6.30, east = 102.35)),
         MELAKA(BoundingBox(south = 1.90, west = 102.00, north = 2.60, east = 102.85)),
         NEGERI_SEMBILAN(BoundingBox(south = 2.40, west = 101.70, north = 3.20, east = 102.65)),
