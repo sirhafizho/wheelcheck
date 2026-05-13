@@ -509,6 +509,14 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Data freshness notice */}
+      <div className="absolute bottom-[7.5rem] left-3 z-[1000]">
+        <div className="flex items-center gap-1 rounded-full bg-amber-50/90 px-2.5 py-1 text-xs text-amber-700 shadow-sm backdrop-blur-sm ring-1 ring-amber-200/60">
+          <span>⏱</span>
+          <span>Data is imported, not live — <a href="https://github.com/sirhafizho/wheelcheck#%EF%B8%8F-data-freshness--important" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">learn more</a></span>
+        </div>
+      </div>
+
       <Link
         href={`/${locale}/add-place`}
         className="absolute bottom-24 right-4 z-[1000] flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl transition-all hover:scale-105 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 active:scale-95"

@@ -348,6 +348,33 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - 📖 Improve documentation
 - ♿ Test with assistive technologies
 
+## ⚠️ Data Freshness — Important
+
+**WheelCheck data is NOT live-fetched.** Places are imported from upstream sources (OpenStreetMap, data.gov.my) and stored in a local PostgreSQL database. Once imported, data does not auto-update.
+
+| What this means | Detail |
+|-----------------|--------|
+| 📦 **Snapshot data** | The database reflects OSM + data.gov.my at the time of the last import |
+| 🔄 **No auto-refresh** | There is no scheduled background sync — refreshes are maintainer-driven |
+| ✅ **Idempotent import** | Re-running an import updates existing places with fresh data and adds new ones |
+| 🙋 **You can help** | Crowd-sourced reports from users (the Waze-style quick report) are always live and override imported data |
+
+**For self-hosters / contributors:** Re-run the import any time to pull the latest OSM data:
+
+```bash
+# Refresh all of Malaysia (~30 min, requires admin token)
+curl -X POST http://localhost:8080/api/aggregation/import/malaysia \
+  -H "Authorization: Bearer <admin-token>"
+
+# Or per-state:
+curl -X POST http://localhost:8080/api/aggregation/import/selangor \
+  -H "Authorization: Bearer <admin-token>"
+```
+
+A pre-built seed dump of ~63,000 places is available at [`data/places-seed.sql.gz`](data/places-seed.sql.gz) for immediate use. See [`data/README.md`](data/README.md).
+
+---
+
 ## 📊 Data Sources & Licensing
 
 | Source | License | What we use |

@@ -146,4 +146,19 @@ test.describe('UI layout and UX', () => {
     await expect(bottomSheet.getByText('Accessibility Evidence:')).toBeVisible();
     await expect(bottomSheet.getByText('♿ Wheelchair: yes')).toBeVisible();
   });
+
+  test('data freshness notice is visible on map page', async ({ page }) => {
+    await mockPlaceApis(page);
+    await page.goto('/en', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('map-view')).toBeVisible({ timeout: 15000 });
+
+    const notice = page.getByText(/Data is imported, not live/i);
+    await expect(notice).toBeVisible();
+
+    // The notice should link to the README section
+    const link = page.getByRole('link', { name: /learn more/i });
+    await expect(link).toBeVisible();
+    const href = await link.getAttribute('href');
+    expect(href).toContain('github.com/sirhafizho/wheelcheck');
+  });
 });
