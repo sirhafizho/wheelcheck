@@ -141,9 +141,15 @@ Admin import endpoints:
 |------|-------|--------|
 | Backend unit tests | 53+ | ✅ All passing |
 | Frontend unit tests | 40 | ✅ All passing |
-| Playwright E2E tests | 102 | ✅ All passing |
-| CDP geolocation tests | 6 | ✅ All passing |
+| Playwright E2E tests (TS) | 265 | ✅ All passing |
+| CDP map tests (Python) | 14 | ✅ All passing |
+| browser-use AI visual tests | 9 | ✅ Ready (needs LLM API key) |
 | Manual API verification | All endpoints | ✅ Verified |
+
+**Three test layers** provide complementary coverage:
+- **Playwright TypeScript** — functional E2E: routes, filters, search, reports, i18n, Malaysia coverage
+- **CDP Python** (`tools/` + `frontend/tests/browser-harness/`) — low-level map interaction via raw `Input.dispatchMouseEvent`: marker clicks through Leaflet clusters, map pan, ARIA audit, viewport scroll, UI overlap detection
+- **browser-use AI visual** (`frontend/tests/visual/`) — LLM vision tests for layout overlap, WCAG contrast, accessibility, and exploratory UX; requires `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`
 
 ### 🔜 Roadmap
 
@@ -227,9 +233,19 @@ cd backend && ./gradlew test
 # Frontend unit tests
 cd frontend && npm test
 
-# E2E tests (requires backend + frontend running)
+# E2E tests — Playwright TypeScript (requires backend + frontend running)
 cd frontend && npx playwright test
+
+# CDP map tests — Playwright Python + raw CDP events (no LLM needed)
+source tools/venv/bin/activate
+python frontend/tests/browser-harness/test_cdp_map.py
+
+# AI visual tests — browser-use (requires ANTHROPIC_API_KEY or OPENAI_API_KEY)
+source tools/venv/bin/activate
+cd frontend && pytest tests/visual/ -v
 ```
+
+See [`tools/README.md`](tools/README.md) for Python venv setup and browser-use/browser-harness details.
 
 ## 🔌 API Endpoints
 
@@ -327,7 +343,9 @@ wheelcheck/
 │   │   ├── hooks/             # usePlaces, useGeolocation, useDebounce
 │   │   ├── lib/               # API client, types, constants, utils
 │   │   └── messages/          # Translation files (EN + BM)
-│   └── tests/                 # 40 unit + 102 E2E tests
+│   └── tests/                 # 40 unit + 265 E2E (Playwright TS)
+│                              # + 14 CDP map tests (Python)
+│                              # + 9 AI visual tests (browser-use)
 ├── docker-compose.yml          # PostGIS (ARM64-native)
 ├── docs/                       # Architecture, PRD, development guide
 └── .github/                    # Issue templates, CI workflows
