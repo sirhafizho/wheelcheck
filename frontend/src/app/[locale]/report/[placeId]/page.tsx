@@ -44,7 +44,7 @@ export default function ReportPage({ params }: ReportPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex h-full items-center justify-center pb-16">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -52,19 +52,22 @@ export default function ReportPage({ params }: ReportPageProps) {
 
   if (!place) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4">
-          Place not found
+      <div className="h-full overflow-y-auto pb-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4">
+            Place not found
+          </div>
+          <Button onClick={() => router.back()}>
+            {t('common.back')}
+          </Button>
         </div>
-        <Button onClick={() => router.back()}>
-          {t('common.back')}
-        </Button>
       </div>
     );
   }
 
   if (submitted) {
     return (
+      <div className="h-full overflow-y-auto pb-16">
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-6xl mb-4">🎉</div>
@@ -76,10 +79,12 @@ export default function ReportPage({ params }: ReportPageProps) {
           </p>
         </div>
       </div>
+      </div>
     );
   }
 
   return (
+    <div className="h-full overflow-y-auto pb-16">
     <div className="max-w-4xl mx-auto px-4 py-6">
       <ReportWizard
         placeId={placeId}
@@ -87,6 +92,7 @@ export default function ReportPage({ params }: ReportPageProps) {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />
+    </div>
     </div>
   );
 }
