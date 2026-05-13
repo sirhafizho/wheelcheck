@@ -24,16 +24,16 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="h-full">
+    <html lang={locale} className="h-full overflow-hidden">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#059669" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>
-      <body className="min-h-full flex flex-col bg-gray-50">
+      <body className="h-full flex flex-col overflow-hidden bg-gray-50">
         <NextIntlClientProvider messages={messages}>
           <Header locale={locale} />
-          <main id="main-content" className="flex-1 pb-16">
+          <main id="main-content" className="flex-1 min-h-0 overflow-hidden">
             {children}
           </main>
           <BottomNav locale={locale} />

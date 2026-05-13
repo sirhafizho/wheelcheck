@@ -66,6 +66,7 @@ export default function SettingsPage({ params }: { params: Params }) {
   };
 
   return (
+    <div className="h-full overflow-y-auto pb-16">
     <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('title')}</h1>
 
@@ -140,6 +141,7 @@ export default function SettingsPage({ params }: { params: Params }) {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
