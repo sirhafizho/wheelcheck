@@ -39,3 +39,7 @@ frontend/playwright-report/
 frontend/test-results/
 backend/build/reports/
 .claude/worktrees/
+
+# Visual / AI test tools
+tools/venv/
+tools/browser-harness/
