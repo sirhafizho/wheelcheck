@@ -92,6 +92,14 @@ class MalaysiaGeoUtilsTest {
     }
 
     @Test
+    fun `Miri Sarawak resolves correctly`() {
+        // Miri bbox was inverted (south > north) — this test guards the fix
+        val geo = MalaysiaGeoUtils.lookup(3.25, 113.07)
+        assertEquals("Miri", geo.city)
+        assertEquals("Sarawak", geo.state)
+    }
+
+    @Test
     fun `city helper returns city string`() {
         assertEquals("Kuala Lumpur", MalaysiaGeoUtils.city(3.15, 101.70))
     }
