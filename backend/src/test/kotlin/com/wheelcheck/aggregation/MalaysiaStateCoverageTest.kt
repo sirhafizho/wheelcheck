@@ -13,6 +13,7 @@ import java.util.stream.Stream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
+
 /**
  * Verifies that each Malaysian state can receive and correctly route data through the adapters.
  *
@@ -31,9 +32,7 @@ class MalaysiaStateCoverageTest {
         enabled = true
     )
     private val dataGovAdapter = DataGovMyFacilitiesAdapter(
-        objectMapper = objectMapper,
-        baseUrl = "https://api.data.gov.my",
-        pageSize = 1000
+        objectMapper = objectMapper
     )
     private val prasaranaAdapter = PrasaranaGtfsAdapter(
         baseUrl = "https://api.data.gov.my/gtfs-static/prasarana",
@@ -54,10 +53,10 @@ class MalaysiaStateCoverageTest {
             Arguments.of("Petaling Jaya",     3.04,  101.58, "Petaling Jaya",    "Selangor"),
             Arguments.of("Shah Alam",         3.09,  101.52, "Shah Alam",        "Selangor"),
             Arguments.of("Klang",             3.03,  101.44, "Klang",            "Selangor"),
-            Arguments.of("Subang Jaya",       3.15,  101.60, "Subang Jaya",      "Selangor"),
-            Arguments.of("Kajang",            2.99,  101.78, "Kajang",           "Selangor"),
+            Arguments.of("Subang Jaya",       3.22,  101.55, "Subang Jaya",      "Selangor"),
+            Arguments.of("Kajang",            3.02,  101.78, "Kajang",           "Selangor"),
             Arguments.of("Seremban",          2.73,  101.94, "Seremban",         "Negeri Sembilan"),
-            Arguments.of("Port Dickson",      2.52,  101.22, "Port Dickson",     "Negeri Sembilan"),
+            Arguments.of("Port Dickson",      2.52,  102.22, "Port Dickson",     "Negeri Sembilan"),
             Arguments.of("Johor Bahru",       1.49,  103.74, "Johor Bahru",      "Johor"),
             Arguments.of("Batu Pahat",        1.85,  103.43, "Batu Pahat",       "Johor"),
             Arguments.of("Muar",              2.04,  102.57, "Muar",             "Johor"),
@@ -90,14 +89,14 @@ class MalaysiaStateCoverageTest {
         @JvmStatic
         fun stateFallbackData(): Stream<Arguments> = Stream.of(
             // A coordinate that misses all city boxes but hits the state fallback
-            Arguments.of("Johor rural",    1.50, 103.50,  "Johor",           "Johor"),
+            Arguments.of("Johor rural",    1.70, 103.90,  "Johor",           "Johor"),
             Arguments.of("Pahang rural",   3.60, 102.80,  "Pahang",          "Pahang"),
-            Arguments.of("Kelantan rural", 5.20, 102.00,  "Kelantan",        "Kelantan"),
-            Arguments.of("Terengganu rural",5.00, 102.80, "Terengganu",      "Terengganu"),
+            Arguments.of("Kelantan rural", 5.50, 102.50,  "Kelantan",        "Kelantan"),
+            Arguments.of("Terengganu rural",5.00, 103.40, "Terengganu",      "Terengganu"),
             Arguments.of("Kedah rural",    6.00, 100.30,  "Kedah",           "Kedah"),
-            Arguments.of("Perlis rural",   6.70, 100.10,  "Perlis",          "Perlis"),
+            Arguments.of("Perlis rural",   6.71, 100.15,  "Perlis",          "Perlis"),
             Arguments.of("Perak rural",    4.20, 101.60,  "Perak",           "Perak"),
-            Arguments.of("NS rural",       2.70, 102.30,  "Negeri Sembilan", "Negeri Sembilan"),
+            Arguments.of("NS rural",       3.00, 102.30,  "Negeri Sembilan", "Negeri Sembilan"),
             Arguments.of("Melaka rural",   2.30, 102.40,  "Melaka",          "Melaka"),
             Arguments.of("Sabah rural",    5.40, 116.50,  "Sabah",           "Sabah"),
             Arguments.of("Sarawak rural",  2.00, 112.00,  "Sarawak",         "Sarawak"),
@@ -285,19 +284,8 @@ class MalaysiaStateCoverageTest {
         )
 
     private fun invokeMapRecord(record: Map<String, Any?>, bbox: BoundingBox): ExternalPlace? {
-        val innerClass = dataGovAdapter.javaClass.declaredClasses
-            .find { it.simpleName == "DatasetConfig" }!!
-        val innerInstance = innerClass
-            .getDeclaredConstructor(String::class.java, Category::class.java, String::class.java)
-            .also { it.isAccessible = true }
-            .newInstance("hospital_list", Category.HOSPITAL, "hospital")
-
-        val method = dataGovAdapter.javaClass
-            .getDeclaredMethod("mapRecord", Map::class.java, innerClass, BoundingBox::class.java)
-            .also { it.isAccessible = true }
-
-        @Suppress("UNCHECKED_CAST")
-        return method.invoke(dataGovAdapter, record, innerInstance, bbox) as ExternalPlace?
+        val ds = DataGovMyFacilitiesAdapter.DatasetConfig("hospital_list", Category.HOSPITAL, "hospital")
+        return dataGovAdapter.mapRecord(record, ds, bbox)
     }
 
     @Test

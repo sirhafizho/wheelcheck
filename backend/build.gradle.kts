@@ -76,6 +76,19 @@ tasks.withType<KotlinCompile> {
 }
 
 tasks.withType<Test> {
-    useJUnitPlatform()
     jvmArgs("-Dnet.bytebuddy.experimental=true")
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform {
+        excludeTags("live")
+    }
+}
+
+tasks.register<Test>("liveTest") {
+    group = "verification"
+    description = "Run live smoke tests that hit real external APIs"
+    useJUnitPlatform {
+        includeTags("live")
+    }
 }
