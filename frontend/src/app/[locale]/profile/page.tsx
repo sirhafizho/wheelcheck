@@ -303,7 +303,7 @@ export default function ProfilePage({ params }: { params: Params }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex h-full items-center justify-center pb-16">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -311,6 +311,7 @@ export default function ProfilePage({ params }: { params: Params }) {
 
   if (!isLoggedIn) {
     return (
+      <div className="h-full overflow-y-auto pb-16">
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">👤</div>
@@ -451,10 +452,12 @@ export default function ProfilePage({ params }: { params: Params }) {
           </form>
         )}
       </div>
+      </div>
     );
   }
 
   return (
+    <div className="h-full overflow-y-auto pb-16">
     <div className="max-w-2xl mx-auto px-4 py-6">
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex items-center gap-4 mb-4">
@@ -519,6 +522,7 @@ export default function ProfilePage({ params }: { params: Params }) {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

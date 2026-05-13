@@ -28,7 +28,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex h-full items-center justify-center pb-16">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -36,15 +36,18 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          {error}
+      <div className="h-full overflow-y-auto pb-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            {error}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
+    <div className="h-full overflow-y-auto pb-16">
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
@@ -76,6 +79,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 }
