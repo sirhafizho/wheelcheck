@@ -5,7 +5,8 @@ import com.wheelcheck.common.Category
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.test.util.ReflectionTestUtils
+
+private typealias DatasetConfig = DataGovMyFacilitiesAdapter.DatasetConfig
 
 class DataGovMyFacilitiesAdapterTest {
 
@@ -15,9 +16,7 @@ class DataGovMyFacilitiesAdapterTest {
     @BeforeEach
     fun setup() {
         adapter = DataGovMyFacilitiesAdapter(
-            objectMapper = objectMapper,
-            baseUrl = "https://api.data.gov.my",
-            pageSize = 1000
+            objectMapper = objectMapper
         )
     }
 
@@ -172,27 +171,11 @@ class DataGovMyFacilitiesAdapterTest {
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
-    private data class DatasetConfig(val id: String, val category: Category, val idPrefix: String)
-
     private fun invokeMapRecord(
         record: Map<String, Any?>,
-        ds: DatasetConfig,
+        ds: DataGovMyFacilitiesAdapter.DatasetConfig,
         bbox: BoundingBox
     ): ExternalPlace? {
-        val innerClass = adapter.javaClass.declaredClasses
-            .find { it.simpleName == "DatasetConfig" }!!
-        val innerInstance = innerClass.getDeclaredConstructor(String::class.java, Category::class.java, String::class.java)
-            .also { it.isAccessible = true }
-            .newInstance(ds.id, ds.category, ds.idPrefix)
-
-        val method = adapter.javaClass.getDeclaredMethod(
-            "mapRecord",
-            Map::class.java,
-            innerClass,
-            BoundingBox::class.java
-        ).also { it.isAccessible = true }
-
-        @Suppress("UNCHECKED_CAST")
-        return method.invoke(adapter, record, innerInstance, bbox) as ExternalPlace?
+        return adapter.mapRecord(record, ds, bbox)
     }
 }

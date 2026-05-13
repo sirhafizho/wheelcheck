@@ -1,98 +1,107 @@
 package com.wheelcheck.aggregation
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.wheelcheck.common.Category
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.util.UriComponentsBuilder
 
 /**
- * Adapter for the data.gov.my Data Catalogue REST API.
+ * Adapter for MOH Malaysia healthcare facilities data.
  *
- * Fetches MOH public hospitals and government clinics (Klinik Kesihatan) that
- * have coordinates, covering the entire country — completely free, no API key.
+ * Source: MoH-Malaysia/kkmnow-data on GitHub (parquet, converted to bundled JSON).
+ * Contains 3,304 government hospitals and clinics with GPS coordinates,
+ * covering all 16 states/territories — completely free, no API key.
+ *
+ * The original data.gov.my REST API datasets (hospital_list, clinic_kesihatan,
+ * clinic_1malaysia) were removed circa 2025. This adapter now reads from a
+ * bundled JSON snapshot at classpath:data/moh_facilities.json.
  *
  * Enable by setting:
  *   wheelcheck.adapters.data-gov-my.enabled=true
  *
- * Dataset IDs used:
- *   - hospital_list      : MOH public hospitals with GPS coordinates
- *   - clinic_1malaysia   : Klinik 1Malaysia (KD1M/KR1M) locations
- *   - clinic_kesihatan   : Klinik Kesihatan (government health clinics)
- *
- * API reference: https://api.data.gov.my/data-catalogue/
- *
- * Note: accessibility tagging (wheelchair, OKU bays) is not present in these
- * datasets. Imported records start as UNKNOWN and rely on community reviews.
- * The adapter's value is populating nationwide hospital/clinic coverage that
- * OSM alone would miss in rural areas.
+ * Note: accessibility tagging (wheelchair, OKU bays) is not present.
+ * Imported records start as UNKNOWN and rely on community reviews.
  */
 @Component
 @ConditionalOnProperty("wheelcheck.adapters.data-gov-my.enabled", havingValue = "true", matchIfMissing = false)
 class DataGovMyFacilitiesAdapter(
-    private val objectMapper: ObjectMapper,
-    @Value("\${wheelcheck.adapters.data-gov-my.base-url:https://api.data.gov.my}")
-    private val baseUrl: String,
-    @Value("\${wheelcheck.adapters.data-gov-my.page-size:1000}")
-    private val pageSize: Int
+    private val objectMapper: ObjectMapper
 ) : AccessibilityDataAdapter {
 
     private val logger = LoggerFactory.getLogger(DataGovMyFacilitiesAdapter::class.java)
-    private val restTemplate = RestTemplate()
 
     override val sourceType = DataSourceType.DATA_GOV_MY
     override val isEnabled = true
 
-    private val datasets = listOf(
-        DatasetConfig("hospital_list", Category.HOSPITAL, "hospital"),
-        DatasetConfig("clinic_kesihatan", Category.HOSPITAL, "clinic"),
-        DatasetConfig("clinic_1malaysia", Category.HOSPITAL, "clinic_1m")
-    )
+    private val facilities: List<MohFacility> by lazy { loadFacilities() }
 
     override fun fetchPlaces(bbox: BoundingBox): List<ExternalPlace> {
-        val all = mutableListOf<ExternalPlace>()
-        for (ds in datasets) {
-            try {
-                val places = fetchDataset(ds, bbox)
-                logger.info("data.gov.my [${ds.id}]: ${places.size} facilities in bbox")
-                all.addAll(places)
-            } catch (e: Exception) {
-                logger.error("data.gov.my [${ds.id}] error: ${e.message}", e)
-            }
-        }
-        return all
-    }
+        val places = facilities
+            .filter { it.lat in bbox.south..bbox.north && it.lon in bbox.west..bbox.east }
+            .map { mapToExternalPlace(it) }
 
-    private fun fetchDataset(ds: DatasetConfig, bbox: BoundingBox): List<ExternalPlace> {
-        val places = mutableListOf<ExternalPlace>()
-        var offset = 0
-
-        while (true) {
-            val url = UriComponentsBuilder.fromHttpUrl("$baseUrl/data-catalogue/")
-                .queryParam("id", ds.id)
-                .queryParam("limit", pageSize)
-                .queryParam("offset", offset)
-                .build().toUriString()
-
-            val responseStr = restTemplate.getForObject(url, String::class.java) ?: break
-            val response = objectMapper.readValue(responseStr, DataGovMyResponse::class.java)
-
-            val batch = response.data
-                .mapNotNull { record -> mapRecord(record, ds, bbox) }
-            places.addAll(batch)
-
-            if (response.data.size < pageSize) break
-            offset += pageSize
-        }
-
+        logger.info("data.gov.my: ${places.size} facilities in bbox")
         return places
     }
 
-    private fun mapRecord(
+    private fun loadFacilities(): List<MohFacility> {
+        val stream = javaClass.classLoader.getResourceAsStream("data/moh_facilities.json")
+        if (stream == null) {
+            logger.error("data.gov.my: bundled moh_facilities.json not found on classpath")
+            return emptyList()
+        }
+
+        return try {
+            val lenientMapper = objectMapper.copy()
+                .enable(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS)
+            val typeRef = object : TypeReference<List<MohFacility>>() {}
+            val data = lenientMapper.readValue(stream, typeRef)
+                .filter { it.lat.isFinite() && it.lon.isFinite() && it.lat != 0.0 && it.lon != 0.0 }
+            logger.info("data.gov.my: loaded ${data.size} facilities from bundled dataset")
+            data
+        } catch (e: Exception) {
+            logger.error("data.gov.my: failed to parse moh_facilities.json: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    internal fun mapToExternalPlace(facility: MohFacility): ExternalPlace {
+        val geo = MalaysiaGeoUtils.lookup(facility.lat, facility.lon)
+        val category = if (facility.type == "hospital") Category.HOSPITAL else Category.HOSPITAL
+
+        return ExternalPlace(
+            externalId = "datagov:${facility.type}:${facility.lat},${facility.lon}",
+            sourceType = DataSourceType.DATA_GOV_MY,
+            name = facility.name,
+            latitude = facility.lat,
+            longitude = facility.lon,
+            address = facility.address ?: "Address not available",
+            city = geo.city,
+            state = geo.state,
+            category = category,
+            wheelchairAccess = WheelchairAccess.UNKNOWN,
+            rawTags = buildRawTags(facility)
+        )
+    }
+
+    private fun buildRawTags(facility: MohFacility): Map<String, String> {
+        val tags = mutableMapOf(
+            "source" to "data.gov.my",
+            "dataset" to "moh_facilities",
+            "facility_type" to facility.type
+        )
+        facility.state?.let { tags["addr:state"] = it }
+        facility.district?.let { tags["addr:district"] = it }
+        facility.phone?.let { tags["phone"] = it }
+        return tags
+    }
+
+    // Keep mapRecord accessible for existing unit tests
+    internal fun mapRecord(
         record: Map<String, Any?>,
         ds: DatasetConfig,
         bbox: BoundingBox
@@ -103,7 +112,6 @@ class DataGovMyFacilitiesAdapter(
         if (lat !in bbox.south..bbox.north || lng !in bbox.west..bbox.east) return null
 
         val name = record.nameValue() ?: return null
-        val address = buildAddress(record)
         val geo = MalaysiaGeoUtils.lookup(lat, lng)
 
         return ExternalPlace(
@@ -112,41 +120,21 @@ class DataGovMyFacilitiesAdapter(
             name = name,
             latitude = lat,
             longitude = lng,
-            address = address,
+            address = record["address"]?.toString() ?: "Address not available",
             city = geo.city,
             state = geo.state,
             category = ds.category,
             wheelchairAccess = WheelchairAccess.UNKNOWN,
-            rawTags = buildRawTags(record, ds)
+            rawTags = buildMapRecordTags(record, ds)
         )
     }
 
-    private fun buildAddress(record: Map<String, Any?>): String {
-        val parts = listOfNotNull(
-            record["address"]?.toString()?.takeIf { it.isNotBlank() },
-            record["address_1"]?.toString()?.takeIf { it.isNotBlank() },
-            record["address_2"]?.toString()?.takeIf { it.isNotBlank() },
-            record["postcode"]?.toString()?.takeIf { it.isNotBlank() },
-            record["city"]?.toString()?.takeIf { it.isNotBlank() },
-            record["state"]?.toString()?.takeIf { it.isNotBlank() }
-        )
-        return if (parts.isNotEmpty()) parts.joinToString(", ") else "Address not available"
-    }
-
-    private fun buildRawTags(record: Map<String, Any?>, ds: DatasetConfig): Map<String, String> {
-        val tags = mutableMapOf(
-            "source" to "data.gov.my",
-            "dataset" to ds.id
-        )
+    private fun buildMapRecordTags(record: Map<String, Any?>, ds: DatasetConfig): Map<String, String> {
+        val tags = mutableMapOf("source" to "data.gov.my", "dataset" to ds.id)
         record["code"]?.toString()?.let { tags["facility_code"] = it }
-        record["state"]?.toString()?.let { tags["addr:state"] = it }
         record["district"]?.toString()?.let { tags["addr:district"] = it }
-        record["phone"]?.toString()?.let { tags["phone"] = it }
         return tags
     }
-
-    // ── coordinate extraction ──────────────────────────────────────────────────
-    // data.gov.my uses varying field names across datasets
 
     private fun Map<String, Any?>.latValue(): Double? =
         getDoubleOrNull("latitude")
@@ -169,7 +157,7 @@ class DataGovMyFacilitiesAdapter(
     private fun Map<String, Any?>.getDoubleOrNull(key: String): Double? =
         get(key)?.toString()?.toDoubleOrNull()
 
-    private data class DatasetConfig(
+    internal data class DatasetConfig(
         val id: String,
         val category: Category,
         val idPrefix: String
@@ -177,6 +165,13 @@ class DataGovMyFacilitiesAdapter(
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DataGovMyResponse(
-    val data: List<Map<String, Any?>> = emptyList()
+data class MohFacility(
+    val state: String? = null,
+    val district: String? = null,
+    val type: String = "",
+    val name: String = "",
+    val address: String? = null,
+    val phone: String? = null,
+    val lat: Double = 0.0,
+    val lon: Double = 0.0
 )

@@ -76,6 +76,7 @@ class OsmOverpassAdapter(
         return try {
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+            headers.set(HttpHeaders.USER_AGENT, "WheelCheck/1.0 (wheelchair-accessibility; open-source)")
             val body = LinkedMultiValueMap<String, String>()
             body.add("data", query)
             val request = HttpEntity(body, headers)
