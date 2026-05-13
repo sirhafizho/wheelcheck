@@ -83,7 +83,7 @@ object MalaysiaGeoUtils {
 
         // ── Sarawak ──────────────────────────────────────────────────────────
         bbox(1.53, 110.32, 1.63, 110.42) to GeoRegion("Kuching", "Sarawak"),
-        bbox(3.31, 113.02, 3.21, 113.12) to GeoRegion("Miri", "Sarawak"),
+        bbox(3.21, 113.02, 3.31, 113.12) to GeoRegion("Miri", "Sarawak"),
         bbox(2.28, 111.82, 2.38, 111.92) to GeoRegion("Sibu", "Sarawak"),
         bbox(2.04, 112.89, 2.14, 112.99) to GeoRegion("Sarikei", "Sarawak"),
         bbox(1.82, 110.30, 1.92, 110.40) to GeoRegion("Samarahan", "Sarawak"),
