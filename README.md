@@ -181,6 +181,23 @@ docker compose up -d
 
 This starts PostGIS on port 5432 with the database pre-configured.
 
+### Load Seed Data (Optional but Recommended)
+
+The repo includes a compressed seed dump of **~63,000 accessibility places** across all 16 Malaysian states. Load it after starting the database:
+
+```bash
+# After docker compose up -d and backend has run migrations once:
+gunzip -c data/places-seed.sql.gz | docker exec -i $(docker ps -qf "name=postgis\|name=wheelcheck-db") psql -U wheelcheck -d wheelcheck
+```
+
+Or re-import fresh data from OSM + data.gov.my via the admin API (takes ~30 min):
+```bash
+curl -X POST http://localhost:8080/api/aggregation/import/malaysia \
+  -H "Authorization: Bearer <admin-token>"
+```
+
+See [`data/README.md`](data/README.md) for full coverage breakdown.
+
 ### Run Backend
 
 ```bash
