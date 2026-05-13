@@ -961,7 +961,7 @@ export default function AdminPage({ params }: { params: Params }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
+      <div className="flex h-full items-center justify-center pb-16">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -969,7 +969,8 @@ export default function AdminPage({ params }: { params: Params }) {
 
   if (accessDenied) {
     return (
-      <div className="mx-auto flex min-h-[50vh] max-w-xl items-center justify-center px-4 py-8">
+      <div className="h-full overflow-y-auto pb-16">
+      <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-8">
         <div className="w-full rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-gray-100">
           <h1 className="text-2xl font-bold text-gray-900">{t('accessDenied')}</h1>
           <p className="mt-3 text-gray-600">{t('accessDeniedMessage')}</p>
@@ -981,10 +982,12 @@ export default function AdminPage({ params }: { params: Params }) {
           </Link>
         </div>
       </div>
+      </div>
     );
   }
 
   return (
+    <div className="h-full overflow-y-auto pb-16">
     <div className="mx-auto max-w-7xl px-4 py-6">
       <div className="mb-6 flex flex-col gap-4">
         <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
@@ -1023,6 +1026,7 @@ export default function AdminPage({ params }: { params: Params }) {
         {activeTab === 'reviews' && renderReviewsTable()}
         {activeTab === 'users' && renderUsersTable()}
       </div>
+    </div>
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex h-full items-center justify-center pb-16">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -32,18 +32,21 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
 
   if (error || !place) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4">
-          {error || 'Place not found'}
+      <div className="h-full overflow-y-auto pb-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4">
+            {error || 'Place not found'}
+          </div>
+          <Button onClick={() => router.back()}>
+            {t('common.back')}
+          </Button>
         </div>
-        <Button onClick={() => router.back()}>
-          {t('common.back')}
-        </Button>
       </div>
     );
   }
 
   return (
+    <div className="h-full overflow-y-auto pb-16">
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       <Button 
         variant="ghost" 
@@ -66,6 +69,7 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
       <div className="bg-white rounded-lg shadow-lg p-6">
         <CommentSection placeId={place.id} locale={locale} />
       </div>
+    </div>
     </div>
   );
 }

@@ -141,6 +141,7 @@ export default function AddPlacePage({ params }: { params: Params }) {
 
   if (success) {
     return (
+      <div className="h-full overflow-y-auto pb-16">
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-6xl mb-4">✅</div>
@@ -148,10 +149,12 @@ export default function AddPlacePage({ params }: { params: Params }) {
           <p className="text-gray-600">{t('successMessage')}</p>
         </div>
       </div>
+      </div>
     );
   }
 
   return (
+    <div className="h-full overflow-y-auto pb-16">
     <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('title')}</h1>
 
@@ -260,6 +263,7 @@ export default function AddPlacePage({ params }: { params: Params }) {
           {submitting ? <LoadingSpinner size="sm" /> : t('submit')}
         </Button>
       </form>
+    </div>
     </div>
   );
 }

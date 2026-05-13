@@ -347,7 +347,7 @@ export default function HomePage() {
     : null;
 
   return (
-    <div className="relative w-full" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="relative h-full w-full overflow-hidden">
       <div className="absolute inset-0">
         <MapView
           places={places}
