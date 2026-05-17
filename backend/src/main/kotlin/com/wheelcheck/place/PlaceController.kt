@@ -3,6 +3,8 @@ package com.wheelcheck.place
 import com.wheelcheck.review.ReviewDto
 import com.wheelcheck.review.ReviewService
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,8 +19,12 @@ class PlaceController(
 ) {
     
     @GetMapping
-    fun getAllPlaces(): ResponseEntity<List<PlaceDto>> {
-        return ResponseEntity.ok(placeService.findAll())
+    fun getAllPlaces(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ResponseEntity<Page<PlaceDto>> {
+        val pageable = PageRequest.of(page, size.coerceAtMost(100))
+        return ResponseEntity.ok(placeService.findAll(pageable))
     }
     
     @GetMapping("/{id}")

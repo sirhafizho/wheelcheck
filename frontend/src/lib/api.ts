@@ -62,8 +62,8 @@ class ApiClient {
       return { data: places, total: places.length };
     }
 
-    const places = await this.fetch<Place[]>('/places');
-    return { data: places, total: places.length };
+    const response = await this.fetch<{ content: Place[]; totalElements: number }>('/places?page=0&size=50');
+    return { data: response.content, total: response.totalElements };
   }
 
   async getPlace(id: string): Promise<ApiResponse<Place>> {
