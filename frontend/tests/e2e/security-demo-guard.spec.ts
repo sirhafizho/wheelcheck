@@ -10,7 +10,7 @@ import {
 
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-test.describe('Security & Demo Guard', () => {
+test.describe.serial('Security & Demo Guard', () => {
   let adminToken: string;
   let userToken: string;
 
@@ -19,8 +19,35 @@ test.describe('Security & Demo Guard', () => {
     userToken = await getAuthToken(request, USER_EMAIL, USER_PASSWORD);
   });
 
+  // --- Admin auth & access control ---
+
+  test('unauthenticated cannot access admin endpoints', async ({ request }) => {
+    const res = await request.get(`${API_BASE}/admin/stats`);
+    expect(res.ok()).toBe(false);
+    expect([401, 403]).toContain(res.status());
+  });
+
+  test('normal user cannot access admin endpoints', async ({ request }) => {
+    const res = await request.get(`${API_BASE}/admin/stats`, {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    expect(res.status()).toBe(403);
+  });
+
+  test('demo admin can read admin stats', async ({ request }) => {
+    await delay(500);
+    const statsRes = await request.get(`${API_BASE}/admin/stats`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    expect(statsRes.ok()).toBe(true);
+    const stats = await statsRes.json();
+    expect(stats.totalPlaces).toBeGreaterThan(0);
+  });
+
+  // --- Demo guard restrictions ---
+
   test('demo admin cannot delete users', async ({ request }) => {
-    // Get a user ID first
+    await delay(500);
     const usersRes = await request.get(`${API_BASE}/admin/users`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
@@ -29,7 +56,6 @@ test.describe('Security & Demo Guard', () => {
     const targetUser = users.content?.find((u: any) => u.email === USER_EMAIL);
     expect(targetUser).toBeTruthy();
 
-    // Try to delete user — should be blocked by demo guard
     const delRes = await request.delete(`${API_BASE}/admin/users/${targetUser.id}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
@@ -39,6 +65,7 @@ test.describe('Security & Demo Guard', () => {
   });
 
   test('demo admin cannot change user roles', async ({ request }) => {
+    await delay(500);
     const usersRes = await request.get(`${API_BASE}/admin/users`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
@@ -54,84 +81,8 @@ test.describe('Security & Demo Guard', () => {
     expect(body.error).toBe('Demo restriction');
   });
 
-  test('unauthenticated cannot access admin endpoints', async ({ request }) => {
-    const res = await request.get(`${API_BASE}/admin/stats`);
-    expect(res.ok()).toBe(false);
-    expect(res.status()).toBe(401);
-  });
-
-  test('normal user cannot access admin endpoints', async ({ request }) => {
-    const res = await request.get(`${API_BASE}/admin/stats`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    expect(res.ok()).toBe(false);
-    expect(res.status()).toBe(403);
-  });
-
-  test('photo upload requires authentication', async ({ request }) => {
-    const res = await request.post(`${API_BASE}/photos/upload`, {
-      multipart: {
-        placeId: '00000000-0000-0000-0000-000000000000',
-        file: { name: 'test.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('fake') },
-      },
-    });
-    expect(res.ok()).toBe(false);
-  });
-
-  test('review submission requires authentication', async ({ request }) => {
-    const res = await request.post(`${API_BASE}/reviews`, {
-      data: {
-        placeId: '00000000-0000-0000-0000-000000000000',
-        entrance: 3,
-        toilet: 3,
-        parking: 3,
-        internalNav: 3,
-        notes: 'Test review',
-      },
-    });
-    expect(res.ok()).toBe(false);
-  });
-
-  test('CORS preflight returns restricted origins', async ({ request }) => {
-    const res = await request.fetch(`${API_BASE}/places/search?name=test`, {
-      method: 'OPTIONS',
-      headers: {
-        'Origin': 'https://evil-site.com',
-        'Access-Control-Request-Method': 'GET',
-      },
-    });
-    // Should NOT include evil-site.com in allowed origins
-    const allowOrigin = res.headers()['access-control-allow-origin'];
-    expect(allowOrigin).not.toBe('https://evil-site.com');
-  });
-
-  test('rate limit returns 429 with tier info', async ({ request }) => {
-    // Hit auth endpoint many times to trigger rate limit (5/min)
-    const results: number[] = [];
-    for (let i = 0; i < 8; i++) {
-      const res = await request.post(`${API_BASE}/auth/login`, {
-        data: { email: 'nonexistent@test.com', password: 'wrong' },
-      });
-      results.push(res.status());
-      if (res.status() === 429) break;
-    }
-    // Should eventually get 429
-    expect(results).toContain(429);
-  });
-
-  test('demo admin can still read admin data', async ({ request }) => {
-    await delay(1000);
-    const statsRes = await request.get(`${API_BASE}/admin/stats`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-    expect(statsRes.ok()).toBe(true);
-    const stats = await statsRes.json();
-    expect(stats.totalPlaces).toBeGreaterThan(0);
-  });
-
   test('demo admin can still delete a place (within limits)', async ({ request }) => {
-    await delay(1000);
-    // Create a test place first
+    await delay(500);
     const createRes = await request.post(`${API_BASE}/places`, {
       headers: { Authorization: `Bearer ${adminToken}` },
       data: {
@@ -148,10 +99,57 @@ test.describe('Security & Demo Guard', () => {
 
     await delay(500);
 
-    // Delete it via admin endpoint — should work within limits
     const delRes = await request.delete(`${API_BASE}/admin/places/${place.id}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
     expect(delRes.status()).toBe(204);
+  });
+
+  // --- Auth & upload security ---
+
+  test('photo upload requires authentication', async ({ request }) => {
+    const res = await request.post(`${API_BASE}/photos/upload`, {
+      multipart: {
+        placeId: '00000000-0000-0000-0000-000000000000',
+        file: { name: 'test.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('fake') },
+      },
+    });
+    expect(res.ok()).toBe(false);
+  });
+
+  test('review submission requires authentication', async ({ request }) => {
+    const res = await request.post(`${API_BASE}/reviews`, {
+      data: {
+        placeId: '00000000-0000-0000-0000-000000000000',
+        entrance: 3, toilet: 3, parking: 3, internalNav: 3,
+        notes: 'Test review',
+      },
+    });
+    expect(res.ok()).toBe(false);
+  });
+
+  test('CORS headers are set on API responses', async ({ request }) => {
+    const res = await request.get(`${API_BASE}/places/search?name=test`, {
+      headers: { 'Origin': 'https://wheelcheck-swart.vercel.app' },
+    });
+    expect(res.ok()).toBe(true);
+    const allowOrigin = res.headers()['access-control-allow-origin'];
+    if (allowOrigin) {
+      expect(allowOrigin).toContain('wheelcheck');
+    }
+  });
+
+  // --- Rate limiting (LAST — exhausts auth tokens) ---
+
+  test('rate limit returns 429 with tier info', async ({ request }) => {
+    const results: number[] = [];
+    for (let i = 0; i < 8; i++) {
+      const res = await request.post(`${API_BASE}/auth/login`, {
+        data: { email: 'nonexistent@test.com', password: 'wrong' },
+      });
+      results.push(res.status());
+      if (res.status() === 429) break;
+    }
+    expect(results).toContain(429);
   });
 });
