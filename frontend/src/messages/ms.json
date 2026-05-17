@@ -197,6 +197,8 @@
     "register": "Buat Akaun",
     "email": "E-mel",
     "password": "Kata Laluan",
+    "showPassword": "Tunjuk kata laluan",
+    "hidePassword": "Sembunyikan kata laluan",
     "displayName": "Nama Paparan",
     "cancel": "Batal",
     "logout": "Log Keluar",

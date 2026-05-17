@@ -4,6 +4,7 @@ import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { HeartIcon } from '@heroicons/react/24/solid';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { API_URL } from '@/lib/constants';
@@ -61,6 +62,7 @@ export default function ProfilePage({ params }: { params: Params }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -330,6 +332,7 @@ export default function ProfilePage({ params }: { params: Params }) {
                 setShowLogin(true);
                 setShowRegister(false);
                 setAuthError(null);
+                setShowPassword(false);
               }}
               className="min-h-[48px]"
             >
@@ -342,6 +345,7 @@ export default function ProfilePage({ params }: { params: Params }) {
                 setShowRegister(true);
                 setShowLogin(false);
                 setAuthError(null);
+                setShowPassword(false);
               }}
               className="min-h-[48px]"
             >
@@ -377,16 +381,30 @@ export default function ProfilePage({ params }: { params: Params }) {
               <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
                 {t('password')}
               </label>
-              <input
-                id="login-password"
-                type="password"
-                name="current-password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
-              />
+              <div className="relative">
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="current-password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-11 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                  data-testid="password-toggle"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword
+                    ? <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                    : <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                  }
+                </button>
+              </div>
             </div>
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={resetAuthForms} className="flex-1 min-h-[48px]">
@@ -441,17 +459,31 @@ export default function ProfilePage({ params }: { params: Params }) {
               <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 mb-1">
                 {t('password')}
               </label>
-              <input
-                id="reg-password"
-                type="password"
-                name="new-password"
-                autoComplete="new-password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
-              />
+              <div className="relative">
+                <input
+                  id="reg-password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="new-password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-11 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                  data-testid="password-toggle"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword
+                    ? <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                    : <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                  }
+                </button>
+              </div>
             </div>
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={resetAuthForms} className="flex-1 min-h-[48px]">

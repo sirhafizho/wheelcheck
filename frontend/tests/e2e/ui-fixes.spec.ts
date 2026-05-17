@@ -321,3 +321,33 @@ test.describe('Report Wizard Cancel Button', () => {
     await expect(submitNow).toBeVisible({ timeout: 10000 });
   });
 });
+
+test.describe('Password visibility toggle', () => {
+  test('login form has a password toggle button', async ({ page }) => {
+    await page.goto('/en/profile', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: /log in/i }).click();
+    const toggle = page.locator('[data-testid="password-toggle"]');
+    await expect(toggle).toBeVisible({ timeout: 10000 });
+  });
+
+  test('password field type toggles between password and text', async ({ page }) => {
+    await page.goto('/en/profile', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: /log in/i }).click();
+    const pwInput = page.locator('#login-password');
+    await expect(pwInput).toHaveAttribute('type', 'password');
+    await page.locator('[data-testid="password-toggle"]').click();
+    await expect(pwInput).toHaveAttribute('type', 'text');
+    await page.locator('[data-testid="password-toggle"]').click();
+    await expect(pwInput).toHaveAttribute('type', 'password');
+  });
+
+  test('register form password toggle works', async ({ page }) => {
+    await page.goto('/en/profile', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: /create account/i }).click();
+    const pwInput = page.locator('#reg-password');
+    await expect(pwInput).toHaveAttribute('type', 'password');
+    await page.locator('[data-testid="password-toggle"]').click();
+    await expect(pwInput).toHaveAttribute('type', 'text');
+  });
+});
+

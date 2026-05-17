@@ -197,6 +197,8 @@
     "register": "Create Account",
     "email": "Email",
     "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "displayName": "Display Name",
     "cancel": "Cancel",
     "logout": "Log Out",
