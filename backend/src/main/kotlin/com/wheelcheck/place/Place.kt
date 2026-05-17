@@ -59,6 +59,18 @@ data class Place(
     
     @Column(name = "osm_description")
     val osmDescription: String? = null,
+
+    @Column(name = "osm_surface")
+    val osmSurface: String? = null,
+
+    @Column(name = "osm_incline")
+    val osmIncline: String? = null,
+
+    @Column(name = "osm_entrance_wheelchair")
+    val osmEntranceWheelchair: String? = null,
+
+    @Column(name = "osm_kerb_tactile")
+    val osmKerbTactile: Boolean? = null,
     
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant = Instant.now(),

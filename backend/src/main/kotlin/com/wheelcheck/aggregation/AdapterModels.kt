@@ -41,6 +41,10 @@ data class ExternalPlace(
     val hasAccessibleToilet: Boolean? = null,
     val hasTactilePaving: Boolean? = null,
     val description: String? = null,
+    val osmSurface: String? = null,
+    val osmIncline: String? = null,
+    val osmEntranceWheelchair: String? = null,
+    val osmKerbTactile: Boolean? = null,
     val rawTags: Map<String, String> = emptyMap()
 )
 

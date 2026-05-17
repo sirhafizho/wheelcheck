@@ -56,6 +56,18 @@ class PlaceController(
         val places = placeService.searchByName(name)
         return ResponseEntity.ok(places)
     }
+
+    @GetMapping("/semantic-search")
+    fun semanticSearchPlaces(
+        @RequestParam q: String,
+        @RequestParam(required = false) lat: Double?,
+        @RequestParam(required = false) lng: Double?,
+        @RequestParam(defaultValue = "5000") radius: Int,
+        @RequestParam(defaultValue = "20") limit: Int
+    ): ResponseEntity<List<PlaceDto>> {
+        val places = placeService.semanticSearch(q, lat, lng, radius, limit)
+        return ResponseEntity.ok(places)
+    }
     
     @PostMapping
     fun createPlace(

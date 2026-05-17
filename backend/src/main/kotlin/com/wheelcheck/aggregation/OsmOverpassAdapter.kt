@@ -56,6 +56,9 @@ class OsmOverpassAdapter(
               node["ramp:wheelchair"="yes"]($b);
               node["highway"="elevator"]($b);
               node["lift"="yes"]($b);
+              node["surface"]["name"]($b);
+              node["kerb:tactile_paving"]($b);
+              node["entrance:wheelchair"]($b);
               node["amenity"~"restaurant|cafe|fast_food|ice_cream|bar|hospital|clinic|pharmacy|bank|place_of_worship|library|cinema|theatre|school|college|university"]["name"]($b);
               node["shop"]["name"]($b);
               node["tourism"~"hotel|museum|attraction"]["name"]($b);
@@ -109,6 +112,11 @@ class OsmOverpassAdapter(
                 ?: tags["toilet:wheelchair"]?.let { it == "yes" },
             hasTactilePaving = tags["tactile_paving"]?.let { it == "yes" },
             description = tags["wheelchair:description"] ?: tags["wheelchair:description:en"],
+            osmSurface = tags["surface"],
+            osmIncline = tags["incline"],
+            osmEntranceWheelchair = tags["entrance:wheelchair"] ?: tags["wheelchair:entrance"],
+            osmKerbTactile = tags["kerb:tactile_paving"]?.let { it == "yes" }
+                ?: tags["tactile_paving"]?.let { it == "yes" },
             rawTags = tags + buildEnhancedTags(tags)
         )
     }

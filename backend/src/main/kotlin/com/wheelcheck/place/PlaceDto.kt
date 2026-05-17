@@ -27,6 +27,10 @@ data class PlaceDto(
     val osmWheelchairTag: String? = null,
     val osmToiletAccessible: Boolean? = null,
     val osmTactilePaving: Boolean? = null,
+    val osmSurface: String? = null,
+    val osmIncline: String? = null,
+    val osmEntranceWheelchair: String? = null,
+    val osmKerbTactile: Boolean? = null,
     val lastReportedAt: Instant? = null,
     val isLive: Boolean = false
 )

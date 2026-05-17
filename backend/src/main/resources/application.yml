@@ -86,3 +86,7 @@ wheelcheck:
       enabled: false
       api-key: ${ORS_API_KEY:}
       base-url: https://api.openrouteservice.org/v2
+  huggingface:
+    api-token: ${HUGGINGFACE_API_TOKEN:}
+    embedding-scheduler:
+      enabled: ${EMBEDDING_SCHEDULER_ENABLED:false}

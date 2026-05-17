@@ -144,6 +144,10 @@ class LiveEnrichmentService(
                     osmToiletAccessible = ep.hasAccessibleToilet,
                     osmTactilePaving = ep.hasTactilePaving,
                     osmDescription = ep.description,
+                    osmSurface = ep.osmSurface,
+                    osmIncline = ep.osmIncline,
+                    osmEntranceWheelchair = ep.osmEntranceWheelchair,
+                    osmKerbTactile = ep.osmKerbTactile,
                     createdAt = Instant.now(),
                     updatedAt = Instant.now()
                 )
@@ -216,7 +220,11 @@ class LiveEnrichmentService(
         description = description,
         osmWheelchairTag = rawTags["wheelchair"],
         osmToiletAccessible = hasAccessibleToilet,
-        osmTactilePaving = hasTactilePaving
+        osmTactilePaving = hasTactilePaving,
+        osmSurface = rawTags["surface"],
+        osmIncline = rawTags["incline"],
+        osmEntranceWheelchair = rawTags["entrance:wheelchair"] ?: rawTags["_entrance_wheelchair"],
+        osmKerbTactile = (rawTags["kerb:tactile_paving"] ?: rawTags["_kerb"])?.let { it == "yes" }
     )
 
     /**

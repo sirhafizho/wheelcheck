@@ -10,6 +10,21 @@ import type {
   PaginatedResponse,
 } from './types';
 
+export async function semanticSearchPlaces(
+  query: string,
+  lat?: number,
+  lng?: number,
+  radius = 5000,
+  limit = 20
+): Promise<Place[]> {
+  const params = new URLSearchParams({ q: query, radius: String(radius), limit: String(limit) });
+  if (lat !== undefined) params.set('lat', String(lat));
+  if (lng !== undefined) params.set('lng', String(lng));
+  const response = await fetch(`${API_URL}/places/semantic-search?${params}`);
+  if (!response.ok) return [];
+  return response.json();
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -75,6 +90,10 @@ class ApiClient {
 
   async getNearbyPlaces(lat: number, lng: number, radius = 5000): Promise<PaginatedResponse<Place>> {
     return this.searchPlaces({ lat, lng, radius });
+  }
+
+  async semanticSearch(q: string, lat?: number, lng?: number, radius = 5000, limit = 20): Promise<Place[]> {
+    return semanticSearchPlaces(q, lat, lng, radius, limit);
   }
 
   async getPlaceReports(placeId: string): Promise<AccessReport[]> {

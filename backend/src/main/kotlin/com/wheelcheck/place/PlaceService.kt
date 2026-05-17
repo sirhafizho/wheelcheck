@@ -5,6 +5,8 @@ import com.wheelcheck.aggregation.LiveEnrichmentService
 import com.wheelcheck.aggregation.MalaysiaGeoUtils
 import com.wheelcheck.common.AccessLevel
 import com.wheelcheck.common.Category
+import com.wheelcheck.search.EmbeddingService
+import com.wheelcheck.search.PlaceEmbeddingRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
@@ -20,7 +22,9 @@ import java.util.*
 @Service
 class PlaceService(
     private val placeRepository: PlaceRepository,
-    private val liveEnrichmentService: LiveEnrichmentService? = null
+    private val liveEnrichmentService: LiveEnrichmentService? = null,
+    private val embeddingService: EmbeddingService? = null,
+    private val embeddingRepository: PlaceEmbeddingRepository? = null
 ) {
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
 
@@ -74,6 +78,22 @@ class PlaceService(
     @Transactional(readOnly = true)
     fun searchByName(name: String): List<PlaceDto> {
         return placeRepository.findByNameContainingIgnoreCaseLimited(expandAbbreviations(name)).map { it.toDto() }
+    }
+
+    @Transactional(readOnly = true)
+    fun semanticSearch(query: String, lat: Double?, lng: Double?, radius: Int = 5000, limit: Int = 20): List<PlaceDto> {
+        val vector = embeddingService?.embed(query) ?: return searchByName(query)
+        val vectorStr = embeddingService.toVectorString(vector)
+
+        val results = if (lat != null && lng != null) {
+            embeddingRepository?.semanticSearch(vectorStr, lat, lng, radius, limit) ?: emptyList()
+        } else {
+            embeddingRepository?.semanticSearchGlobal(vectorStr, limit) ?: emptyList()
+        }
+
+        if (results.isEmpty()) return searchByName(query)
+
+        return results.mapNotNull { result -> placeRepository.findByIdOrNull(result.id)?.toDto() }
     }
 
     @Transactional(readOnly = true)
@@ -172,7 +192,18 @@ class PlaceService(
             updatedAt = Instant.now()
         )
 
-        return placeRepository.save(place).toDto()
+        val savedPlace = placeRepository.save(place)
+        embeddingService?.let { svc ->
+            embeddingRepository?.let { repo ->
+                try {
+                    val text = "${savedPlace.name} ${savedPlace.category.name.lowercase().replace('_', ' ')}"
+                    val vector = svc.embed(text)
+                    if (vector != null) repo.saveEmbedding(savedPlace.id, svc.toVectorString(vector))
+                } catch (_: Exception) {
+                }
+            }
+        }
+        return savedPlace.toDto()
     }
 
     @Transactional
@@ -243,6 +274,10 @@ class PlaceService(
         osmWheelchairTag = osmWheelchairTag,
         osmToiletAccessible = osmToiletAccessible,
         osmTactilePaving = osmTactilePaving,
+        osmSurface = osmSurface,
+        osmIncline = osmIncline,
+        osmEntranceWheelchair = osmEntranceWheelchair,
+        osmKerbTactile = osmKerbTactile,
         lastReportedAt = updatedAt
     )
 }

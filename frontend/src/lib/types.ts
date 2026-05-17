@@ -17,6 +17,10 @@ export interface Place {
   osmWheelchairTag?: string | null;
   osmToiletAccessible?: boolean | null;
   osmTactilePaving?: boolean | null;
+  osmSurface?: string | null;
+  osmIncline?: string | null;
+  osmEntranceWheelchair?: string | null;
+  osmKerbTactile?: boolean | null;
   reviewCount: number;
   createdAt: string;
   lastReportedAt?: string;
