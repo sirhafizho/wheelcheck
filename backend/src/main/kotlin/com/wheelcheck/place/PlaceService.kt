@@ -88,13 +88,19 @@ class PlaceService(
         accessLevel: String?,
         pageable: Pageable
     ): Page<PlaceDto> {
-        return placeRepository.searchWithFilters(
-            query = query?.takeIf { it.isNotBlank() },
-            category = category?.takeIf { it.isNotBlank() },
-            city = city?.takeIf { it.isNotBlank() },
-            accessLevel = accessLevel?.takeIf { it.isNotBlank() },
-            pageable = pageable
-        ).map(java.util.function.Function { place: Place -> place.toDto() })
+        val q = query?.takeIf { it.isNotBlank() }
+        val cat = category?.takeIf { it.isNotBlank() }
+        val access = accessLevel?.takeIf { it.isNotBlank() }
+
+        val result: Page<Place> = when {
+            q != null && cat != null -> placeRepository.searchByQueryAndCategory(q, cat, pageable)
+            q != null -> placeRepository.searchByQuery(q, pageable)
+            cat != null -> placeRepository.findByCategory(cat, pageable)
+            access != null -> placeRepository.findByAccessLevel(access, pageable)
+            else -> placeRepository.findAll(pageable)
+        }
+
+        return result.map(java.util.function.Function { place: Place -> place.toDto() })
     }
 
     @Transactional(readOnly = true)

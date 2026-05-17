@@ -63,29 +63,66 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
 
     @Query(value = """
         SELECT * FROM places p
-        WHERE (:query IS NULL OR LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
+        WHERE LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
            OR p.name ILIKE CONCAT('%%', :query, '%%')
-           OR p.address ILIKE CONCAT('%%', :query, '%%'))
-        AND (:category IS NULL OR p.category = :category)
-        AND (:city IS NULL OR p.city ILIKE CONCAT('%%', :city, '%%'))
-        AND (:accessLevel IS NULL OR p.accessibility_level = :accessLevel)
+           OR p.address ILIKE CONCAT('%%', :query, '%%')
         ORDER BY p.created_at DESC
     """,
     countQuery = """
         SELECT COUNT(*) FROM places p
-        WHERE (:query IS NULL OR LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
+        WHERE LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
            OR p.name ILIKE CONCAT('%%', :query, '%%')
-           OR p.address ILIKE CONCAT('%%', :query, '%%'))
-        AND (:category IS NULL OR p.category = :category)
-        AND (:city IS NULL OR p.city ILIKE CONCAT('%%', :city, '%%'))
-        AND (:accessLevel IS NULL OR p.accessibility_level = :accessLevel)
+           OR p.address ILIKE CONCAT('%%', :query, '%%')
     """,
     nativeQuery = true)
-    fun searchWithFilters(
-        @Param("query") query: String?,
-        @Param("category") category: String?,
-        @Param("city") city: String?,
-        @Param("accessLevel") accessLevel: String?,
+    fun searchByQuery(
+        @Param("query") query: String,
+        pageable: Pageable
+    ): Page<Place>
+
+    @Query(value = """
+        SELECT * FROM places p
+        WHERE p.category = :category
+        ORDER BY p.created_at DESC
+    """,
+    countQuery = "SELECT COUNT(*) FROM places p WHERE p.category = :category",
+    nativeQuery = true)
+    fun findByCategory(
+        @Param("category") category: String,
+        pageable: Pageable
+    ): Page<Place>
+
+    @Query(value = """
+        SELECT * FROM places p
+        WHERE p.accessibility_level = :accessLevel
+        ORDER BY p.created_at DESC
+    """,
+    countQuery = "SELECT COUNT(*) FROM places p WHERE p.accessibility_level = :accessLevel",
+    nativeQuery = true)
+    fun findByAccessLevel(
+        @Param("accessLevel") accessLevel: String,
+        pageable: Pageable
+    ): Page<Place>
+
+    @Query(value = """
+        SELECT * FROM places p
+        WHERE (LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :query, '%%')
+           OR p.address ILIKE CONCAT('%%', :query, '%%'))
+        AND p.category = :category
+        ORDER BY p.created_at DESC
+    """,
+    countQuery = """
+        SELECT COUNT(*) FROM places p
+        WHERE (LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :query, '%%')
+           OR p.address ILIKE CONCAT('%%', :query, '%%'))
+        AND p.category = :category
+    """,
+    nativeQuery = true)
+    fun searchByQueryAndCategory(
+        @Param("query") query: String,
+        @Param("category") category: String,
         pageable: Pageable
     ): Page<Place>
 }
