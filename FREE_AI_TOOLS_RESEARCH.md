@@ -649,6 +649,362 @@ Zero-cost: just metadata stored against the user, shown as icons on profile.
 
 ---
 
+## Part 4 — Detailed Accessibility Data for Wheelchair Users
+
+The current 4-aspect verdicts (entrance, toilet, parking, interior) answer *whether* a place is accessible. What users actually need is *how* accessible and *for whom* — because a manual chair user, a power chair user, and someone on a mobility scooter have completely different tolerances.
+
+### Implementation strategy: progressive disclosure
+
+**Do not extend the core report wizard.** Submission rates will drop. Instead:
+
+1. **Core wizard stays identical** — 4 questions, ~30 seconds, unchanged
+2. **Optional "Tell us more" step appears after submission** — "Got 2 more minutes? Help future visitors with specifics."
+3. **Place detail page shows unknown fields as grey with a CTA** — "Be the first to add this info" drives contributors to fill gaps organically
+
+**Storage:** All detailed fields go in a `detailed_attributes JSONB` column on `access_reports`. No schema churn when new fields are added later. Only render fields on the place detail page if at least one review has filled them in.
+
+---
+
+### Entrance fields
+
+The entrance is the single most critical filter — it determines whether a user can get in at all.
+
+| Field | Type | Options |
+|-------|------|---------|
+| `step_height` | enum | no_step / lip_under_2cm / step_3_to_10cm / multiple_steps |
+| `ramp_gradient` | enum | gentle_under_5pct / moderate_5_to_8pct / steep_over_8pct / no_ramp |
+| `door_type` | enum | automatic_sliding / automatic_swing / manual_push / heavy_manual |
+| `door_width` | enum | narrow_under_75cm / standard_75_to_90cm / wide_over_90cm |
+| `accessible_entrance_is_main` | boolean | Is the accessible entrance the same as the main entrance? |
+
+The last field is a dignity issue — many Malaysian venues route wheelchair users through service corridors. Users want to know this upfront.
+
+---
+
+### Toilet fields
+
+Accessible toilets are the trip-limiting factor — they constrain how long a user can stay and whether they can go at all.
+
+| Field | Type | Options |
+|-------|------|---------|
+| `toilet_is_dedicated_cubicle` | boolean | Dedicated accessible cubicle, not just a larger stall |
+| `toilet_lock_type` | enum | unlocked / radar_key / ask_staff / no_accessible_toilet |
+| `toilet_grab_bars` | boolean | Grab bars present |
+| `toilet_turning_space` | enum | spacious / tight_but_usable / insufficient |
+| `changing_places_facility` | boolean | Full Changing Places facility available (hoist, adult changing bench) |
+
+The `changing_places_facility` field is niche but critical for users who need personal care — it's a categorically different level of accessibility from a standard accessible toilet.
+
+---
+
+### Interior fields
+
+| Field | Type | Options |
+|-------|------|---------|
+| `lift_available` | enum | yes / no / unreliable (frequently broken) |
+| `aisle_width` | enum | spacious_power_chair / passable_manual / tight_manual_only |
+| `floor_surface` | enum | smooth / carpet / uneven / cobblestone |
+| `accessible_seating` | boolean | Wheelchair user can sit at a table (not just beside one) |
+
+Lift reliability is a notorious pain point — the only accessible route in a multi-floor building depends on a lift that's frequently out of service. The `unreliable` option matters.
+
+---
+
+### Approach & parking fields
+
+The journey from car or bus stop to the entrance is often where things fall apart.
+
+| Field | Type | Options |
+|-------|------|---------|
+| `dropped_kerb_present` | boolean | Dropped kerb from parking/street to entrance |
+| `accessible_parking_distance` | enum | close_under_30m / moderate / far / no_accessible_parking |
+| `covered_accessible_route` | boolean | Is the route from parking/street to entrance covered/sheltered? |
+| `pavement_quality` | enum | smooth / uneven / no_pavement |
+
+`covered_accessible_route` is Malaysia-specific. Outdoor uncovered routes become unusable in heavy rain, which is a daily occurrence. This single field is disproportionately valuable locally.
+
+---
+
+### The "works for me" context field
+
+One field competitors don't prominently feature but wheelchair users consistently say matters most: a freeform field for the reviewer's mobility context.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mobility_aid_type` | enum | manual_self_propelled / manual_attendant_pushed / power_chair / mobility_scooter / walking_aid / other |
+| `reviewer_context` | text (255 chars) | e.g. "I use a lightweight folding manual chair. Aisles are tight — probably not suitable for power chairs." |
+
+This transforms a partial verdict into actionable information. A place rated "partial" by a power chair user might be "fully accessible" for a manual chair user.
+
+---
+
+### What to show on the place detail page
+
+When detailed attributes are present, surface them as an expandable "Detailed Accessibility Info" section below the main verdict. Layout suggestion:
+
+```
+[Entrance]
+✅ No step at entrance
+✅ Automatic sliding door
+⚠️  Door width: standard (75–90cm)
+❓ Ramp gradient: not yet reported  [Add this]
+
+[Toilets]
+✅ Dedicated accessible cubicle
+⚠️  Must ask staff for key
+❓ Grab bars: not yet reported  [Add this]
+
+[Inside]
+⚠️  Lift available but reported as unreliable
+✅ Spacious — suitable for power chairs
+```
+
+Grey out unreported fields with an inline "Add this" link that deep-links into the "Tell us more" flow for that specific place. This creates a natural loop: detail page surfaces gaps → CTA sends users to fill them → detail page gets richer.
+
+---
+
+### Files to touch (implementation)
+
+- `backend/src/main/resources/db/migration/` — add `detailed_attributes JSONB` and `mobility_aid_type` enum column to `access_reports`
+- `backend/src/main/kotlin/com/wheelcheck/review/AccessReport.kt` — add `detailedAttributes: Map<String, Any>?` field
+- `backend/src/main/kotlin/com/wheelcheck/review/ReviewService.kt` — accept and store detailed attributes
+- `frontend/src/components/report/ReportWizard.tsx` — add optional "Tell us more" step after submission confirmation
+- `frontend/src/components/places/PlaceDetail.tsx` — render detailed attributes section with grey unknowns + CTAs
+- `frontend/src/types/accessibility.ts` — add TypeScript types for all detailed attribute fields
+
+---
+
+## Part 5 — Live UI Audit (Playwright, 2026-05-18)
+
+Full walkthrough of every screen on the live demo at `https://wheelcheck-swart.vercel.app`. Tested desktop (1280px) and mobile (390×844, iPhone 14 viewport). Logged in as `user@wheelcheck.demo`.
+
+---
+
+### Home Map — Issues Found
+
+**1. Filter chips cut off on mobile**
+On 390px, only 2 of 4 filter chips are visible (♿ Wheelchair Accessible, 🚻 Accessible Toilet). The other two (🅿️ Accessible Parking, 🚪 Wide Entrance) are off-screen with no scroll affordance shown. Users don't know they exist.
+- **Fix:** Either make the chip row horizontally scrollable with a fade-out gradient on the right edge as a scroll hint, or collapse chips into a "Filters" button that opens a sheet.
+
+**2. No visual selected state difference between active/inactive filters**
+When a filter chip is active (pressed), the visual difference is subtle — just a slightly different background. On mobile in bright sunlight this is likely invisible.
+- **Fix:** Use a solid filled style for active chips vs. outlined for inactive. Consider adding a checkmark icon inside active chips.
+
+**3. "Data is imported, not live" banner competes with the FAB**
+The orange ⏱ banner at the bottom overlaps vertically with the "Add a place" FAB on smaller screens. On mobile the FAB is pushed above the nav bar but sits too close to the banner.
+- **Fix:** Dismiss the banner after first view (persist in localStorage). Or move it to a one-time tooltip/onboarding modal so it doesn't permanently occupy map real estate.
+
+**4. "50 places nearby" pill has no breakdown**
+The pill shows a count but gives no sense of how many are accessible vs. unknown. A user's primary question is "how many of these 50 are actually accessible?" — the number alone doesn't answer that.
+- **Fix:** Show a mini breakdown in the pill: "50 nearby · 12 ✅ · 8 ⚠️ · 30 ❓"
+
+**5. No empty state when filters produce zero results**
+If a user enables all 4 filters simultaneously with no matches, the map just shows no markers with no feedback. The pill still shows a count (or shows 0 with no explanation).
+- **Fix:** When filtered count = 0, show a toast or empty state: "No fully accessible venues found nearby. Try removing some filters or zooming out."
+
+**6. BM locale: filter chip labels are in English**
+Navigating to `/ms` shows the map in Bahasa Malaysia (nav labels, banner text translated) but the filter chips still read "♿ Wheelchair Accessible" etc. in English.
+- **Fix:** Translate chip labels via `next-intl` message keys.
+
+---
+
+### Search — Issues Found
+
+**7. Search suggestions show "Address not available" for many entries**
+Multiple results (Aquaria KLCC, KJ10 KLCC, Suria KLCC, etc.) show "Address not available" as the subtitle. This makes the suggestion list hard to distinguish between duplicates (two "Suria KLCC" entries both with no address).
+- **Fix:** Fall back to city + state when address is missing (e.g. "Kuala Lumpur, KL"). Also de-duplicate results with same name + same city.
+
+**8. No keyboard navigation announced for suggestions**
+The suggestions list uses `role="listbox"` correctly but there's no `aria-activedescendant` update on arrow-key navigation, so screen readers don't announce which suggestion is focused.
+- **Fix:** Implement proper `aria-activedescendant` on the search input referencing the focused `role="option"` id.
+
+**9. Selecting a search result doesn't open the bottom sheet**
+Clicking "Suria KLCC" from suggestions pans the map to that location but doesn't automatically open the place's bottom sheet. The user has to then find and click the marker manually — two steps when it should be one.
+- **Fix:** After flying to the location, auto-select the place and open the bottom sheet directly.
+
+---
+
+### Bottom Sheet — Issues Found
+
+**10. Bottom sheet on mobile shows very little content at default (half) state**
+At the half-snap position, the bottom sheet shows: place name, category, address, review count, and two buttons. This is fine but the two buttons ("View Details" / "Report") take up ~40% of the visible area. On a small screen the buttons dominate over the information.
+- **Fix:** Make the buttons smaller/more compact in the half-state. Full-width buttons only needed in the full-expanded state.
+
+**11. No distance to venue shown in bottom sheet**
+The codebase has a "wheelchair distance calculation (~X min roll at 4km/h)" feature, but it's not visible in the bottom sheet. This is exactly the information a wheelchair user wants before deciding to go somewhere.
+- **Fix:** Show "~8 min roll · 520m" (using the existing calculation) below the address in the bottom sheet half-state.
+
+**12. Bottom sheet "Report" link label is ambiguous**
+The "Report" button reads as "report a problem" (flag content) in most app contexts. Here it means "submit an accessibility report", which is the primary positive action.
+- **Fix:** Rename to "Rate Accessibility" or "Add Report" to make the intent clear.
+
+**13. No swipe hint on first open**
+The drag handle is present but there's no animation or hint that the sheet is swipeable upward to see more content. First-time users may not know they can expand it.
+- **Fix:** On first open, run a brief "peek" animation that briefly expands the sheet to 70% then snaps back to half, hinting at the gesture. Show once, persist in localStorage.
+
+---
+
+### Place Detail Page — Issues Found
+
+**14. No "Get Directions" button**
+The page has "View on Map" (goes back to the home map) but no way to navigate to the venue. This is a critical missing action — a user who decides a place is accessible wants to navigate there immediately.
+- **Fix:** Add a "Get Directions" button that deep-links to Google Maps on Android (`geo:` intent) and Apple Maps on iOS (`maps://`). Place it next to "Report Accessibility".
+
+**15. Accessibility verdict badge has no explanation for new users**
+The green "✅ Accessible" pill is clear once you know the system, but nowhere on the page is it explained how the verdict is calculated (score from community reports). A new user might not trust it.
+- **Fix:** Add a small "ⓘ" icon next to the verdict that opens a tooltip/popover: "Based on 1 community report. Venues with ≥2.5/3 average score are marked Accessible."
+
+**16. Reviews section has no category icons — just text labels**
+The 4 aspect scores (Entrance ✅, Toilet ✅, Parking ✅, Internal ✅) are rendered as plain text with emoji. They're small and easy to miss on mobile.
+- **Fix:** Use distinct icons per category (door icon for entrance, toilet icon for toilet, parking sign for parking, arrows for internal nav) with colour-coded backgrounds matching the verdict colour.
+
+**17. "Discussion (0)" section sits below reviews with no visual separation**
+The comments section is immediately below the reviews section with just a heading separating them. On a long page these blend together.
+- **Fix:** Add a card/section divider with a different background tint, or move comments into a tab alongside reviews.
+
+**18. Comment box "Post" button requires login but there's no indication until you type**
+The Post button is visibly disabled (greyed out) when not logged in, but there's no label explaining why. A user types a comment, sees the disabled Post button, and has no idea they need to log in.
+- **Fix:** Replace the disabled Post button with a "Log in to comment" link when not authenticated.
+
+**19. No "favorite" confirmation feedback**
+The heart/save button (top right) has no toast or visual animation on tap. The icon changes state but there's no feedback that the action succeeded.
+- **Fix:** Show a brief toast "Saved to favourites" on success.
+
+---
+
+### Report Wizard — Issues Found
+
+**20. Step counter says "Step 1 of 6" but the original spec said 4 questions**
+The wizard has 6 steps: entrance, toilet, parking, internal navigation, photos, notes. The "30 second report" marketing claim is undermined by 6 steps. Steps 5 (photos) and 6 (notes) are optional but still count in the progress label.
+- **Fix:** Either label optional steps differently ("Step 5: Photos (optional)") or show required steps as "4 questions + optional extras" so users know the core is fast.
+
+**21. No "skip all optional steps" shortcut**
+After step 4 (internal nav), two optional steps remain. There's no "Submit now" shortcut — users must click Next twice more to reach Submit.
+- **Fix:** After completing the 4 required steps, show a "Submit now" secondary button alongside the regular "Next" button, letting users skip the optional steps entirely.
+
+**22. Step 5 (photos) has no camera icon button for mobile**
+The photo upload is a single large outlined button "📷 Add Photo (0/5)". On mobile, tapping this opens the file picker which works, but there's no dedicated "Take Photo" vs "Choose from Library" split — the OS handles it but it would feel more native to have two buttons on mobile.
+- **Fix:** On mobile, show two buttons: "📷 Take Photo" and "🖼️ Choose from Library" using the `capture` attribute on the file input.
+
+**23. Wizard has no exit/cancel button**
+There is a "Back" button that steps backward through the wizard, but no "Cancel" or "×" to abandon the report entirely and return to the place page. If a user accidentally taps "Report" and wants out, they must tap Back 4 times.
+- **Fix:** Add a subtle "✕ Cancel" or back-arrow link at the top of the wizard that returns to the place detail page.
+
+**24. No autosave between steps**
+If the user navigates away mid-wizard (e.g. browser back, switching app on mobile), all progress is lost. For a 6-step flow this is painful.
+- **Fix:** Persist wizard state to `sessionStorage` keyed by `placeId`. Restore on re-entry with a banner "Continue your unfinished report?"
+
+---
+
+### Places List Page — Issues Found
+
+**25. On desktop, places show in 3-column grid — on mobile, single column**
+The layout shift is fine, but the desktop grid wastes a lot of horizontal space on cards that are mostly empty (0 reviews, no address). The cards look sparse.
+- **Fix:** Add a category icon/emoji prominently in the card (top-left corner), and show the accessibility badge more prominently. Cards currently feel like unstructured text lists.
+
+**26. No filters on the Places list page**
+The map has 4 filter chips. The Places list has only a text search box — no way to filter by category or accessibility level. A user browsing the list for accessible restaurants in KL has no way to narrow down.
+- **Fix:** Add the same filter chips from the map to the Places list page, and add a category dropdown.
+
+**27. "Showing 20 places" — no location context**
+The list shows 20 places but doesn't say from where (near me? nationwide?). The ordering appears random.
+- **Fix:** Show "Showing 20 places near Kuala Lumpur" or "Showing 20 most recent places" with a sort control (Nearest / Most Reviewed / Recently Updated).
+
+**28. "Add a Place" button position on mobile**
+On mobile, the "+ Add a Place" button is a full-width green button at the very top of the list — above the search bar. It dominates the page and pushes the actual content down. Most users are browsing, not adding.
+- **Fix:** Move "+ Add a Place" to a FAB (floating action button) at the bottom right, consistent with the home map view.
+
+---
+
+### Add Place Page — Issues Found
+
+**29. Map picker loads at default KL location, not user's location**
+The location picker map defaults to a fixed KL coordinate even if the user is elsewhere. A user adding a place in Penang must manually pan the map to find their location.
+- **Fix:** On page load, request geolocation and centre the map picker on the user's current position.
+
+**30. Category grid uses emoji only — no text on mobile for some**
+On 390px the category grid (Restaurant, Cafe, Shop, Mall…) is 4 columns of emoji + text. The text is small but readable. However, there's no "Bank" or "Clinic" category — venues that are very common in Malaysia for wheelchair users. 
+- **Fix:** Add "Clinic/Pharmacy" and "Bank/ATM" as categories. These are frequent destinations for OKU card holders (for medical and government transactions).
+
+**31. Form validation error for missing place name isn't inline**
+The "Add Place" button is disabled until a name is entered, with an error hint ("Enter a place name") shown below the button rather than inline next to the input field. The user has to scroll down to see why the button is disabled.
+- **Fix:** Show validation feedback inline below the name input field, not below the submit button.
+
+---
+
+### Profile Page — Issues Found
+
+**32. Profile shows reviews as raw checkmark lists with no place name**
+In "Your Reviews", each review card shows 4 green checkmarks and a notes excerpt ("Tested via Playwright E2E - fully accessible venue") and a date — but no venue name. The user can't tell which place the review is for without clicking through.
+- **Fix:** Add the venue name as the primary heading of each review card in the profile.
+
+**33. No "My Saved Places" (Favourites) section on profile**
+The app supports favouriting places, but the profile page only shows submitted reviews. There's no way to view your saved places from the profile.
+- **Fix:** Add a "Saved Places" tab or section alongside "Your Reviews" on the profile page.
+
+**34. Login form has no "Show password" toggle**
+The password field has no visibility toggle. On mobile, typing a password blind into a small field is error-prone.
+- **Fix:** Add a 👁 toggle button at the right of the password field.
+
+**35. No "Forgot password" link on the login form**
+Standard auth flow is missing this. Even if the backend doesn't support it yet, the link should exist and show "Password reset coming soon."
+
+---
+
+### Settings Page — Issues Found
+
+**36. Language toggle is a full-width button that reloads the page**
+"Switch to Bahasa Malaysia" triggers a full page reload to `/ms`. This is fine functionally but the reload is jarring — the map re-initialises from scratch.
+- **Fix:** Persist language preference to localStorage and use `next-intl`'s client-side locale switching to avoid a full reload.
+
+**37. High Contrast Mode and Large Text toggles have no preview**
+The two accessibility toggles in Settings are toggle switches with no indication of what they do. A user enabling "Large Text" can't preview the effect without committing.
+- **Fix:** Show a live preview text sample below the toggles that updates instantly as the user toggles each option.
+
+**38. Settings page is nearly empty — missed opportunity**
+Settings only has Language, High Contrast, Large Text, and About. There's no:
+- Default map location (to open on their city, not always KL)
+- Notification preferences (once push notifications are added)
+- Accessibility profile (wheelchair type, mobility aid) for personalised routing
+
+---
+
+### Cross-Cutting Issues Found
+
+**39. No loading skeletons on any page**
+Every page that fetches data shows a blank white screen while loading. The Places list, Profile, and Place Detail all have a brief flash of empty white content before data loads.
+- **Fix:** Add Tailwind-based skeleton loaders (animated grey placeholder blocks) for all data-dependent sections.
+
+**40. No error states on any page**
+If the API is down or slow, every page silently shows nothing. There's no "Something went wrong, try again" message anywhere.
+- **Fix:** Add generic error boundary components with retry buttons for all API-dependent sections.
+
+**41. Accessibility verdict badge colour relies on colour alone**
+The ✅ Accessible (green), ⚠️ Partial (amber), and ❌ Not Accessible (red) badges use colour as the sole differentiator beyond the emoji. Emoji help, but the text "Accessible" / "Partial" / "Not Accessible" is not directly adjacent to the colour in all contexts.
+- **Fix:** Ensure the text label is always co-located with the colour, and test with a colour-blindness simulator. Green/amber can be indistinguishable for deuteranopia users.
+
+**42. No offline page**
+The service worker exists but isn't registered (noted in Part 2). When offline, the app shows a browser default "no internet" error page. A proper PWA should show a branded offline page with cached places still browsable.
+
+---
+
+### Summary: Top 10 Highest-Impact UI Fixes
+
+| # | Issue | Screen | Effort |
+|---|-------|--------|--------|
+| 1 | Filter chips cut off on mobile (only 2/4 visible) | Home map | Low |
+| 2 | Selecting search result doesn't open bottom sheet | Search | Low |
+| 3 | No "Get Directions" button | Place detail | Very low |
+| 4 | No exit/cancel button on report wizard | Report wizard | Very low |
+| 5 | No loading skeletons anywhere | All pages | Low |
+| 6 | "Add a Place" button dominates Places list on mobile | Places list | Very low |
+| 7 | Distance to venue missing from bottom sheet | Bottom sheet | Low |
+| 8 | Profile reviews don't show venue name | Profile | Very low |
+| 9 | No skip-optional-steps shortcut in wizard | Report wizard | Low |
+| 10 | No inline validation feedback on Add Place form | Add Place | Very low |
+
+---
+
 ## Notes for Implementing AI Agent
 
 - The backend uses an **adapter pattern** for data sources — any new data source should implement the existing `DataSourceAdapter` interface in `backend/src/main/kotlin/com/wheelcheck/aggregation/adapters/`
