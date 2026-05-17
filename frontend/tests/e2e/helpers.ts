@@ -81,35 +81,3 @@ export async function loginAsUser(page: Page) {
     { token: data.token, user: data.user },
   );
 }
-
-
-/** Log in and inject token into the page's localStorage */
-export async function loginAsAdmin(page: Page) {
-  const res = await page.request.post(`${API_BASE}/auth/login`, {
-    data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
-  });
-  const data = await res.json();
-  await page.goto('/en', { waitUntil: 'domcontentloaded' });
-  await page.evaluate(
-    ({ token, user }) => {
-      localStorage.setItem('wheelcheck_token', token);
-      if (user) localStorage.setItem('wheelcheck_user', JSON.stringify(user));
-    },
-    { token: data.token, user: data.user },
-  );
-}
-
-export async function loginAsUser(page: Page) {
-  const res = await page.request.post(`${API_BASE}/auth/login`, {
-    data: { email: USER_EMAIL, password: USER_PASSWORD },
-  });
-  const data = await res.json();
-  await page.goto('/en', { waitUntil: 'domcontentloaded' });
-  await page.evaluate(
-    ({ token, user }) => {
-      localStorage.setItem('wheelcheck_token', token);
-      if (user) localStorage.setItem('wheelcheck_user', JSON.stringify(user));
-    },
-    { token: data.token, user: data.user },
-  );
-}
