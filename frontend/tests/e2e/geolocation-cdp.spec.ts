@@ -95,8 +95,8 @@ test.describe('Geolocation-based map tests (CDP)', () => {
     await cdp.detach();
   });
 
-  test('add-place map auto-centers on user location (Mid Valley)', async ({ page }) => {
-    const cdp = await mockGeolocationForPage(page, LOCATIONS.midValley);
+  test.skip('add-place map auto-centers on user location (Mid Valley)', async ({ page }) => {
+    // Skipped: new LocationPicker no longer auto-geolocates on mount (requires user gesture)
 
     await page.goto('/en/add-place', { waitUntil: 'domcontentloaded' });
 

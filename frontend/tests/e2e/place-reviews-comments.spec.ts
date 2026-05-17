@@ -1,18 +1,19 @@
 import { test, expect } from '@playwright/test';
+import { API_BASE } from './helpers';
 
 test.describe('Place Detail — Reviews & Comments', () => {
   let placeId: string;
 
   test.beforeAll(async ({ request }) => {
     // Get a place with reviews (use one of the seed places)
-    const res = await request.get('http://localhost:8080/api/places/search?name=KLCC');
+    const res = await request.get(`${API_BASE}/places/search?name=KLCC`);
     const places = await res.json();
     placeId = places[0]?.id;
     if (!placeId) {
       // Fallback: get any place
-      const allRes = await request.get('http://localhost:8080/api/places');
+      const allRes = await request.get(`${API_BASE}/places`);
       const allPlaces = await allRes.json();
-      placeId = allPlaces[0].id;
+      placeId = allPlaces.content?.[0]?.id ?? allPlaces[0]?.id;
     }
   });
 
