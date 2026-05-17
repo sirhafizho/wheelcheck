@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { Comment } from '@/lib/types';
 import { api } from '@/lib/api';
@@ -195,6 +196,11 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('wheelcheck_token'));
+  }, []);
 
   const getToken = () => {
     if (typeof window === 'undefined') return null;
@@ -305,18 +311,29 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
           rows={3}
           maxLength={2000}
           data-testid="comment-input"
+          disabled={!isLoggedIn}
         />
         <div className="flex justify-between items-center mt-2">
-          <span className="text-xs text-gray-400">{newComment.length}/2000</span>
-          <button
-            type="button"
-            onClick={() => void handleSubmit()}
-            disabled={!newComment.trim() || submitting}
-            className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[40px]"
-            data-testid="comment-submit"
-          >
-            {submitting ? tCommon('loading') : t('post')}
-          </button>
+          <span className="text-xs text-gray-400">{isLoggedIn ? `${newComment.length}/2000` : ''}</span>
+          {isLoggedIn ? (
+            <button
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={!newComment.trim() || submitting}
+              className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[40px]"
+              data-testid="comment-submit"
+            >
+              {submitting ? tCommon('loading') : t('post')}
+            </button>
+          ) : (
+            <Link
+              href={`/${locale}/profile`}
+              data-testid="comment-login-link"
+              className="px-4 py-2 text-sm font-medium text-emerald-700 hover:text-emerald-800 underline underline-offset-2 transition-colors"
+            >
+              {t('loginToCommentLink')}
+            </Link>
+          )}
         </div>
       </div>
 

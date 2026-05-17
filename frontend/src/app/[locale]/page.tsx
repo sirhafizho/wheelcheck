@@ -30,11 +30,11 @@ const DATA_SOURCE_SHORT_LABELS: Record<string, string> = {
   COMMUNITY: 'Community',
   SEED: 'Seed data',
 };
-const ACCESSIBILITY_FILTERS: Array<{ id: AccessibilityFeature; label: string }> = [
-  { id: 'wheelchairAccessible', label: '♿ Wheelchair Accessible' },
-  { id: 'accessibleToilet', label: '🚻 Accessible Toilet' },
-  { id: 'accessibleParking', label: '🅿️ Accessible Parking' },
-  { id: 'wideEntrance', label: '🚪 Wide Entrance' },
+const ACCESSIBILITY_FILTERS: Array<{ id: AccessibilityFeature; emoji: string }> = [
+  { id: 'wheelchairAccessible', emoji: '♿' },
+  { id: 'accessibleToilet', emoji: '🚻' },
+  { id: 'accessibleParking', emoji: '🅿️' },
+  { id: 'wideEntrance', emoji: '🚪' },
 ];
 
 type FlyToCoordinates = {
@@ -150,6 +150,7 @@ function getStoredViewport(): FlyToCoordinates | undefined {
 export default function HomePage() {
   const locale = useLocale();
   const t = useTranslations();
+  const tFilters = useTranslations('home.filters');
   const urlSearchParams = useSearchParams();
   const targetPlaceId = urlSearchParams.get('placeId');
   const targetLat = urlSearchParams.get('lat');
@@ -427,7 +428,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-full bg-white/70 shadow-lg ring-1 ring-white/60 backdrop-blur-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="relative overflow-x-auto rounded-full bg-white/70 shadow-lg ring-1 ring-white/60 backdrop-blur-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {/* Fade gradient to hint scrollability */}
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-8 rounded-r-full bg-gradient-to-l from-white/70 to-transparent" aria-hidden="true" />
           <div className="flex min-w-max gap-2 px-2 py-2">
             {ACCESSIBILITY_FILTERS.map((filter) => {
               const isActive = activeFilters.includes(filter.id);
@@ -444,7 +447,7 @@ export default function HomePage() {
                       : 'bg-gray-100/90 text-gray-700 hover:bg-gray-200/90'
                   }`}
                 >
-                  {filter.label}
+                  {filter.emoji} {tFilters(filter.id as never)}
                 </button>
               );
             })}

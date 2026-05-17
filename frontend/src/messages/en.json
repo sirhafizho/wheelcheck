@@ -25,7 +25,13 @@
     "searchPlaceholder": "Search for a place...",
     "myLocation": "My Location",
     "nearMe": "Places near me",
-    "addPlace": "Add a place"
+    "addPlace": "Add a place",
+    "filters": {
+      "wheelchairAccessible": "Wheelchair Accessible",
+      "accessibleToilet": "Accessible Toilet",
+      "accessibleParking": "Accessible Parking",
+      "wideEntrance": "Wide Entrance"
+    }
   },
   "places": {
     "title": "Places",
@@ -53,7 +59,8 @@
       "GEOAPIFY": "Geoapify",
       "COMMUNITY": "Community report",
       "SEED": "Seed data"
-    }
+    },
+    "getDirections": "Get Directions"
   },
   "report": {
     "title": "Report Accessibility",
@@ -93,7 +100,11 @@
     "back": "Back",
     "next": "Next",
     "submit": "Submit Report",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "submitNow": "Submit Now",
+    "optional": "optional",
+    "cancelReport": "Cancel report",
+    "stepOf": "Step {current} of {total}"
   },
   "nav": {
     "home": "Home",
@@ -294,7 +305,9 @@
     "empty": "No saved places yet",
     "emptySubtext": "Tap the heart icon on any place to save it here",
     "count": "{count} saved",
-    "savedOn": "Saved on"
+    "savedOn": "Saved on",
+    "savedToFavorites": "Saved to favourites",
+    "removedFromFavorites": "Removed from favourites"
   },
   "comments": {
     "title": "Discussion",
@@ -315,6 +328,7 @@
     "anonymous": "Anonymous",
     "replyPlaceholder": "Write a reply...",
     "upvote": "Upvote",
-    "downvote": "Downvote"
+    "downvote": "Downvote",
+    "loginToCommentLink": "Log in to comment"
   }
 }

@@ -136,9 +136,10 @@ export default function PlacesPage({ params }: PlacesPageProps) {
             <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
             <p className="mt-1 text-sm text-gray-500">{t('showing', { count: places.length })}</p>
           </div>
+          {/* Desktop: show inline; hidden on mobile (FAB used instead) */}
           <Link
             href={`/${locale}/add-place`}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
+            className="hidden sm:inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
           >
             <PlusIcon className="w-5 h-5" aria-hidden="true" />
             <span>{tAddPlace('title')}</span>
@@ -186,6 +187,15 @@ export default function PlacesPage({ params }: PlacesPageProps) {
           </>
         )}
       </div>
+      {/* Mobile FAB — only shown on small screens */}
+      <Link
+        href={`/${locale}/add-place`}
+        aria-label={tAddPlace('title')}
+        data-testid="add-place-fab"
+        className="sm:hidden fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+      >
+        <PlusIcon className="h-7 w-7" aria-hidden="true" />
+      </Link>
     </div>
   );
 }

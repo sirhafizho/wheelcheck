@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Button } from '../ui/Button';
 import { QuestionStep } from './QuestionStep';
 import { PhotoUpload } from './PhotoUpload';
@@ -16,6 +17,9 @@ interface ReportWizardProps {
 
 type StepId = 'entrance' | 'toilet' | 'parking' | 'internalNav' | 'photos' | 'notes';
 
+const REQUIRED_STEPS: StepId[] = ['entrance', 'toilet', 'parking', 'internalNav'];
+const OPTIONAL_STEPS: StepId[] = ['photos', 'notes'];
+
 export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportWizardProps) {
   const t = useTranslations('report');
   const [currentStep, setCurrentStep] = useState<StepId>('entrance');
@@ -24,8 +28,13 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
     placeId,
   });
 
-  const steps: StepId[] = ['entrance', 'toilet', 'parking', 'internalNav', 'photos', 'notes'];
+  const steps: StepId[] = [...REQUIRED_STEPS, ...OPTIONAL_STEPS];
   const currentStepIndex = steps.indexOf(currentStep);
+  const isOptionalStep = OPTIONAL_STEPS.includes(currentStep);
+  const requiredStepsComplete =
+    !!formData.entrance && !!formData.toilet && !!formData.parking && !!formData.internalNav;
+  const justFinishedRequired =
+    currentStep === 'internalNav' && !!formData.internalNav;
 
   const handleAnswer = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -67,18 +76,36 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
                      currentStep === 'photos' || 
                      currentStep === 'notes';
 
+  const stepLabel = isOptionalStep
+    ? `${t('stepOf', { current: currentStepIndex + 1, total: steps.length })} (${t('optional')})`
+    : t('stepOf', { current: currentStepIndex + 1, total: steps.length });
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h2>
-        <p className="text-gray-600">{placeName}</p>
+      {/* Header with cancel button */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
+          <p className="text-gray-600 mt-1">{placeName}</p>
+        </div>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label={t('cancelReport')}
+            data-testid="wizard-cancel"
+            className="rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors -mr-1 -mt-1"
+          >
+            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       {/* Progress indicator */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">
-            Step {currentStepIndex + 1} of {steps.length}
+            {stepLabel}
           </span>
           <span className="text-sm text-gray-500">
             {Math.round(((currentStepIndex + 1) / steps.length) * 100)}%
@@ -178,31 +205,56 @@ export function ReportWizard({ placeId, placeName, onSubmit, onCancel }: ReportW
       </div>
 
       {/* Navigation buttons */}
-      <div className="flex gap-3">
-        <Button
-          variant="outline"
-          onClick={handleBack}
-          className="flex-1"
-        >
-          {t('back')}
-        </Button>
-        {isLastStep ? (
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-3">
           <Button
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={submitting}
+            variant="outline"
+            onClick={handleBack}
             className="flex-1"
           >
-            {submitting ? t('submitting') : t('submit')}
+            {t('back')}
           </Button>
-        ) : (
+          {isLastStep ? (
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="flex-1"
+            >
+              {submitting ? t('submitting') : t('submit')}
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              onClick={handleNext}
+              disabled={!canProceed}
+              className="flex-1"
+            >
+              {t('next')}
+            </Button>
+          )}
+        </div>
+        {/* "Submit Now" shortcut — shown after all required steps are answered and we're on the internalNav step */}
+        {justFinishedRequired && !isLastStep && (
           <Button
-            variant="primary"
-            onClick={handleNext}
-            disabled={!canProceed}
-            className="flex-1"
+            variant="outline"
+            onClick={() => void handleSubmit()}
+            disabled={submitting}
+            className="w-full text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+            data-testid="submit-now-btn"
           >
-            {t('next')}
+            {submitting ? t('submitting') : t('submitNow')}
+          </Button>
+        )}
+        {requiredStepsComplete && isOptionalStep && (
+          <Button
+            variant="outline"
+            onClick={() => void handleSubmit()}
+            disabled={submitting}
+            className="w-full text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+            data-testid="submit-now-btn"
+          >
+            {submitting ? t('submitting') : t('submitNow')}
           </Button>
         )}
       </div>

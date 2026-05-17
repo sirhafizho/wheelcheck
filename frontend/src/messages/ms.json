@@ -25,7 +25,13 @@
     "searchPlaceholder": "Cari tempat...",
     "myLocation": "Lokasi Saya",
     "nearMe": "Tempat berhampiran",
-    "addPlace": "Tambah tempat"
+    "addPlace": "Tambah tempat",
+    "filters": {
+      "wheelchairAccessible": "Boleh Diakses Kerusi Roda",
+      "accessibleToilet": "Tandas Boleh Diakses",
+      "accessibleParking": "Parkir OKU",
+      "wideEntrance": "Pintu Masuk Lebar"
+    }
   },
   "places": {
     "title": "Tempat",
@@ -53,7 +59,8 @@
       "GEOAPIFY": "Geoapify",
       "COMMUNITY": "Laporan komuniti",
       "SEED": "Data awal"
-    }
+    },
+    "getDirections": "Dapatkan Arah"
   },
   "report": {
     "title": "Lapor Kebolehcapaian",
@@ -93,7 +100,11 @@
     "back": "Kembali",
     "next": "Seterusnya",
     "submit": "Hantar Laporan",
-    "submitting": "Menghantar..."
+    "submitting": "Menghantar...",
+    "submitNow": "Hantar Sekarang",
+    "optional": "pilihan",
+    "cancelReport": "Batal laporan",
+    "stepOf": "Langkah {current} daripada {total}"
   },
   "nav": {
     "home": "Utama",
@@ -294,7 +305,9 @@
     "empty": "Tiada tempat tersimpan lagi",
     "emptySubtext": "Tekan ikon hati pada mana-mana tempat untuk simpan di sini",
     "count": "{count} tersimpan",
-    "savedOn": "Disimpan pada"
+    "savedOn": "Disimpan pada",
+    "savedToFavorites": "Disimpan ke kegemaran",
+    "removedFromFavorites": "Dibuang dari kegemaran"
   },
   "comments": {
     "title": "Perbincangan",
@@ -315,6 +328,7 @@
     "anonymous": "Tanpa Nama",
     "replyPlaceholder": "Tulis balasan...",
     "upvote": "Undi naik",
-    "downvote": "Undi turun"
+    "downvote": "Undi turun",
+    "loginToCommentLink": "Log masuk untuk komen"
   }
 }

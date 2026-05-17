@@ -1,11 +1,13 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { MapPinIcon, InformationCircleIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, InformationCircleIcon, HeartIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import type { Place } from '@/lib/types';
 import { AccessBadge } from './AccessBadge';
 import { Button } from '../ui/Button';
+import { Toast } from '../ui/Toast';
 import { useFavorite } from '@/hooks/useFavorite';
 
 const DATA_SOURCE_TRANSLATION_KEYS: Record<string, string> = {
@@ -56,6 +58,18 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
   const tCategories = useTranslations('addPlace.categories');
   const tFav = useTranslations('favorites');
   const { favorited, toggle, loading: favLoading } = useFavorite(place.id);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const handleFavoriteToggle = useCallback(async () => {
+    const wasFavorited = favorited;
+    await toggle();
+    setToast({
+      message: wasFavorited ? tFav('removedFromFavorites') : tFav('savedToFavorites'),
+      type: 'success',
+    });
+  }, [favorited, toggle, tFav]);
+
+  const directionsUrl = `https://maps.google.com/maps?q=${place.latitude},${place.longitude}`;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -92,6 +106,13 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="p-6">
         <div className="flex items-start justify-between gap-4 mb-4">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -100,7 +121,7 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              onClick={toggle}
+              onClick={() => void handleFavoriteToggle()}
               disabled={favLoading}
               aria-label={favorited ? tFav('remove') : tFav('save')}
               data-testid="favorite-toggle"
@@ -181,18 +202,30 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
           </dl>
         </div>
 
-        <div className={`grid gap-3 ${onShowOnMapClick ? 'sm:grid-cols-2' : ''}`}>
-          {onShowOnMapClick && (
-            <Button
-              variant="outline"
-              fullWidth
-              onClick={onShowOnMapClick}
-              className="min-h-[48px] gap-2"
+        <div className="grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <a
+              href={directionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="get-directions-btn"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
             >
-              <MapPinIcon className="h-5 w-5" aria-hidden="true" />
-              {tPlaces('showOnMap')}
-            </Button>
-          )}
+              <ArrowTopRightOnSquareIcon className="h-5 w-5" aria-hidden="true" />
+              {tPlaces('getDirections')}
+            </a>
+            {onShowOnMapClick && (
+              <Button
+                variant="outline"
+                fullWidth
+                onClick={onShowOnMapClick}
+                className="min-h-[48px] gap-2"
+              >
+                <MapPinIcon className="h-5 w-5" aria-hidden="true" />
+                {tPlaces('showOnMap')}
+              </Button>
+            )}
+          </div>
           <Button
             variant="primary"
             fullWidth
