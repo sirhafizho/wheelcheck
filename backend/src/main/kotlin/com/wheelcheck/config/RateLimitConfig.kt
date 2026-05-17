@@ -50,9 +50,9 @@ class RateLimitConfig : OncePerRequestFilter() {
             path == "/api/places/nearby" || path.startsWith("/api/places/search") ->
                 heavyBuckets.getOrCreate(ip) { newBucket(30, Duration.ofMinutes(1)) } to "heavy"
 
-            // Write endpoints — 10 per minute
+            // Write endpoints — 20 per minute
             method == "POST" || method == "PUT" || method == "DELETE" ->
-                writeBuckets.getOrCreate(ip) { newBucket(10, Duration.ofMinutes(1)) } to "write"
+                writeBuckets.getOrCreate(ip) { newBucket(20, Duration.ofMinutes(1)) } to "write"
 
             // General reads — 120 per minute
             else ->
