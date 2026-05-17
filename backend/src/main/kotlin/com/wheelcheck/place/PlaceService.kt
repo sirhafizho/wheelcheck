@@ -4,6 +4,7 @@ import com.wheelcheck.admin.UpdatePlaceRequest
 import com.wheelcheck.aggregation.LiveEnrichmentService
 import com.wheelcheck.aggregation.MalaysiaGeoUtils
 import com.wheelcheck.common.AccessLevel
+import com.wheelcheck.common.Category
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
@@ -89,8 +90,12 @@ class PlaceService(
         pageable: Pageable
     ): Page<PlaceDto> {
         val q = query?.takeIf { it.isNotBlank() }
-        val cat = category?.takeIf { it.isNotBlank() }
-        val access = accessLevel?.takeIf { it.isNotBlank() }
+        val cat = category?.takeIf { it.isNotBlank() }?.let {
+            try { Category.valueOf(it.uppercase()) } catch (_: Exception) { null }
+        }
+        val access = accessLevel?.takeIf { it.isNotBlank() }?.let {
+            try { AccessLevel.valueOf(it.uppercase()) } catch (_: Exception) { null }
+        }
 
         val result: Page<Place> = when {
             q != null && cat != null -> placeRepository.searchByTextAndCategory(q, cat, pageable)

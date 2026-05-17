@@ -1,5 +1,7 @@
 package com.wheelcheck.place
 
+import com.wheelcheck.common.AccessLevel
+import com.wheelcheck.common.Category
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -69,20 +71,20 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
 
     @Query("SELECT p FROM Place p WHERE p.category = :category")
     fun findByCategoryPaged(
-        @Param("category") category: String,
+        @Param("category") category: Category,
         pageable: Pageable
     ): Page<Place>
 
     @Query("SELECT p FROM Place p WHERE p.accessibilityLevel = :accessLevel")
     fun findByAccessLevelPaged(
-        @Param("accessLevel") accessLevel: String,
+        @Param("accessLevel") accessLevel: AccessLevel,
         pageable: Pageable
     ): Page<Place>
 
     @Query("SELECT p FROM Place p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.address) LIKE LOWER(CONCAT('%', :search, '%'))) AND p.category = :category")
     fun searchByTextAndCategory(
         @Param("search") search: String,
-        @Param("category") category: String,
+        @Param("category") category: Category,
         pageable: Pageable
     ): Page<Place>
 }
