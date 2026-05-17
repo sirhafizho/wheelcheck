@@ -4,6 +4,7 @@ enum class Category {
     RESTAURANT,
     CAFE,
     MALL,
+    SHOP,
     HOSPITAL,
     MOSQUE,
     GOVERNMENT,

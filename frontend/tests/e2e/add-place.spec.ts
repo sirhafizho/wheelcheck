@@ -105,6 +105,7 @@ test.describe('Add Place — Authenticated Form', () => {
     const expectedCategories = [
       '🍽️', // RESTAURANT
       '☕',  // CAFE
+      '🏪', // SHOP
       '🛍️', // MALL
       '🏥', // HOSPITAL
       '🕌', // MOSQUE

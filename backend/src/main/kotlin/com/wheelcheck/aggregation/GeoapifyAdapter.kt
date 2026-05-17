@@ -156,6 +156,7 @@ class GeoapifyAdapter(
             "hospital" in joined || "clinic" in joined || "healthcare" in joined -> Category.HOSPITAL
             "worship" in joined || "religion" in joined -> Category.MOSQUE
             "shopping_mall" in joined || "mall" in joined -> Category.MALL
+            "commercial" in joined || "shop" in joined || "supermarket" in joined -> Category.SHOP
             "hotel" in joined || "accommodation" in joined -> Category.HOTEL
             "park" in joined || "leisure" in joined -> Category.PARK
             "government" in joined || "office" in joined -> Category.GOVERNMENT

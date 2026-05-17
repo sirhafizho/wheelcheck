@@ -143,6 +143,7 @@
     },
     "categories": {
       "MALL": "Mall",
+      "SHOP": "Shop",
       "RESTAURANT": "Restaurant",
       "HOSPITAL": "Hospital",
       "MOSQUE": "Mosque",

@@ -143,6 +143,7 @@
     },
     "categories": {
       "MALL": "Pusat Beli-belah",
+      "SHOP": "Kedai",
       "RESTAURANT": "Restoran",
       "HOSPITAL": "Hospital",
       "MOSQUE": "Masjid",

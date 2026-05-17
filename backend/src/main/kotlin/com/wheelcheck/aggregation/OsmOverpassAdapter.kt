@@ -56,16 +56,16 @@ class OsmOverpassAdapter(
               node["ramp:wheelchair"="yes"]($b);
               node["highway"="elevator"]($b);
               node["lift"="yes"]($b);
-              node["amenity"~"restaurant|cafe|hospital|clinic|pharmacy|bank|place_of_worship|library|cinema|theatre"]["name"]($b);
-              node["shop"~"supermarket|mall|convenience|department_store"]["name"]($b);
+              node["amenity"~"restaurant|cafe|fast_food|ice_cream|bar|hospital|clinic|pharmacy|bank|place_of_worship|library|cinema|theatre|school|college|university"]["name"]($b);
+              node["shop"]["name"]($b);
               node["tourism"~"hotel|museum|attraction"]["name"]($b);
               node["leisure"~"park|sports_centre|swimming_pool"]["name"]($b);
-              node["building"~"hospital|public|government"]["name"]($b);
+              node["building"~"hospital|public|government|commercial|retail"]["name"]($b);
               node["railway"~"station|halt"]["name"]($b);
               node["public_transport"="station"]["name"]($b);
-              way["amenity"~"restaurant|cafe|hospital|clinic|pharmacy|bank|place_of_worship|library|cinema|theatre"]["name"]($b);
-              way["shop"~"supermarket|mall|department_store"]["name"]($b);
-              way["building"~"hospital|public|government"]["name"]($b);
+              way["amenity"~"restaurant|cafe|fast_food|ice_cream|bar|hospital|clinic|pharmacy|bank|place_of_worship|library|cinema|theatre|school|college|university"]["name"]($b);
+              way["shop"]["name"]($b);
+              way["building"~"hospital|public|government|commercial|retail"]["name"]($b);
               way["railway"~"station|halt"]["name"]($b);
             );
             out center tags;
@@ -130,19 +130,24 @@ class OsmOverpassAdapter(
         val publicTransport = tags["public_transport"]
 
         return when {
-            amenity == "restaurant" || amenity == "cafe" -> Category.RESTAURANT
+            amenity == "restaurant" -> Category.RESTAURANT
+            amenity == "cafe" || amenity == "ice_cream" -> Category.CAFE
+            amenity == "fast_food" || amenity == "bar" -> Category.RESTAURANT
             amenity == "hospital" || amenity == "clinic" -> Category.HOSPITAL
             amenity == "place_of_worship" -> Category.MOSQUE
-            amenity == "pharmacy" || amenity == "bank" -> Category.OTHER
+            amenity == "pharmacy" || amenity == "bank" -> Category.SHOP
             amenity == "library" || amenity == "cinema" || amenity == "theatre" -> Category.OTHER
+            amenity in listOf("school", "college", "university") -> Category.EDUCATION
             shop == "mall" || shop == "department_store" -> Category.MALL
-            shop == "supermarket" || shop == "convenience" -> Category.OTHER
+            shop == "supermarket" || shop == "convenience" -> Category.SHOP
+            shop != null -> Category.SHOP
             tourism == "hotel" -> Category.HOTEL
             tourism == "museum" || tourism == "attraction" -> Category.OTHER
             leisure == "park" -> Category.PARK
             leisure == "sports_centre" || leisure == "swimming_pool" -> Category.OTHER
             building == "government" || building == "public" -> Category.GOVERNMENT
             building == "hospital" -> Category.HOSPITAL
+            building in listOf("commercial", "retail") -> Category.SHOP
             railway == "station" || railway == "halt" -> Category.TRANSPORT
             publicTransport == "station" -> Category.TRANSPORT
             else -> Category.OTHER

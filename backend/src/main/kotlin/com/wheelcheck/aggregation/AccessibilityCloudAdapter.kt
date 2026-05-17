@@ -103,7 +103,8 @@ class AccessibilityCloudAdapter(
             "restaurant" in lower || "cafe" in lower || "food" in lower -> Category.RESTAURANT
             "hospital" in lower || "clinic" in lower || "health" in lower -> Category.HOSPITAL
             "mosque" in lower || "worship" in lower || "church" in lower -> Category.MOSQUE
-            "mall" in lower || "shop" in lower || "store" in lower -> Category.MALL
+            "mall" in lower -> Category.MALL
+            "shop" in lower || "store" in lower || "supermarket" in lower -> Category.SHOP
             "hotel" in lower || "accommodation" in lower -> Category.HOTEL
             "park" in lower || "garden" in lower -> Category.PARK
             "government" in lower || "office" in lower -> Category.GOVERNMENT

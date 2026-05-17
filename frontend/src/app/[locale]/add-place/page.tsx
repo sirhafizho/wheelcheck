@@ -14,6 +14,7 @@ type Params = Promise<{ locale: string }>;
 const CATEGORIES = [
   { value: 'RESTAURANT', emoji: '🍽️' },
   { value: 'CAFE', emoji: '☕' },
+  { value: 'SHOP', emoji: '🏪' },
   { value: 'MALL', emoji: '🛍️' },
   { value: 'HOSPITAL', emoji: '🏥' },
   { value: 'MOSQUE', emoji: '🕌' },

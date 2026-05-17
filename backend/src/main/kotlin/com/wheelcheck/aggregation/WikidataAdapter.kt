@@ -185,6 +185,7 @@ class WikidataAdapter(
             "hospital" in searchableText || "clinic" in searchableText || "medical center" in searchableText -> Category.HOSPITAL
             "mosque" in searchableText || "masjid" in searchableText || "surau" in searchableText || "place of worship" in searchableText -> Category.MOSQUE
             "mall" in searchableText || "shopping centre" in searchableText || "shopping center" in searchableText -> Category.MALL
+            "shop" in searchableText || "store" in searchableText || "market" in searchableText || "kedai" in searchableText -> Category.SHOP
             "hotel" in searchableText || "resort" in searchableText -> Category.HOTEL
             "park" in searchableText || "garden" in searchableText -> Category.PARK
             "government" in searchableText || "ministry" in searchableText || "city hall" in searchableText || "court" in searchableText -> Category.GOVERNMENT
