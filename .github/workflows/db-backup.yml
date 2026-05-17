@@ -29,8 +29,13 @@ jobs:
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           BACKUP_FILE="wheelcheck_backup_${TIMESTAMP}.sql"
 
-          # Dump schema + data (exclude Supabase internal schemas)
-          pg_dump "$DATABASE_URL" \
+          # Use PG17 client explicitly
+          PG_DUMP=$(which pg_dump || echo "/usr/lib/postgresql/17/bin/pg_dump")
+          if [ -f /usr/lib/postgresql/17/bin/pg_dump ]; then
+            PG_DUMP=/usr/lib/postgresql/17/bin/pg_dump
+          fi
+
+          "$PG_DUMP" "$DATABASE_URL" \
             --no-owner \
             --no-privileges \
             --exclude-schema='auth' \
