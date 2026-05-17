@@ -39,33 +39,37 @@ class LiveEnrichmentService(
         val places: List<ExternalPlace>
     )
 
+    // Throttle: only allow one shadow-enrich per grid cell per 10 minutes
+    private val enrichedRecently = ConcurrentHashMap<String, Long>()
+    private val enrichCooldownMs = TimeUnit.MINUTES.toMillis(10)
+
     /**
-     * Fetch live places from OSM for the given area.
-     * Results are cached per grid cell to avoid repeated API calls.
+     * Trigger background shadow enrichment without blocking the caller.
+     * Throttled per grid cell to avoid hammering OSM on every map move.
      */
-    fun fetchLivePlaces(lat: Double, lng: Double, radiusMeters: Int): List<PlaceDto> {
+    @Async
+    fun triggerShadowEnrichAsync(lat: Double, lng: Double, radiusMeters: Int) {
         val bbox = radiusToBbox(lat, lng, radiusMeters)
         val cacheKey = bboxToGridKey(bbox)
 
-        // Check cache
-        val cached = cache[cacheKey]
-        if (cached != null && (System.currentTimeMillis() - cached.timestamp) < cacheTtlMs) {
-            logger.debug("Live enrichment cache hit for grid $cacheKey (${cached.places.size} places)")
-            return cached.places.map { it.toDto() }
+        val lastEnriched = enrichedRecently[cacheKey]
+        if (lastEnriched != null && (System.currentTimeMillis() - lastEnriched) < enrichCooldownMs) {
+            return // Already enriched recently, skip
         }
+        enrichedRecently[cacheKey] = System.currentTimeMillis()
 
-        return try {
-            val externalPlaces = osmAdapter.fetchPlaces(bbox)
-            cache[cacheKey] = CachedResult(System.currentTimeMillis(), externalPlaces)
-            logger.info("Live enrichment: fetched ${externalPlaces.size} places from OSM for grid $cacheKey")
-
-            // Shadow-save new discoveries asynchronously
+        try {
+            val cached = cache[cacheKey]
+            val externalPlaces = if (cached != null && (System.currentTimeMillis() - cached.timestamp) < cacheTtlMs) {
+                cached.places
+            } else {
+                val fetched = osmAdapter.fetchPlaces(bbox)
+                cache[cacheKey] = CachedResult(System.currentTimeMillis(), fetched)
+                fetched
+            }
             shadowSaveAsync(externalPlaces)
-
-            externalPlaces.map { it.toDto() }
         } catch (e: Exception) {
-            logger.warn("Live enrichment failed: ${e.message}")
-            emptyList()
+            logger.debug("Background enrichment skipped for $cacheKey: ${e.message}")
         }
     }
 

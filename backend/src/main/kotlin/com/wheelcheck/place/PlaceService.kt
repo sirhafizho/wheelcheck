@@ -64,22 +64,16 @@ class PlaceService(
         }
         val dbDtos = dbPlaces.map { it.toDto() }
 
-        // Live enrichment: merge OSM results when requested
-        if (request.enrichLive && liveEnrichmentService != null) {
-            val livePlaces = liveEnrichmentService.fetchLivePlaces(
-                request.latitude,
-                request.longitude,
-                request.radius
-            )
-            return liveEnrichmentService.mergeAndDedupe(dbDtos, livePlaces)
-        }
+        // Fire-and-forget background shadow enrichment (never blocks the response)
+        // This seeds new OSM places into DB for future requests
+        liveEnrichmentService?.triggerShadowEnrichAsync(request.latitude, request.longitude, request.radius)
 
         return dbDtos
     }
 
     @Transactional(readOnly = true)
     fun searchByName(name: String): List<PlaceDto> {
-        return placeRepository.findByNameContainingIgnoreCaseLimited(name).map { it.toDto() }
+        return placeRepository.findByNameContainingIgnoreCaseLimited(expandAbbreviations(name)).map { it.toDto() }
     }
 
     @Transactional(readOnly = true)
@@ -90,7 +84,7 @@ class PlaceService(
         accessLevel: String?,
         pageable: Pageable
     ): Page<PlaceDto> {
-        val q = query?.takeIf { it.isNotBlank() }
+        val q = query?.takeIf { it.isNotBlank() }?.let { expandAbbreviations(it) }
         val cat = category?.takeIf { it.isNotBlank() }?.let {
             try { Category.valueOf(it.uppercase()) } catch (_: Exception) { null }
         }
@@ -110,6 +104,45 @@ class PlaceService(
         }
 
         return result.map(java.util.function.Function { place: Place -> place.toDto() })
+    }
+
+    /**
+     * Expand Malaysian city/state abbreviations so searches like "KL" or "KB"
+     * match "Kuala Lumpur" or "Kota Bharu".
+     */
+    private fun expandAbbreviations(input: String): String {
+        val ABBREVIATIONS = mapOf(
+            "\\bKL\\b" to "Kuala Lumpur",
+            "\\bKB\\b" to "Kota Bharu",
+            "\\bKK\\b" to "Kota Kinabalu",
+            "\\bJB\\b" to "Johor Bahru",
+            "\\bPG\\b" to "Penang",
+            "\\bPNG\\b" to "Penang",
+            "\\bPenang\\b" to "Penang",
+            "\\bIPOH\\b" to "Ipoh",
+            "\\bMKK\\b" to "Kota Bharu",
+            "\\bKT\\b" to "Kuala Terengganu",
+            "\\bALOR SETAR\\b" to "Alor Setar",
+            "\\bAS\\b" to "Alor Setar",
+            "\\bSBH\\b" to "Sabah",
+            "\\bSRWK\\b" to "Sarawak",
+            "\\bKCHI\\b" to "Kuching",
+            "\\bMY\\b" to "Malaysia",
+            "\\bPJ\\b" to "Petaling Jaya",
+            "\\bSA\\b" to "Shah Alam",
+            "\\bSUBJ\\b" to "Subang Jaya",
+            "\\bKLIA\\b" to "KLIA",
+            "\\bMV\\b" to "Mid Valley",
+            "\\bPVMLL\\b" to "Pavilion",
+            "\\bPAV\\b" to "Pavilion",
+            "\\bNUEPD\\b" to "Nu Sentral"
+        )
+
+        var result = input.trim()
+        for ((pattern, expansion) in ABBREVIATIONS) {
+            result = result.replace(Regex(pattern, RegexOption.IGNORE_CASE), expansion)
+        }
+        return result
     }
 
     @Transactional(readOnly = true)
