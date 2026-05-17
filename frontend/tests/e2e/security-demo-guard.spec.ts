@@ -48,7 +48,7 @@ test.describe.serial('Security & Demo Guard', () => {
 
   test('demo admin cannot delete users', async ({ request }) => {
     await delay(500);
-    const usersRes = await request.get(`${API_BASE}/admin/users`, {
+    const usersRes = await request.get(`${API_BASE}/admin/users?size=200`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
     expect(usersRes.ok()).toBe(true);
@@ -66,7 +66,7 @@ test.describe.serial('Security & Demo Guard', () => {
 
   test('demo admin cannot change user roles', async ({ request }) => {
     await delay(500);
-    const usersRes = await request.get(`${API_BASE}/admin/users`, {
+    const usersRes = await request.get(`${API_BASE}/admin/users?size=200`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
     const users = await usersRes.json();
