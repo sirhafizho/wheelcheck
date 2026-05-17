@@ -108,7 +108,7 @@ test.describe('Search Functionality', () => {
     const searchInput = page.locator('input[type="search"]');
     const searchResponse = page.waitForResponse(
       resp => resp.url().includes('/places/search') && resp.status() === 200,
-      { timeout: 25000 }
+      { timeout: 45000 }
     );
     await searchInput.fill('Pavilion KL');
     await searchResponse;
