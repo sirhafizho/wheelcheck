@@ -26,6 +26,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className="h-full overflow-hidden">
       <head>
+        {/* Anti-FOUC: apply dark/contrast/large-text before first paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement;var dm=localStorage.getItem('wheelcheck_dark_mode');var hc=localStorage.getItem('wheelcheck_high_contrast');var lt=localStorage.getItem('wheelcheck_large_text');if(dm==='true')d.classList.add('dark');if(hc==='true')d.classList.add('high-contrast');if(lt==='true')d.classList.add('large-text');}catch(e){}})();`,
+          }}
+        />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />

@@ -5,6 +5,13 @@
   --foreground: #171717;
 }
 
+/* Dark mode CSS variables */
+html.dark {
+  --background: #111827;
+  --foreground: #f9fafb;
+  color-scheme: dark;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -17,7 +24,356 @@ body {
   line-height: 1.5;
 }
 
-/* Accessibility improvements */
+/* ── Dark Mode ────────────────────────────────────────────────────────────── */
+
+/* Body & Layout */
+html.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+html.dark .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+html.dark .bg-white {
+  background-color: #1f2937 !important;
+}
+
+html.dark .bg-gray-100 {
+  background-color: #374151 !important;
+}
+
+html.dark .bg-gray-200 {
+  background-color: #4b5563 !important;
+}
+
+/* Backdrop / translucent surfaces */
+html.dark .bg-white\/95 {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+}
+
+html.dark .bg-white\/90 {
+  background-color: rgba(31, 41, 55, 0.90) !important;
+}
+
+html.dark .bg-white\/70 {
+  background-color: rgba(31, 41, 55, 0.70) !important;
+}
+
+html.dark .bg-white\/85 {
+  background-color: rgba(31, 41, 55, 0.85) !important;
+}
+
+/* Text */
+html.dark .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+html.dark .text-gray-800 {
+  color: #f3f4f6 !important;
+}
+
+html.dark .text-gray-700 {
+  color: #e5e7eb !important;
+}
+
+html.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+html.dark .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+html.dark .text-gray-400 {
+  color: #6b7280 !important;
+}
+
+html.dark .text-gray-300 {
+  color: #4b5563 !important;
+}
+
+html.dark .text-black {
+  color: #f9fafb !important;
+}
+
+/* Borders */
+html.dark .border-gray-100 {
+  border-color: #374151 !important;
+}
+
+html.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+html.dark .border-gray-200\/50 {
+  border-color: rgba(55, 65, 81, 0.5) !important;
+}
+
+html.dark .border-gray-300 {
+  border-color: #4b5563 !important;
+}
+
+html.dark .divide-gray-100 > :not(:last-child) {
+  border-color: #374151 !important;
+}
+
+html.dark .divide-gray-200 > :not(:last-child) {
+  border-color: #374151 !important;
+}
+
+/* Shadows — lighten them so cards still have depth */
+html.dark .shadow,
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl {
+  --tw-shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Status: red */
+html.dark .bg-red-50 {
+  background-color: rgba(153, 27, 27, 0.2) !important;
+}
+
+html.dark .border-red-200 {
+  border-color: #7f1d1d !important;
+}
+
+html.dark .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+html.dark .text-red-500 {
+  color: #f87171 !important;
+}
+
+html.dark .text-red-400 {
+  color: #f87171 !important;
+}
+
+/* Status: blue */
+html.dark .bg-blue-50 {
+  background-color: rgba(30, 58, 138, 0.2) !important;
+}
+
+html.dark .border-blue-200 {
+  border-color: #1e3a8a !important;
+}
+
+html.dark .text-blue-700 {
+  color: #93c5fd !important;
+}
+
+html.dark .text-blue-600 {
+  color: #93c5fd !important;
+}
+
+/* Status: yellow */
+html.dark .bg-yellow-50 {
+  background-color: rgba(120, 53, 15, 0.2) !important;
+}
+
+html.dark .border-yellow-200 {
+  border-color: #78350f !important;
+}
+
+html.dark .text-yellow-700 {
+  color: #fde68a !important;
+}
+
+html.dark .text-yellow-600 {
+  color: #fde68a !important;
+}
+
+/* Emerald — brand colours stay bright, just backgrounds go dark */
+html.dark .bg-emerald-50 {
+  background-color: rgba(6, 78, 59, 0.3) !important;
+}
+
+html.dark .bg-emerald-100 {
+  background-color: rgba(6, 78, 59, 0.4) !important;
+}
+
+html.dark .text-emerald-700 {
+  color: #6ee7b7 !important;
+}
+
+html.dark .text-emerald-800 {
+  color: #a7f3d0 !important;
+}
+
+html.dark .border-emerald-200 {
+  border-color: #065f46 !important;
+}
+
+/* Form controls */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: #059669 !important;
+}
+
+html.dark .bg-gray-200.peer-checked\:bg-emerald-600 {
+  background-color: #374151 !important;
+}
+
+/* Hover states for ghost/outline buttons */
+html.dark .hover\:bg-gray-100:hover {
+  background-color: #374151 !important;
+}
+
+html.dark .hover\:bg-gray-50:hover {
+  background-color: #1f2937 !important;
+}
+
+/* Table */
+html.dark table {
+  color: #f9fafb;
+}
+
+html.dark thead {
+  background-color: #374151 !important;
+}
+
+html.dark thead th {
+  color: #e5e7eb !important;
+  border-color: #4b5563 !important;
+}
+
+html.dark tbody tr {
+  border-color: #374151 !important;
+}
+
+html.dark tbody tr:hover {
+  background-color: #374151 !important;
+}
+
+html.dark td {
+  color: #e5e7eb !important;
+  border-color: #374151 !important;
+}
+
+/* Map overlay panels */
+html.dark .bg-gray-900\/80 {
+  background-color: rgba(17, 24, 39, 0.85) !important;
+}
+
+/* Leaflet controls dark */
+html.dark .leaflet-control-zoom a {
+  background: rgba(31, 41, 55, 0.95) !important;
+  color: #f9fafb !important;
+  border-color: rgba(75, 85, 99, 0.5) !important;
+}
+
+html.dark .leaflet-control-zoom a:hover {
+  background: rgba(55, 65, 81, 1) !important;
+}
+
+html.dark .leaflet-control-zoom a.leaflet-disabled {
+  background: rgba(31, 41, 55, 0.75) !important;
+  color: #6b7280 !important;
+}
+
+html.dark .leaflet-popup-content-wrapper {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+html.dark .leaflet-popup-tip {
+  background: #1f2937 !important;
+}
+
+html.dark .leaflet-control-attribution {
+  background: rgba(31, 41, 55, 0.7) !important;
+  color: #9ca3af !important;
+}
+
+html.dark .leaflet-tile-pane {
+  filter: brightness(0.7) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+/* Ring/focus offset in dark */
+html.dark .focus\:ring-offset-2:focus {
+  --tw-ring-offset-color: #1f2937;
+}
+
+/* Background for the bg-emerald-50/90 used in map sidebars */
+html.dark .bg-emerald-50\/90 {
+  background-color: rgba(6, 78, 59, 0.7) !important;
+}
+
+/* Amber — live data indicator */
+html.dark .bg-amber-50\/90 {
+  background-color: rgba(120, 53, 15, 0.4) !important;
+}
+
+html.dark .text-amber-700 {
+  color: #fcd34d !important;
+}
+
+html.dark .ring-amber-200\/60 {
+  --tw-ring-color: rgba(120, 53, 15, 0.4) !important;
+}
+
+/* Transparent gray variants used in map category filters */
+html.dark .bg-gray-100\/90 {
+  background-color: rgba(55, 65, 81, 0.9) !important;
+}
+
+html.dark .bg-gray-200\/90 {
+  background-color: rgba(75, 85, 99, 0.9) !important;
+}
+
+/* ring-black/5 → barely visible ring in light mode, same in dark */
+html.dark .ring-black\/5 {
+  --tw-ring-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+html.dark .ring-white\/60 {
+  --tw-ring-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Blue pill badge on map */
+html.dark .bg-blue-50 {
+  background-color: rgba(30, 58, 138, 0.2) !important;
+}
+
+/* Scrollbar in dark mode */
+html.dark ::-webkit-scrollbar {
+  background-color: #1f2937;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+  border-radius: 4px;
+}
+
+/* Profile & reviews page */
+html.dark .bg-emerald-600 {
+  background-color: #059669 !important;
+}
+
+/* Admin page action buttons bg */
+html.dark .bg-red-600 {
+  background-color: #dc2626 !important;
+}
+
+/* ── End Dark Mode ────────────────────────────────────────────────────────── */
 
 /* Ensure focus is always visible for keyboard navigation */
 *:focus-visible {

@@ -11,6 +11,7 @@ test.describe('Settings Page', () => {
     await expect(page.getByText(/current language/i)).toBeVisible();
 
     // Accessibility section
+    await expect(page.getByText(/dark mode/i)).toBeVisible();
     await expect(page.getByText(/high contrast mode/i)).toBeVisible();
     await expect(page.getByText(/large text/i)).toBeVisible();
 

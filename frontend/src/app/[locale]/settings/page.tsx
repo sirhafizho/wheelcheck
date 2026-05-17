@@ -31,19 +31,23 @@ export default function SettingsPage({ params }: { params: Params }) {
   const t = useTranslations('settings');
   const [highContrast, setHighContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const storedHighContrast = localStorage.getItem('wheelcheck_high_contrast') === 'true';
     const storedLargeText = localStorage.getItem('wheelcheck_large_text') === 'true';
+    const storedDarkMode = localStorage.getItem('wheelcheck_dark_mode') === 'true';
     const token = localStorage.getItem('wheelcheck_token');
     const tokenPayload = token ? parseToken(token) : null;
 
     setHighContrast(storedHighContrast);
     setLargeText(storedLargeText);
+    setDarkMode(storedDarkMode);
     setIsAdmin(tokenPayload?.role?.toUpperCase() === 'ADMIN');
     document.documentElement.classList.toggle('high-contrast', storedHighContrast);
     document.documentElement.classList.toggle('large-text', storedLargeText);
+    document.documentElement.classList.toggle('dark', storedDarkMode);
   }, []);
 
   const toggleHighContrast = () => {
@@ -58,6 +62,13 @@ export default function SettingsPage({ params }: { params: Params }) {
     setLargeText(newValue);
     localStorage.setItem('wheelcheck_large_text', String(newValue));
     document.documentElement.classList.toggle('large-text', newValue);
+  };
+
+  const toggleDarkMode = () => {
+    const newValue = !darkMode;
+    setDarkMode(newValue);
+    localStorage.setItem('wheelcheck_dark_mode', String(newValue));
+    document.documentElement.classList.toggle('dark', newValue);
   };
 
   const switchLanguage = () => {
@@ -86,6 +97,14 @@ export default function SettingsPage({ params }: { params: Params }) {
         <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('accessibility')}</h2>
           <div className="space-y-4">
+            <label className="flex items-center justify-between cursor-pointer min-h-[48px] gap-4">
+              <span className="text-gray-700">{t('darkMode')}</span>
+              <div className="relative shrink-0">
+                <input type="checkbox" checked={darkMode} onChange={toggleDarkMode} className="sr-only peer" />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer-checked:bg-emerald-600 transition-colors"></div>
+                <div className="absolute left-[2px] top-[2px] bg-white w-5 h-5 rounded-full transition-transform peer-checked:translate-x-full"></div>
+              </div>
+            </label>
             <label className="flex items-center justify-between cursor-pointer min-h-[48px] gap-4">
               <span className="text-gray-700">{t('highContrast')}</span>
               <div className="relative shrink-0">
