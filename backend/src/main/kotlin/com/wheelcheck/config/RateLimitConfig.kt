@@ -14,14 +14,13 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Per-IP rate limiting for the public demo deployment.
- * Limits are intentionally conservative to prevent abuse on free-tier infrastructure.
  *
  * Tiers:
  *  - Heavy endpoints (nearby search, search): 30 req/min per IP
- *  - Write endpoints (reviews, reports, comments): 10 req/min per IP
+ *  - Write endpoints (reviews, reports, comments): 20 req/min per IP
  *  - Auth endpoints (login, register): 5 req/min per IP
+ *  - Admin endpoints: 10 req/min per IP
  *  - General read (GET): 120 req/min per IP
- *  - Admin endpoints: not rate-limited (JWT-protected)
  */
 @Component
 class RateLimitConfig : OncePerRequestFilter() {
@@ -30,6 +29,7 @@ class RateLimitConfig : OncePerRequestFilter() {
     private val heavyBuckets  = ConcurrentHashMap<String, Bucket>()  // nearby, search
     private val writeBuckets  = ConcurrentHashMap<String, Bucket>()  // POST reviews/comments
     private val authBuckets   = ConcurrentHashMap<String, Bucket>()  // login/register
+    private val adminBuckets  = ConcurrentHashMap<String, Bucket>()  // admin endpoints
     private val generalBuckets = ConcurrentHashMap<String, Bucket>() // everything else
 
     override fun doFilterInternal(
@@ -45,6 +45,10 @@ class RateLimitConfig : OncePerRequestFilter() {
             // Auth — very strict: 5 per minute
             path.startsWith("/api/auth") ->
                 authBuckets.getOrCreate(ip) { newBucket(5, Duration.ofMinutes(1)) } to "auth"
+
+            // Admin endpoints — 10 per minute
+            path.startsWith("/api/admin") ->
+                adminBuckets.getOrCreate(ip) { newBucket(10, Duration.ofMinutes(1)) } to "admin"
 
             // Heavy read endpoints — 30 per minute
             path == "/api/places/nearby" || path.startsWith("/api/places/search") ->
@@ -72,9 +76,8 @@ class RateLimitConfig : OncePerRequestFilter() {
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.requestURI
-        // Let admin endpoints pass — they are JWT-protected (ADMIN role required)
+        // Only skip rate limiting for aggregation and docs endpoints
         return path.startsWith("/api/aggregation") ||
-               path.startsWith("/api/admin") ||
                path.startsWith("/swagger-ui") ||
                path.startsWith("/v3/api-docs") ||
                path.startsWith("/actuator/health")

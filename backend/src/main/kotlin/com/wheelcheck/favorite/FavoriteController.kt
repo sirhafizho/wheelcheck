@@ -8,7 +8,6 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/favorites")
-@CrossOrigin(origins = ["*"])
 class FavoriteController(
     private val favoriteService: FavoriteService
 ) {

@@ -22,7 +22,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = ["*"])
 @PreAuthorize("hasRole('ADMIN')")
 class AdminController(
     private val placeService: PlaceService,

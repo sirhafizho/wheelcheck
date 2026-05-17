@@ -13,7 +13,6 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/reviews")
-@CrossOrigin(origins = ["*"])
 class ReviewController(
     private val reviewService: ReviewService,
     @Value("\${wheelcheck.uploads.dir:uploads}") private val uploadsDir: String

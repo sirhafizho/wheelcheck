@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/admin/osm")
-@CrossOrigin(origins = ["*"])
 class OsmImportController(
     private val osmImportService: OsmImportService
 ) {

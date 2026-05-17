@@ -15,7 +15,6 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/places")
-@CrossOrigin(origins = ["*"])
 class PlaceController(
     private val placeService: PlaceService,
     private val reviewService: ReviewService,

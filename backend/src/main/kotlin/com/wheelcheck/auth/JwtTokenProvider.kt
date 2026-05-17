@@ -51,6 +51,14 @@ class JwtTokenProvider(
         }
     }
 
+    fun getEmailFromToken(token: String): String? {
+        return try {
+            parseToken(token).get("email", String::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun validateToken(token: String): Boolean {
         return try {
             parseToken(token)

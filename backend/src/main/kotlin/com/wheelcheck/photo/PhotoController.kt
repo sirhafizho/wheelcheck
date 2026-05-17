@@ -13,7 +13,6 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/photos")
-@CrossOrigin(origins = ["*"])
 class PhotoController(
     private val photoService: PhotoService
 ) {

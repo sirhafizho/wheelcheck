@@ -43,7 +43,18 @@ class PhotoService(
             ?: throw IllegalArgumentException("Place not found: $placeId")
         
         if (!isValidImageType(file.contentType)) {
-            throw IllegalArgumentException("Invalid image type: ${file.contentType}")
+            throw IllegalArgumentException("Invalid image type: ${file.contentType}. Only JPEG and PNG are allowed.")
+        }
+
+        // 10MB max file size
+        if (file.size > 10 * 1024 * 1024) {
+            throw IllegalArgumentException("File too large. Maximum size is 10MB.")
+        }
+
+        // Verify file content matches claimed type (magic bytes)
+        val bytes = file.bytes
+        if (!isValidImageContent(bytes)) {
+            throw IllegalArgumentException("File content does not match a valid image format.")
         }
         
         val filename = "${UUID.randomUUID()}.jpg"
@@ -87,6 +98,16 @@ class PhotoService(
     
     private fun isValidImageType(contentType: String?): Boolean {
         return contentType in listOf("image/jpeg", "image/jpg", "image/png")
+    }
+
+    /** Verify magic bytes to prevent disguised file uploads */
+    private fun isValidImageContent(bytes: ByteArray): Boolean {
+        if (bytes.size < 4) return false
+        // JPEG: FF D8 FF
+        if (bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() && bytes[2] == 0xFF.toByte()) return true
+        // PNG: 89 50 4E 47
+        if (bytes[0] == 0x89.toByte() && bytes[1] == 0x50.toByte() && bytes[2] == 0x4E.toByte() && bytes[3] == 0x47.toByte()) return true
+        return false
     }
     
     fun getPhotoFile(photoId: UUID): File? {

@@ -9,7 +9,6 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/comments")
-@CrossOrigin(origins = ["*"])
 class CommentController(
     private val commentService: CommentService
 ) {
