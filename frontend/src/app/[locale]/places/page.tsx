@@ -110,8 +110,25 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
   if (loading && places.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center pb-16">
-        <LoadingSpinner size="lg" />
+      <div className="flex flex-col h-full">
+        <div className="px-4 pt-4 pb-2">
+          <div className="h-10 w-full rounded-xl bg-gray-200 animate-pulse mb-2" />
+          <div className="h-4 w-32 rounded bg-gray-200 animate-pulse" />
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-3 pt-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 w-3/4 rounded bg-gray-200 animate-pulse" />
+                  <div className="h-4 w-1/2 rounded bg-gray-200 animate-pulse" />
+                  <div className="h-4 w-2/3 rounded bg-gray-200 animate-pulse" />
+                </div>
+                <div className="h-8 w-20 rounded-full bg-gray-200 animate-pulse shrink-0" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

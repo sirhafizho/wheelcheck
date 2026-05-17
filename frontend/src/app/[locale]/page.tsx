@@ -213,8 +213,9 @@ export default function HomePage() {
     if (!selectedPlace) {
       return null;
     }
-
-    return places.find((place) => place.id === selectedPlace.id) ?? null;
+    // Fall back to selectedPlace itself so bottom sheet shows immediately,
+    // even before the nearby API has returned results for the new viewport.
+    return places.find((place) => place.id === selectedPlace.id) ?? selectedPlace;
   }, [places, selectedPlace]);
   const isSearching = debouncedSearch.length > 0;
   const suggestions = debouncedSearch.length >= 2 ? places.slice(0, MAX_SUGGESTIONS) : [];
@@ -225,6 +226,15 @@ export default function HomePage() {
     if (blurTimeoutRef.current) {
       clearTimeout(blurTimeoutRef.current);
     }
+  }, []);
+
+  // Auto-center on user location on first visit (only when no stored viewport)
+  useEffect(() => {
+    const hasStoredViewport = !!sessionStorage.getItem(MAP_VIEWPORT_KEY);
+    if (!hasStoredViewport) {
+      getCurrentPosition();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -285,7 +295,7 @@ export default function HomePage() {
 
     setSearchQuery(place.name);
     setSearchFocused(false);
-    setSelectedPlace(null);
+    setSelectedPlace(place);
     setActivePlaceId(place.id);
     closeSuggestions();
     flyToPlace(place);

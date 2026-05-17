@@ -136,11 +136,15 @@ export default function AddPlacePage({ params }: { params: Params }) {
     if (c && !city) setCity(c);
   }, [address, city]);
 
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const canSubmit = Boolean(name && category && latitude && longitude);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit) {
+      setTouched({ name: true, category: true, location: true });
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
@@ -262,7 +266,8 @@ export default function AddPlacePage({ params }: { params: Params }) {
               autoFocus
               inputMode="search"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => { setName(e.target.value); setTouched(prev => ({ ...prev, name: true })); }}
+              onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px] text-base"
               placeholder={t('namePlaceholder')}
@@ -293,9 +298,10 @@ export default function AddPlacePage({ params }: { params: Params }) {
                 </div>
               </div>
             )}
+            {touched.name && !name && (
+              <p className="mt-1 text-xs text-red-500">{t('missing.name')}</p>
+            )}
           </div>
-
-          {/* Step 2: Category Chips */}
           <div>
             <label className="block text-sm font-semibold text-gray-800 mb-2">
               2. {t('category')}
@@ -325,6 +331,9 @@ export default function AddPlacePage({ params }: { params: Params }) {
               3. {t('location')}
             </label>
             <LocationPicker onLocationChange={handleLocationChange} onAddressChange={handleAddressChange} />
+            {touched.location && !latitude && (
+              <p className="mt-1 text-xs text-red-500">{t('missing.location')}</p>
+            )}
           </div>
 
           {/* Auto-filled address (shown if we have one) */}
@@ -396,13 +405,6 @@ export default function AddPlacePage({ params }: { params: Params }) {
                 <>♿ {t('submit')}</>
               )}
             </Button>
-            {!canSubmit && (
-              <p className="text-center text-xs text-gray-400 mt-2">
-                {!name && t('missing.name')}
-                {name && !category && t('missing.category')}
-                {name && category && !latitude && t('missing.location')}
-              </p>
-            )}
           </div>
         </form>
       </div>

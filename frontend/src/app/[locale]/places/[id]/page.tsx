@@ -24,8 +24,23 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center pb-16">
-        <LoadingSpinner size="lg" />
+      <div className="h-full overflow-y-auto pb-16">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden m-4">
+          <div className="p-6 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="h-7 w-2/3 rounded-lg bg-gray-200 animate-pulse" />
+              <div className="h-8 w-24 rounded-full bg-gray-200 animate-pulse shrink-0" />
+            </div>
+            <div className="h-4 w-full rounded bg-gray-200 animate-pulse" />
+            <div className="h-4 w-1/2 rounded bg-gray-200 animate-pulse" />
+            <div className="h-20 w-full rounded-lg bg-gray-100 animate-pulse" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-12 rounded-lg bg-gray-200 animate-pulse" />
+              <div className="h-12 rounded-lg bg-gray-200 animate-pulse" />
+            </div>
+            <div className="h-12 w-full rounded-lg bg-gray-200 animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }
