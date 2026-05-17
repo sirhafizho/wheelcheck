@@ -61,67 +61,27 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
     
     fun findByCreatedBy(userId: UUID): List<Place>
 
-    @Query(value = """
-        SELECT * FROM places p
-        WHERE LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
-           OR p.name ILIKE CONCAT('%%', :query, '%%')
-           OR p.address ILIKE CONCAT('%%', :query, '%%')
-        ORDER BY p.created_at DESC
-    """,
-    countQuery = """
-        SELECT COUNT(*) FROM places p
-        WHERE LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
-           OR p.name ILIKE CONCAT('%%', :query, '%%')
-           OR p.address ILIKE CONCAT('%%', :query, '%%')
-    """,
-    nativeQuery = true)
-    fun searchByQuery(
-        @Param("query") query: String,
+    @Query("SELECT p FROM Place p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.address) LIKE LOWER(CONCAT('%', :search, '%'))")
+    fun searchByText(
+        @Param("search") search: String,
         pageable: Pageable
     ): Page<Place>
 
-    @Query(value = """
-        SELECT * FROM places p
-        WHERE p.category = :category
-        ORDER BY p.created_at DESC
-    """,
-    countQuery = "SELECT COUNT(*) FROM places p WHERE p.category = :category",
-    nativeQuery = true)
-    fun findByCategory(
+    @Query("SELECT p FROM Place p WHERE p.category = :category")
+    fun findByCategoryPaged(
         @Param("category") category: String,
         pageable: Pageable
     ): Page<Place>
 
-    @Query(value = """
-        SELECT * FROM places p
-        WHERE p.accessibility_level = :accessLevel
-        ORDER BY p.created_at DESC
-    """,
-    countQuery = "SELECT COUNT(*) FROM places p WHERE p.accessibility_level = :accessLevel",
-    nativeQuery = true)
-    fun findByAccessLevel(
+    @Query("SELECT p FROM Place p WHERE p.accessibilityLevel = :accessLevel")
+    fun findByAccessLevelPaged(
         @Param("accessLevel") accessLevel: String,
         pageable: Pageable
     ): Page<Place>
 
-    @Query(value = """
-        SELECT * FROM places p
-        WHERE (LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
-           OR p.name ILIKE CONCAT('%%', :query, '%%')
-           OR p.address ILIKE CONCAT('%%', :query, '%%'))
-        AND p.category = :category
-        ORDER BY p.created_at DESC
-    """,
-    countQuery = """
-        SELECT COUNT(*) FROM places p
-        WHERE (LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
-           OR p.name ILIKE CONCAT('%%', :query, '%%')
-           OR p.address ILIKE CONCAT('%%', :query, '%%'))
-        AND p.category = :category
-    """,
-    nativeQuery = true)
-    fun searchByQueryAndCategory(
-        @Param("query") query: String,
+    @Query("SELECT p FROM Place p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.address) LIKE LOWER(CONCAT('%', :search, '%'))) AND p.category = :category")
+    fun searchByTextAndCategory(
+        @Param("search") search: String,
         @Param("category") category: String,
         pageable: Pageable
     ): Page<Place>

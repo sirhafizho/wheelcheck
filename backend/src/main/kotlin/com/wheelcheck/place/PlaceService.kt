@@ -93,10 +93,10 @@ class PlaceService(
         val access = accessLevel?.takeIf { it.isNotBlank() }
 
         val result: Page<Place> = when {
-            q != null && cat != null -> placeRepository.searchByQueryAndCategory(q, cat, pageable)
-            q != null -> placeRepository.searchByQuery(q, pageable)
-            cat != null -> placeRepository.findByCategory(cat, pageable)
-            access != null -> placeRepository.findByAccessLevel(access, pageable)
+            q != null && cat != null -> placeRepository.searchByTextAndCategory(q, cat, pageable)
+            q != null -> placeRepository.searchByText(q, pageable)
+            cat != null -> placeRepository.findByCategoryPaged(cat, pageable)
+            access != null -> placeRepository.findByAccessLevelPaged(access, pageable)
             else -> placeRepository.findAll(pageable)
         }
 
