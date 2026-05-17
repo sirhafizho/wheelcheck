@@ -64,15 +64,15 @@ test.describe('Places Page', () => {
 
   test('should filter places when searching', async ({ page }) => {
     await page.goto('/en/places', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
 
     const searchInput = page.locator('input[type="search"]');
     
     // Search for a known venue
     await searchInput.fill('KLCC');
     
-    // Wait for re-fetch
-    await page.waitForTimeout(1000);
+    // Wait for debounce + API refetch — articles should reappear
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
     
     // Should still show results (KLCC is a seeded venue)
     const cards = page.locator('article');

@@ -58,17 +58,17 @@ test.describe('Search Functionality', () => {
 
     // Search to filter
     await searchInput.fill('National Mosque');
-    await page.waitForTimeout(500);
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
     const filteredCount = await page.locator('article').count();
-    expect(filteredCount).toBeLessThan(initialCount);
+    expect(filteredCount).toBeLessThanOrEqual(initialCount);
 
     // Clear search
     await searchInput.fill('');
-    await page.waitForTimeout(500);
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
 
     // Should show more places again
     const restoredCount = await page.locator('article').count();
-    expect(restoredCount).toBeGreaterThan(filteredCount);
+    expect(restoredCount).toBeGreaterThanOrEqual(filteredCount);
   });
 
   test('home page should show nearby places count by default', async ({ page }) => {

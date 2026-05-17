@@ -159,16 +159,24 @@ Admin import endpoints:
 - [ ] Venue owner self-certification
 - [ ] Additional languages (Mandarin, Tamil)
 
+## 🌐 Live Demo
+
+| Service | URL |
+|---------|-----|
+| **Frontend** | [wheelcheck-swart.vercel.app](https://wheelcheck-swart.vercel.app) |
+| **Backend API** | [sirhafizho-wheelcheck-api.hf.space](https://sirhafizho-wheelcheck-api.hf.space/api/places?page=0&size=5) |
+| **API Docs** | [Swagger UI](https://sirhafizho-wheelcheck-api.hf.space/swagger-ui.html) |
+
+> **Note:** The backend runs on HuggingFace Spaces (free tier) — first request may take ~10s if the container is cold-starting.
+
 ## 🚀 Quick Start
 
-### 🧪 Test Account
+### 🧪 Demo Accounts
 
-For testing, use these credentials:
-
-| Field | Value |
-|-------|-------|
-| Email | `admin@wheelcheck.my` |
-| Password | `WheelCheck2026!` |
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@wheelcheck.demo` | `demo1234` |
+| **User** | `user@wheelcheck.demo` | `demo1234` |
 
 Or register a new account from the Profile page.
 
