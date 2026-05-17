@@ -2,6 +2,8 @@ package com.wheelcheck.place
 
 import com.wheelcheck.review.ReviewDto
 import com.wheelcheck.review.ReviewService
+import com.wheelcheck.enrichment.AiEnrichmentDto
+import com.wheelcheck.enrichment.AiEnrichmentService
 import com.wheelcheck.user.UserRepository
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -18,7 +20,8 @@ import java.util.*
 class PlaceController(
     private val placeService: PlaceService,
     private val reviewService: ReviewService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val enrichmentService: AiEnrichmentService? = null
 ) {
     
     @GetMapping
@@ -41,6 +44,13 @@ class PlaceController(
     fun getPlaceReports(@PathVariable id: UUID): ResponseEntity<List<ReviewDto>> {
         val reviews = reviewService.findByPlaceId(id)
         return ResponseEntity.ok(reviews)
+    }
+
+    @GetMapping("/{id}/enrichment")
+    fun getPlaceEnrichment(@PathVariable id: UUID): ResponseEntity<AiEnrichmentDto> {
+        val enrichment = enrichmentService?.getEnrichment(id)
+            ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(enrichment)
     }
     
     @PostMapping("/nearby")

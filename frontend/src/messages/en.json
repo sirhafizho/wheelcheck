@@ -60,7 +60,18 @@
       "COMMUNITY": "Community report",
       "SEED": "Seed data"
     },
-    "getDirections": "Get Directions"
+    "getDirections": "Get Directions",
+    "aiReasoning": {
+      "title": "AI Accessibility Research",
+      "reasoning": "Reasoning",
+      "sources": "Sources",
+      "poweredBy": "Powered by {model}",
+      "tier": {
+        "VERIFIED": "Verified",
+        "INFERRED": "Inferred",
+        "ASSUMPTION": "Assumption"
+      }
+    }
   },
   "report": {
     "title": "Report Accessibility",

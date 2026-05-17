@@ -60,7 +60,18 @@
       "COMMUNITY": "Laporan komuniti",
       "SEED": "Data awal"
     },
-    "getDirections": "Dapatkan Arah"
+    "getDirections": "Dapatkan Arah",
+    "aiReasoning": {
+      "title": "Penyelidikan AI Kebolehcapaian",
+      "reasoning": "Penerangan",
+      "sources": "Sumber",
+      "poweredBy": "Dikuasai oleh {model}",
+      "tier": {
+        "VERIFIED": "Disahkan",
+        "INFERRED": "Dijangka",
+        "ASSUMPTION": "Andaian"
+      }
+    }
   },
   "report": {
     "title": "Lapor Kebolehcapaian",

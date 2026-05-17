@@ -90,3 +90,7 @@ wheelcheck:
     api-token: ${HUGGINGFACE_API_TOKEN:}
     embedding-scheduler:
       enabled: ${EMBEDDING_SCHEDULER_ENABLED:false}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: gemini-1.5-flash
+    enabled: ${GEMINI_ENABLED:true}

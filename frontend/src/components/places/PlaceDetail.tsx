@@ -1,14 +1,46 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { MapPinIcon, InformationCircleIcon, HeartIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, InformationCircleIcon, HeartIcon, ArrowTopRightOnSquareIcon, SparklesIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import type { Place } from '@/lib/types';
 import { AccessBadge } from './AccessBadge';
 import { Button } from '../ui/Button';
 import { Toast } from '../ui/Toast';
 import { useFavorite } from '@/hooks/useFavorite';
+import { API_URL } from '@/lib/constants';
+
+interface AiSource {
+  url: string;
+  title: string;
+  snippet?: string;
+}
+
+interface AiEnrichmentData {
+  placeId: string;
+  confidenceTier: 'VERIFIED' | 'INFERRED' | 'ASSUMPTION';
+  aiSummary: string | null;
+  aiReasoning: string | null;
+  isAccessible: boolean | null;
+  disclaimer: string | null;
+  photoUrl: string | null;
+  sources: AiSource[];
+  modelUsed: string | null;
+  enrichedAt: string;
+}
+
+const CONFIDENCE_COLORS = {
+  VERIFIED: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+  INFERRED: 'bg-amber-50 border-amber-200 text-amber-800',
+  ASSUMPTION: 'bg-gray-50 border-gray-200 text-gray-700',
+} as const;
+
+const CONFIDENCE_BADGE = {
+  VERIFIED: 'bg-emerald-100 text-emerald-700',
+  INFERRED: 'bg-amber-100 text-amber-700',
+  ASSUMPTION: 'bg-gray-100 text-gray-600',
+} as const;
 
 const DATA_SOURCE_TRANSLATION_KEYS: Record<string, string> = {
   OSM: 'dataSources.OSM',
@@ -59,6 +91,17 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
   const tFav = useTranslations('favorites');
   const { favorited, toggle, loading: favLoading } = useFavorite(place.id);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [enrichment, setEnrichment] = useState<AiEnrichmentData | null>(null);
+  const [showReasoning, setShowReasoning] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_URL}/places/${place.id}/enrichment`)
+      .then(r => r.ok ? r.json() as Promise<AiEnrichmentData> : null)
+      .then(data => { if (!cancelled && data) setEnrichment(data); })
+      .catch(() => { /* silently skip if no enrichment */ });
+    return () => { cancelled = true; };
+  }, [place.id]);
 
   const handleFavoriteToggle = useCallback(async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('wheelcheck_token') : null;
@@ -165,6 +208,95 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
               />
               <p className="text-sm text-gray-700">{place.description}</p>
             </div>
+          </div>
+        )}
+
+        {/* AI Reasoning Panel */}
+        {enrichment && (
+          <div className={`mb-4 rounded-lg border p-3 ${CONFIDENCE_COLORS[enrichment.confidenceTier]}`}
+               data-testid="ai-enrichment-panel">
+            <button
+              type="button"
+              onClick={() => setShowReasoning(v => !v)}
+              className="w-full flex items-center justify-between gap-2 text-left"
+              data-testid="ai-enrichment-toggle"
+              aria-expanded={showReasoning}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <SparklesIcon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <span className="text-sm font-medium truncate">
+                  {tPlaces('aiReasoning.title')}
+                </span>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${CONFIDENCE_BADGE[enrichment.confidenceTier]}`}>
+                  {tPlaces(`aiReasoning.tier.${enrichment.confidenceTier}`)}
+                </span>
+              </div>
+              {showReasoning
+                ? <ChevronUpIcon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                : <ChevronDownIcon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              }
+            </button>
+
+            {enrichment.aiSummary && (
+              <p className="mt-2 text-sm leading-relaxed">{enrichment.aiSummary}</p>
+            )}
+
+            {showReasoning && (
+              <div className="mt-3 space-y-3">
+                {enrichment.aiReasoning && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-1 opacity-70">
+                      {tPlaces('aiReasoning.reasoning')}
+                    </p>
+                    <p className="text-sm leading-relaxed">{enrichment.aiReasoning}</p>
+                  </div>
+                )}
+
+                {enrichment.disclaimer && (
+                  <div className="p-2 rounded bg-white/60 border border-current/20 text-xs">
+                    ⚠️ {enrichment.disclaimer}
+                  </div>
+                )}
+
+                {enrichment.photoUrl && (
+                  <img
+                    src={enrichment.photoUrl}
+                    alt={`${place.name} photo`}
+                    className="w-full rounded-lg object-cover max-h-40"
+                    loading="lazy"
+                  />
+                )}
+
+                {enrichment.sources.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-1 opacity-70">
+                      {tPlaces('aiReasoning.sources')}
+                    </p>
+                    <ul className="space-y-1">
+                      {enrichment.sources.map((src, i) => (
+                        <li key={i}>
+                          <a
+                            href={src.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs underline underline-offset-2 break-all hover:opacity-80"
+                          >
+                            {src.title}
+                          </a>
+                          {src.snippet && (
+                            <p className="text-xs opacity-70 mt-0.5">{src.snippet}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p className="text-xs opacity-60 pt-1">
+                  {tPlaces('aiReasoning.poweredBy', { model: enrichment.modelUsed ?? 'AI' })}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

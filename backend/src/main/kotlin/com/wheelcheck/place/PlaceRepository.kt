@@ -63,6 +63,8 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
     
     fun findByCreatedBy(userId: UUID): List<Place>
 
+    fun findByStateIgnoreCase(state: String): List<Place>
+
     @Query(value = """
         SELECT * FROM places p
         WHERE LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:search, ' ', ''), '%%'))
