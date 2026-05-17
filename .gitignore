@@ -43,3 +43,5 @@ backend/build/reports/
 # Visual / AI test tools
 tools/venv/
 tools/browser-harness/
+.vercel
+.env*.local

@@ -301,6 +301,18 @@
       "skillPath": "skills/book-converter/SKILL.md",
       "computedHash": "fcac1359e0dbaf0fb4ebcb21fc8b8c6352c1f0c03c9a86df547d85141178c6ed"
     },
+    "browser-harness": {
+      "source": "browser-use/browser-harness",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "description": "CDP browser harness for Leaflet/canvas interactions and visual debugging"
+    },
+    "browser-use": {
+      "source": "browser-use/browser-use",
+      "sourceType": "github",
+      "skillPath": "skills/browser-use/SKILL.md",
+      "description": "AI agent browser automation for visual regression and accessibility audits"
+    },
     "create-spring-boot-kotlin-project": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
@@ -379,6 +391,18 @@
       "skillPath": "skills/slides-generator/SKILL.md",
       "computedHash": "f8d4594c84c51c72beac4bb85c741c5d513a2e4fdfaab3b62590835edd884395"
     },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase/SKILL.md",
+      "computedHash": "45a3cdccc364a4bbd6cdf700fc069e9f24ebc0428098746cbfbf8b18a5e160d2"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "d606a1146be6d54fb9e73f718b5320b9acac5ff2ba2d7230a555df4b5a923b4a"
+    },
     "template-skill": {
       "source": "bmad-labs/skills",
       "sourceType": "github",
@@ -426,18 +450,6 @@
       "sourceType": "github",
       "skillPath": "skills/web-design-guidelines/SKILL.md",
       "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
-    },
-    "browser-harness": {
-      "source": "browser-use/browser-harness",
-      "sourceType": "github",
-      "skillPath": "SKILL.md",
-      "description": "CDP browser harness for Leaflet/canvas interactions and visual debugging"
-    },
-    "browser-use": {
-      "source": "browser-use/browser-use",
-      "sourceType": "github",
-      "skillPath": "skills/browser-use/SKILL.md",
-      "description": "AI agent browser automation for visual regression and accessibility audits"
     }
   }
 }

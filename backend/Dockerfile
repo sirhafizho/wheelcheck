@@ -7,17 +7,22 @@ COPY src ./src
 
 RUN gradle build -x test --no-daemon
 
-# Runtime stage
+# Runtime stage — HuggingFace Spaces uses port 7860
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Create uploads directory
 RUN mkdir -p /app/uploads
 
 COPY --from=build /app/build/libs/*.jar app.jar
 
-EXPOSE 8080
+# HuggingFace Spaces requires port 7860
+EXPOSE 7860
 
 ENV SPRING_PROFILES_ACTIVE=prod
+ENV SERVER_PORT=7860
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+  "-Xmx400m", \
+  "-Xss512k", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-jar", "app.jar"]
