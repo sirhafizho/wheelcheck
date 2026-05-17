@@ -367,7 +367,7 @@ export default function AdminPage({ params }: { params: Params }) {
       const params = new URLSearchParams();
       params.set('page', String(page));
       params.set('size', String(PAGE_SIZE));
-      if (q) params.set('query', q);
+      if (q) params.set('search', q);
       if (cat) params.set('category', cat);
       if (city) params.set('city', city);
       if (access) params.set('accessLevel', access);

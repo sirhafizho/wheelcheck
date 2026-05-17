@@ -127,7 +127,7 @@ test.describe('Admin Search API', () => {
   test('should search places via API with query param', async ({ request }) => {
     const token = await getAuthToken(request, ADMIN_EMAIL, ADMIN_PASSWORD);
 
-    const res = await request.get(`${API_BASE}/admin/places?query=KLCC&page=0&size=10`, {
+    const res = await request.get(`${API_BASE}/admin/places?search=KLCC&page=0&size=10`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(res.status()).toBe(200);
@@ -158,7 +158,7 @@ test.describe('Admin Search API', () => {
   test('should fuzzy search in admin (midvalley → Mid Valley)', async ({ request }) => {
     const token = await getAuthToken(request, ADMIN_EMAIL, ADMIN_PASSWORD);
 
-    const res = await request.get(`${API_BASE}/admin/places?query=midvalley&page=0&size=10`, {
+    const res = await request.get(`${API_BASE}/admin/places?search=midvalley&page=0&size=10`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(res.status()).toBe(200);
