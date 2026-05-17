@@ -45,3 +45,6 @@ tools/venv/
 tools/browser-harness/
 .vercel
 .env*.local
+.agents/
+supabase/.temp/
+.claude/skills/
