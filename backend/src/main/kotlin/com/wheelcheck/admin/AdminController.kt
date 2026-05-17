@@ -31,10 +31,21 @@ class AdminController(
 ) {
     @GetMapping("/places")
     fun getAllPlaces(
+        @RequestParam(required = false) query: String?,
+        @RequestParam(required = false) category: String?,
+        @RequestParam(required = false) city: String?,
+        @RequestParam(required = false) accessLevel: String?,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC)
         pageable: Pageable
     ): ResponseEntity<Page<PlaceDto>> {
-        return ResponseEntity.ok(placeService.findAll(pageable))
+        val hasFilters = !query.isNullOrBlank() || !category.isNullOrBlank() ||
+            !city.isNullOrBlank() || !accessLevel.isNullOrBlank()
+
+        return if (hasFilters) {
+            ResponseEntity.ok(placeService.searchWithFilters(query, category, city, accessLevel, pageable))
+        } else {
+            ResponseEntity.ok(placeService.findAll(pageable))
+        }
     }
 
     @PutMapping("/places/{id}")

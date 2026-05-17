@@ -52,6 +52,7 @@ class ApiClient {
           latitude: params.lat,
           longitude: params.lng,
           radius: params.radius || 5000,
+          enrichLive: true,
         }),
       });
       return { data: places, total: places.length };

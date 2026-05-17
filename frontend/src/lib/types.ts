@@ -21,6 +21,7 @@ export interface Place {
   createdAt: string;
   lastReportedAt?: string;
   distance?: number | null;
+  isLive?: boolean;
 }
 
 export interface AccessReport {

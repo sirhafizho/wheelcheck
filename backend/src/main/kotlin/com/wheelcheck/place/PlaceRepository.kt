@@ -1,5 +1,7 @@
 package com.wheelcheck.place
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -58,4 +60,32 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
     fun existsByOsmId(osmId: String): Boolean
     
     fun findByCreatedBy(userId: UUID): List<Place>
+
+    @Query(value = """
+        SELECT * FROM places p
+        WHERE (:query IS NULL OR LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :query, '%%')
+           OR p.address ILIKE CONCAT('%%', :query, '%%'))
+        AND (:category IS NULL OR p.category = :category)
+        AND (:city IS NULL OR p.city ILIKE CONCAT('%%', :city, '%%'))
+        AND (:accessLevel IS NULL OR p.accessibility_level = :accessLevel)
+        ORDER BY p.created_at DESC
+    """,
+    countQuery = """
+        SELECT COUNT(*) FROM places p
+        WHERE (:query IS NULL OR LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:query, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :query, '%%')
+           OR p.address ILIKE CONCAT('%%', :query, '%%'))
+        AND (:category IS NULL OR p.category = :category)
+        AND (:city IS NULL OR p.city ILIKE CONCAT('%%', :city, '%%'))
+        AND (:accessLevel IS NULL OR p.accessibility_level = :accessLevel)
+    """,
+    nativeQuery = true)
+    fun searchWithFilters(
+        @Param("query") query: String?,
+        @Param("category") category: String?,
+        @Param("city") city: String?,
+        @Param("accessLevel") accessLevel: String?,
+        pageable: Pageable
+    ): Page<Place>
 }

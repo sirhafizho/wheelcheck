@@ -266,6 +266,11 @@ export default function AdminPage({ params }: { params: Params }) {
   const [actionKey, setActionKey] = useState<string | null>(null);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const [placeForm, setPlaceForm] = useState<EditablePlaceForm | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterCity, setFilterCity] = useState('');
+  const [filterAccess, setFilterAccess] = useState('');
+  const [searchDebounce, setSearchDebounce] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const dateFormatter = useMemo(
     () =>
@@ -344,7 +349,7 @@ export default function AdminPage({ params }: { params: Params }) {
     setStats(data);
   };
 
-  const loadPlaces = async (page: number, authToken = token) => {
+  const loadPlaces = async (page: number, authToken = token, filters?: { query?: string; category?: string; city?: string; accessLevel?: string }) => {
     if (!authToken) {
       handleAccessDenied();
       return;
@@ -354,7 +359,20 @@ export default function AdminPage({ params }: { params: Params }) {
     setError(null);
 
     try {
-      const data = await adminRequest<SpringPage<PlaceDto>>(authToken, `/admin/places?page=${page}&size=${PAGE_SIZE}`);
+      const q = filters?.query ?? searchQuery;
+      const cat = filters?.category ?? filterCategory;
+      const city = filters?.city ?? filterCity;
+      const access = filters?.accessLevel ?? filterAccess;
+
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('size', String(PAGE_SIZE));
+      if (q) params.set('query', q);
+      if (cat) params.set('category', cat);
+      if (city) params.set('city', city);
+      if (access) params.set('accessLevel', access);
+
+      const data = await adminRequest<SpringPage<PlaceDto>>(authToken, `/admin/places?${params.toString()}`);
       setPlacesPage(data);
     } catch (requestError) {
       if (requestError instanceof AccessDeniedError) {
@@ -604,6 +622,35 @@ export default function AdminPage({ params }: { params: Params }) {
     }
   };
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    if (searchDebounce) clearTimeout(searchDebounce);
+    setSearchDebounce(
+      setTimeout(() => {
+        void loadPlaces(0, token, { query: value, category: filterCategory, city: filterCity, accessLevel: filterAccess });
+      }, 400)
+    );
+  };
+
+  const handleFilterChange = (key: 'category' | 'city' | 'accessLevel', value: string) => {
+    const filters = { query: searchQuery, category: filterCategory, city: filterCity, accessLevel: filterAccess };
+    filters[key] = value;
+    if (key === 'category') setFilterCategory(value);
+    if (key === 'city') setFilterCity(value);
+    if (key === 'accessLevel') setFilterAccess(value);
+    void loadPlaces(0, token, filters);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilterCategory('');
+    setFilterCity('');
+    setFilterAccess('');
+    void loadPlaces(0, token, { query: '', category: '', city: '', accessLevel: '' });
+  };
+
+  const hasActiveFilters = searchQuery || filterCategory || filterCity || filterAccess;
+
   const renderPlacesTable = () => {
     if (tabLoading.places && !placesPage) {
       return (
@@ -621,6 +668,62 @@ export default function AdminPage({ params }: { params: Params }) {
       !placeForm?.name.trim() || !placeForm.address.trim() || !placeForm.city.trim() || !placeForm.category;
 
     return (
+      <div className="space-y-4">
+        {/* Search & Filter Bar */}
+        <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-100">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="sm:col-span-2 lg:col-span-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search by name or address..."
+                className="min-h-[44px] w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                data-testid="admin-search-input"
+              />
+            </div>
+            <select
+              value={filterCategory}
+              onChange={(e) => handleFilterChange('category', e.target.value)}
+              className="min-h-[44px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              data-testid="admin-filter-category"
+            >
+              <option value="">All Categories</option>
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>{tCategories(cat)}</option>
+              ))}
+            </select>
+            <select
+              value={filterAccess}
+              onChange={(e) => handleFilterChange('accessLevel', e.target.value)}
+              className="min-h-[44px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              data-testid="admin-filter-access"
+            >
+              <option value="">All Access Levels</option>
+              <option value="FULL">{formatAccessLabel('FULL')}</option>
+              <option value="PARTIAL">{formatAccessLabel('PARTIAL')}</option>
+              <option value="NOT_ACCESSIBLE">{formatAccessLabel('NOT_ACCESSIBLE')}</option>
+              <option value="UNKNOWN">{formatAccessLabel('UNKNOWN')}</option>
+            </select>
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={clearFilters}
+                className="min-h-[44px]"
+                data-testid="admin-clear-filters"
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+          {hasActiveFilters && placesPage && (
+            <p className="mt-2 text-sm text-gray-500" data-testid="admin-filter-count">
+              {placesPage.totalElements} results
+            </p>
+          )}
+        </div>
+
       <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-100">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[980px] divide-y divide-gray-200">
@@ -800,6 +903,7 @@ export default function AdminPage({ params }: { params: Params }) {
             void loadPlaces(placesPage.number + 1);
           }}
         />
+      </div>
       </div>
     );
   };

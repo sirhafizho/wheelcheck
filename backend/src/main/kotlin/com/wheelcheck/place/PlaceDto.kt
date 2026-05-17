@@ -27,7 +27,8 @@ data class PlaceDto(
     val osmWheelchairTag: String? = null,
     val osmToiletAccessible: Boolean? = null,
     val osmTactilePaving: Boolean? = null,
-    val lastReportedAt: Instant? = null
+    val lastReportedAt: Instant? = null,
+    val isLive: Boolean = false
 )
 
 data class CreatePlaceRequest(
@@ -52,5 +53,6 @@ data class NearbyPlacesRequest(
     val longitude: Double,
     val radius: Int = 5000,
     val limit: Int = 50,
-    val category: Category? = null
+    val category: Category? = null,
+    val enrichLive: Boolean = false
 )

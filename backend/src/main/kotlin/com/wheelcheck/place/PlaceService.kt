@@ -1,6 +1,7 @@
 package com.wheelcheck.place
 
 import com.wheelcheck.admin.UpdatePlaceRequest
+import com.wheelcheck.aggregation.LiveEnrichmentService
 import com.wheelcheck.aggregation.MalaysiaGeoUtils
 import com.wheelcheck.common.AccessLevel
 import org.locationtech.jts.geom.Coordinate
@@ -16,7 +17,8 @@ import java.util.*
 
 @Service
 class PlaceService(
-    private val placeRepository: PlaceRepository
+    private val placeRepository: PlaceRepository,
+    private val liveEnrichmentService: LiveEnrichmentService? = null
 ) {
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
 
@@ -42,7 +44,7 @@ class PlaceService(
 
     @Transactional(readOnly = true)
     fun findNearby(request: NearbyPlacesRequest): List<PlaceDto> {
-        val places = if (request.category != null) {
+        val dbPlaces = if (request.category != null) {
             placeRepository.findNearbyByCategory(
                 request.latitude,
                 request.longitude,
@@ -58,12 +60,41 @@ class PlaceService(
                 request.limit
             )
         }
-        return places.map { it.toDto() }
+        val dbDtos = dbPlaces.map { it.toDto() }
+
+        // Live enrichment: merge OSM results when requested
+        if (request.enrichLive && liveEnrichmentService != null) {
+            val livePlaces = liveEnrichmentService.fetchLivePlaces(
+                request.latitude,
+                request.longitude,
+                request.radius
+            )
+            return liveEnrichmentService.mergeAndDedupe(dbDtos, livePlaces)
+        }
+
+        return dbDtos
     }
 
     @Transactional(readOnly = true)
     fun searchByName(name: String): List<PlaceDto> {
         return placeRepository.findByNameContainingIgnoreCaseLimited(name).map { it.toDto() }
+    }
+
+    @Transactional(readOnly = true)
+    fun searchWithFilters(
+        query: String?,
+        category: String?,
+        city: String?,
+        accessLevel: String?,
+        pageable: Pageable
+    ): Page<PlaceDto> {
+        return placeRepository.searchWithFilters(
+            query = query?.takeIf { it.isNotBlank() },
+            category = category?.takeIf { it.isNotBlank() },
+            city = city?.takeIf { it.isNotBlank() },
+            accessLevel = accessLevel?.takeIf { it.isNotBlank() },
+            pageable = pageable
+        ).map(java.util.function.Function { place: Place -> place.toDto() })
     }
 
     @Transactional(readOnly = true)
