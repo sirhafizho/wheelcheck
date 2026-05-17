@@ -365,6 +365,8 @@ export default function ProfilePage({ params }: { params: Params }) {
               <input
                 id="login-email"
                 type="email"
+                name="email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -378,6 +380,8 @@ export default function ProfilePage({ params }: { params: Params }) {
               <input
                 id="login-password"
                 type="password"
+                name="current-password"
+                autoComplete="current-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -410,6 +414,8 @@ export default function ProfilePage({ params }: { params: Params }) {
               <input
                 id="reg-name"
                 type="text"
+                name="name"
+                autoComplete="name"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -423,6 +429,8 @@ export default function ProfilePage({ params }: { params: Params }) {
               <input
                 id="reg-email"
                 type="email"
+                name="email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -436,6 +444,8 @@ export default function ProfilePage({ params }: { params: Params }) {
               <input
                 id="reg-password"
                 type="password"
+                name="new-password"
+                autoComplete="new-password"
                 required
                 minLength={6}
                 value={password}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ToastProps {
   message: string;
@@ -19,8 +19,10 @@ export function Toast({ message, type = 'success', onClose, duration = 2500 }: T
   const colors = {
     success: 'bg-emerald-600 text-white',
     error: 'bg-red-600 text-white',
-    info: 'bg-gray-800 text-white',
+    info: 'bg-gray-700 text-white',
   };
+
+  const Icon = type === 'info' ? InformationCircleIcon : CheckCircleIcon;
 
   return (
     <div
@@ -29,7 +31,7 @@ export function Toast({ message, type = 'success', onClose, duration = 2500 }: T
       data-testid="toast"
       className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 rounded-full px-4 py-2.5 shadow-lg text-sm font-medium animate-fade-in ${colors[type]}`}
     >
-      <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       <span>{message}</span>
       <button
         type="button"

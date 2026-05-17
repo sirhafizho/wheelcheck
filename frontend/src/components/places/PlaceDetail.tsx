@@ -58,9 +58,14 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
   const tCategories = useTranslations('addPlace.categories');
   const tFav = useTranslations('favorites');
   const { favorited, toggle, loading: favLoading } = useFavorite(place.id);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const handleFavoriteToggle = useCallback(async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('wheelcheck_token') : null;
+    if (!token) {
+      setToast({ message: tFav('loginToSave'), type: 'info' });
+      return;
+    }
     const wasFavorited = favorited;
     await toggle();
     setToast({
