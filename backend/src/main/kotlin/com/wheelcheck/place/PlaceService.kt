@@ -9,6 +9,7 @@ import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -97,9 +98,12 @@ class PlaceService(
             try { AccessLevel.valueOf(it.uppercase()) } catch (_: Exception) { null }
         }
 
+        // Native queries have their own ORDER BY, so strip sort from pageable
+        val unsorted = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+
         val result: Page<Place> = when {
-            q != null && cat != null -> placeRepository.searchByTextAndCategory(q, cat, pageable)
-            q != null -> placeRepository.searchByText(q, pageable)
+            q != null && cat != null -> placeRepository.searchByTextAndCategory(q, cat.name, unsorted)
+            q != null -> placeRepository.searchByText(q, unsorted)
             cat != null -> placeRepository.findByCategoryPaged(cat, pageable)
             access != null -> placeRepository.findByAccessLevelPaged(access, pageable)
             else -> placeRepository.findAll(pageable)

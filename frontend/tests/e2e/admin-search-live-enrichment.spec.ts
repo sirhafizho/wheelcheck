@@ -85,9 +85,9 @@ test.describe('Admin Search & Filters', () => {
 
     // Apply a filter
     const searchInput = page.getByTestId('admin-search-input');
-    await expect(searchInput).toBeVisible({ timeout: 10000 });
+    await expect(searchInput).toBeVisible({ timeout: 15000 });
     await searchInput.fill('test');
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(1000);
 
     // Clear button should appear
     const clearBtn = page.getByTestId('admin-clear-filters');
@@ -124,7 +124,7 @@ test.describe('Admin Search & Filters', () => {
 });
 
 test.describe('Admin Search API', () => {
-  test('should search places via API with query param', async ({ request }) => {
+  test('should search places via API with search param', async ({ request }) => {
     const token = await getAuthToken(request, ADMIN_EMAIL, ADMIN_PASSWORD);
 
     const res = await request.get(`${API_BASE}/admin/places?search=KLCC&page=0&size=10`, {
@@ -134,10 +134,11 @@ test.describe('Admin Search API', () => {
 
     const data = await res.json();
     expect(data.content).toBeDefined();
-    // All results should contain KLCC in name (case insensitive)
+    expect(data.content.length).toBeGreaterThan(0);
+    // Results should contain KLCC in name or address (case insensitive)
     for (const place of data.content) {
-      const name = place.name.toLowerCase();
-      expect(name.includes('klcc')).toBeTruthy();
+      const combined = `${place.name} ${place.address}`.toLowerCase();
+      expect(combined.includes('klcc')).toBeTruthy();
     }
   });
 

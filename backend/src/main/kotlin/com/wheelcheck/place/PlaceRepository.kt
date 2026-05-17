@@ -63,7 +63,20 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
     
     fun findByCreatedBy(userId: UUID): List<Place>
 
-    @Query("SELECT p FROM Place p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.address) LIKE LOWER(CONCAT('%', :search, '%'))")
+    @Query(value = """
+        SELECT * FROM places p
+        WHERE LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:search, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :search, '%%')
+           OR p.address ILIKE CONCAT('%%', :search, '%%')
+        ORDER BY p.created_at DESC
+    """,
+    countQuery = """
+        SELECT COUNT(*) FROM places p
+        WHERE LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:search, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :search, '%%')
+           OR p.address ILIKE CONCAT('%%', :search, '%%')
+    """,
+    nativeQuery = true)
     fun searchByText(
         @Param("search") search: String,
         pageable: Pageable
@@ -81,10 +94,25 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         pageable: Pageable
     ): Page<Place>
 
-    @Query("SELECT p FROM Place p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.address) LIKE LOWER(CONCAT('%', :search, '%'))) AND p.category = :category")
+    @Query(value = """
+        SELECT * FROM places p
+        WHERE (LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:search, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :search, '%%')
+           OR p.address ILIKE CONCAT('%%', :search, '%%'))
+        AND p.category = :category
+        ORDER BY p.created_at DESC
+    """,
+    countQuery = """
+        SELECT COUNT(*) FROM places p
+        WHERE (LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:search, ' ', ''), '%%'))
+           OR p.name ILIKE CONCAT('%%', :search, '%%')
+           OR p.address ILIKE CONCAT('%%', :search, '%%'))
+        AND p.category = :category
+    """,
+    nativeQuery = true)
     fun searchByTextAndCategory(
         @Param("search") search: String,
-        @Param("category") category: Category,
+        @Param("category") category: String,
         pageable: Pageable
     ): Page<Place>
 }
