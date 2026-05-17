@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { loginAsUser } from './helpers';
 
 test.describe('Report Wizard Flow', () => {
   test('should complete the full report wizard', async ({ page }) => {
+    // Login first — report submission requires authentication
+    await loginAsUser(page);
+
     // Navigate to a place detail page first
     await page.goto('/en/places', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });

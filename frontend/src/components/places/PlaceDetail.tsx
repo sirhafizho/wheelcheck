@@ -1,10 +1,12 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { MapPinIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, InformationCircleIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import type { Place } from '@/lib/types';
 import { AccessBadge } from './AccessBadge';
 import { Button } from '../ui/Button';
+import { useFavorite } from '@/hooks/useFavorite';
 
 const DATA_SOURCE_TRANSLATION_KEYS: Record<string, string> = {
   OSM: 'dataSources.OSM',
@@ -52,6 +54,8 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
   const tCommon = useTranslations('common');
   const tPlaces = useTranslations('places');
   const tCategories = useTranslations('addPlace.categories');
+  const tFav = useTranslations('favorites');
+  const { favorited, toggle, loading: favLoading } = useFavorite(place.id);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -93,7 +97,22 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
           <h1 className="text-2xl font-bold text-gray-900">
             {place.name}
           </h1>
-          <AccessBadge level={place.accessibilityLevel} size="lg" />
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={toggle}
+              disabled={favLoading}
+              aria-label={favorited ? tFav('remove') : tFav('save')}
+              data-testid="favorite-toggle"
+              className="rounded-full p-2 transition-colors hover:bg-red-50 disabled:opacity-50"
+            >
+              {favorited
+                ? <HeartSolidIcon className="h-6 w-6 text-red-500" />
+                : <HeartIcon className="h-6 w-6 text-gray-400 hover:text-red-400" />
+              }
+            </button>
+            <AccessBadge level={place.accessibilityLevel} size="lg" />
+          </div>
         </div>
 
         <div className="flex items-start gap-2 text-gray-700 mb-1">

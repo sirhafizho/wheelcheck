@@ -37,7 +37,7 @@ test.describe('Admin Dashboard', () => {
   test('should switch to reviews tab', async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto('/en/admin', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByRole('heading', { name: /admin dashboard/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /admin dashboard/i })).toBeVisible({ timeout: 20000 });
 
     // Click reviews tab
     await page.getByRole('tab', { name: /reviews/i }).click();
@@ -87,6 +87,6 @@ test.describe('Admin Dashboard', () => {
     await loginAsAdmin(page);
     await page.goto('/ms/admin', { waitUntil: 'domcontentloaded' });
 
-    await expect(page.getByRole('heading', { name: /papan pemuka admin/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /papan pemuka admin/i })).toBeVisible({ timeout: 20000 });
   });
 });

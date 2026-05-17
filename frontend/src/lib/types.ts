@@ -87,6 +87,18 @@ export interface PlaceSearchParams {
   size?: number;
 }
 
+export interface Favorite {
+  id: string;
+  placeId: string;
+  placeName?: string | null;
+  createdAt: string;
+}
+
+export interface FavoriteStatus {
+  favorited: boolean;
+  totalFavorites: number;
+}
+
 export interface ApiResponse<T> {
   data: T;
   message?: string;

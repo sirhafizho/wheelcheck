@@ -20,8 +20,10 @@ test.describe('Place Detail — Reviews & Comments', () => {
   test('should show reviews section on place detail page', async ({ page }) => {
     await page.goto(`/en/places/${placeId}`, { waitUntil: 'domcontentloaded' });
 
-    // Reviews section should exist
-    await expect(page.getByText(/accessibility reports/i)).toBeVisible({ timeout: 10000 });
+    // Reviews section always renders — shows title when reviews exist, else "no reports" message
+    await expect(
+      page.getByText(/accessibility reports|no reports yet/i)
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test('should show comment section on place detail page', async ({ page }) => {

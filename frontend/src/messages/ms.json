@@ -279,6 +279,16 @@
     "fullSizeEvidencePhoto": "Foto bukti saiz penuh",
     "closePhoto": "Tutup foto"
   },
+  "favorites": {
+    "title": "Tempat Tersimpan",
+    "save": "Simpan Tempat",
+    "saved": "Tersimpan",
+    "remove": "Buang daripada Tersimpan",
+    "loginToSave": "Log masuk untuk simpan tempat",
+    "empty": "Tiada tempat tersimpan lagi",
+    "emptySubtext": "Tekan ikon hati pada mana-mana tempat untuk simpan di sini",
+    "count": "{count} tersimpan"
+  },
   "comments": {
     "title": "Perbincangan",
     "loading": "Memuatkan komen...",

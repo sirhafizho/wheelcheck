@@ -8,6 +8,8 @@ import type {
   PlaceSearchParams,
   ApiResponse,
   PaginatedResponse,
+  Favorite,
+  FavoriteStatus,
 } from './types';
 
 export async function semanticSearchPlaces(
@@ -100,7 +102,9 @@ class ApiClient {
     return this.fetch<AccessReport[]>(`/places/${placeId}/reports`);
   }
 
-  async createReport(report: CreateReportRequest): Promise<AccessReport> {
+  async createReport(report: CreateReportRequest, token?: string): Promise<AccessReport> {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     return this.fetch<AccessReport>('/reviews', {
       method: 'POST',
       body: JSON.stringify({
@@ -111,6 +115,7 @@ class ApiClient {
         internalNav: report.internalNav,
         notes: report.notes || null,
       }),
+      headers,
     });
   }
 
@@ -138,6 +143,25 @@ class ApiClient {
     return this.fetch<Comment>(`/comments/${commentId}/vote?type=${type}`, {
       method: 'POST',
       headers,
+    });
+  }
+
+  async getFavoriteStatus(placeId: string, token?: string): Promise<FavoriteStatus> {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return this.fetch<FavoriteStatus>(`/favorites/${placeId}/status`, { headers });
+  }
+
+  async toggleFavorite(placeId: string, token: string): Promise<FavoriteStatus> {
+    return this.fetch<FavoriteStatus>(`/favorites/${placeId}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+  }
+
+  async getUserFavorites(token: string): Promise<Favorite[]> {
+    return this.fetch<Favorite[]>('/favorites', {
+      headers: { 'Authorization': `Bearer ${token}` },
     });
   }
 }

@@ -25,7 +25,8 @@ export default function ReportPage({ params }: ReportPageProps) {
 
   const handleSubmit = async (report: CreateReportRequest) => {
     try {
-      await api.createReport(report);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('wheelcheck_token') ?? undefined : undefined;
+      await api.createReport(report, token);
       setSubmitted(true);
       
       // Redirect after 2 seconds

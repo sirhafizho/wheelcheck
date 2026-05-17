@@ -279,6 +279,16 @@
     "fullSizeEvidencePhoto": "Full size evidence photo",
     "closePhoto": "Close photo"
   },
+  "favorites": {
+    "title": "Saved Places",
+    "save": "Save Place",
+    "saved": "Saved",
+    "remove": "Remove from Saved",
+    "loginToSave": "Log in to save places",
+    "empty": "No saved places yet",
+    "emptySubtext": "Tap the heart icon on any place to save it here",
+    "count": "{count} saved"
+  },
   "comments": {
     "title": "Discussion",
     "loading": "Loading comments...",
