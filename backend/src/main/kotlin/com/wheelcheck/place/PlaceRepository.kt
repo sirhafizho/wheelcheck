@@ -39,7 +39,12 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         @Param("limit") limit: Int
     ): List<Place>
     
-    fun findByNameContainingIgnoreCase(name: String): List<Place>
+    @Query(value = """
+        SELECT * FROM places 
+        WHERE LOWER(name) LIKE LOWER(CONCAT('%', :name, '%'))
+        LIMIT 50
+    """, nativeQuery = true)
+    fun findByNameContainingIgnoreCaseLimited(@Param("name") name: String): List<Place>
     
     fun findByOsmId(osmId: String): Place?
     

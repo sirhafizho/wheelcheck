@@ -4,17 +4,23 @@ test.describe('Search Functionality', () => {
   test('should search from home page and show results', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
+    // Wait for initial nearby data to load first
+    await expect(page.getByText(/nearby/)).toBeVisible({ timeout: 15000 });
+
     const searchInput = page.locator('input[type="search"]');
     await expect(searchInput).toBeVisible();
 
-    // Type search query
+    // Set up response listener BEFORE typing
+    const searchResponse = page.waitForResponse(
+      resp => resp.url().includes('/places/search') && resp.status() === 200,
+      { timeout: 25000 }
+    );
+
     await searchInput.fill('KLCC');
 
-    // Wait for debounced search to trigger and results to update
-    await page.waitForTimeout(500);
-
-    // Should show filtered results (KLCC Park, Suria KLCC)
-    await expect(page.getByText(/\d+ results? found/)).toBeVisible({ timeout: 10000 });
+    // Wait for the search API to actually respond
+    await searchResponse;
+    await expect(page.getByText(/\d+ results? found/)).toBeVisible({ timeout: 5000 });
   });
 
   test('should search from places page and filter results', async ({ page }) => {
@@ -23,15 +29,17 @@ test.describe('Search Functionality', () => {
     // Wait for initial places to load
     await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
 
-    // Search for specific place
+    // Set up response listener, then search
     const searchInput = page.locator('input[type="search"]');
+    const searchResponse = page.waitForResponse(
+      resp => resp.url().includes('/places/search') && resp.status() === 200,
+      { timeout: 25000 }
+    );
     await searchInput.fill('Pavilion KL');
+    await searchResponse;
 
-    // Wait for debounced search
-    await page.waitForTimeout(500);
-
-    // Results should be filtered — at least one result containing "Pavilion"
-    await expect(page.getByText('Pavilion KL').first()).toBeVisible({ timeout: 10000 });
+    // Results should be filtered
+    await expect(page.getByText('Pavilion KL').first()).toBeVisible({ timeout: 5000 });
     const filteredCount = await page.locator('article').count();
     expect(filteredCount).toBeGreaterThanOrEqual(1);
     expect(filteredCount).toBeLessThan(50);
@@ -42,11 +50,14 @@ test.describe('Search Functionality', () => {
     await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
 
     const searchInput = page.locator('input[type="search"]');
+    const searchResponse = page.waitForResponse(
+      resp => resp.url().includes('/places/search') && resp.status() === 200,
+      { timeout: 25000 }
+    );
     await searchInput.fill('xyznonexistent123');
+    await searchResponse;
 
-    await page.waitForTimeout(500);
-
-    await expect(page.getByText(/no places found/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/no places found/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('should clear search and show all results again', async ({ page }) => {
@@ -57,16 +68,25 @@ test.describe('Search Functionality', () => {
     const initialCount = await page.locator('article').count();
 
     // Search to filter
+    const searchResponse = page.waitForResponse(
+      resp => resp.url().includes('/places/search') && resp.status() === 200,
+      { timeout: 25000 }
+    );
     await searchInput.fill('National Mosque');
-    await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
+    await searchResponse;
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 5000 });
     const filteredCount = await page.locator('article').count();
     expect(filteredCount).toBeLessThanOrEqual(initialCount);
 
-    // Clear search
+    // Clear search — triggers paginated /places reload
+    const clearResponse = page.waitForResponse(
+      resp => resp.url().includes('/places') && resp.status() === 200,
+      { timeout: 25000 }
+    );
     await searchInput.fill('');
-    await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
+    await clearResponse;
+    await expect(page.locator('article').first()).toBeVisible({ timeout: 5000 });
 
-    // Should show more places again
     const restoredCount = await page.locator('article').count();
     expect(restoredCount).toBeGreaterThanOrEqual(filteredCount);
   });
@@ -75,20 +95,24 @@ test.describe('Search Functionality', () => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
     // Default view should show places nearby (using default KL coordinates)
-    await expect(page.getByText(/\d+ places? nearby/)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/\d+ places? nearby/)).toBeVisible({ timeout: 15000 });
   });
 
   test('home page should switch to results count when searching', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
     // Initially shows "nearby"
-    await expect(page.getByText(/nearby/)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/nearby/)).toBeVisible({ timeout: 15000 });
 
-    // Search switches to "found"
+    // Set up listener BEFORE typing — use specific term to avoid huge result sets
     const searchInput = page.locator('input[type="search"]');
-    await searchInput.fill('Park');
-    await page.waitForTimeout(500);
+    const searchResponse = page.waitForResponse(
+      resp => resp.url().includes('/places/search') && resp.status() === 200,
+      { timeout: 25000 }
+    );
+    await searchInput.fill('Pavilion KL');
+    await searchResponse;
 
-    await expect(page.getByText(/found/)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/found/)).toBeVisible({ timeout: 5000 });
   });
 });

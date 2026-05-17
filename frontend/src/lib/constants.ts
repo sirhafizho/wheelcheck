@@ -9,7 +9,7 @@ export const MAP_CONFIG = {
   },
   defaultZoom: parseInt(process.env.NEXT_PUBLIC_DEFAULT_ZOOM || '13', 10),
   minZoom: 5,
-  maxZoom: 18,
+  maxZoom: 19,
 };
 
 export const ACCESSIBILITY_COLORS = {

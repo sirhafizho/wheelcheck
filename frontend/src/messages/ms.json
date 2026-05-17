@@ -116,8 +116,11 @@
     "longitude": "Longitud",
     "photos": "Foto Bukti",
     "photosRequired": "Sekurang-kurangnya 1 foto diperlukan",
+    "photosOptional": "pilihan",
     "photosHint": "Muat naik foto menunjukkan ciri kebolehcapaian tempat (tanjakan, pintu masuk, tempat letak kereta, dll.)",
     "photosRequiredError": "Sila muat naik sekurang-kurangnya satu foto sebagai bukti",
+    "existingPlaces": "Tempat sedia ada — pilih untuk isi borang",
+    "typeNewPlace": "Tak jumpa? Terus taip untuk tambah tempat baru",
     "photoDescription": "Foto bukti tempat",
     "submit": "Tambah Tempat",
     "success": "Tempat Ditambah!",
@@ -125,7 +128,8 @@
     "errors": {
       "createPlace": "Gagal mencipta tempat",
       "uploadPhoto": "Gagal memuat naik foto bukti",
-      "submitFailed": "Gagal menambah tempat"
+      "submitFailed": "Gagal menambah tempat",
+      "loginRequired": "Sila log masuk dahulu untuk menambah tempat"
     },
     "categories": {
       "MALL": "Pusat Beli-belah",

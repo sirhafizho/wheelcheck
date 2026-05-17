@@ -154,6 +154,8 @@ export function MapView({
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={zoom}
+        minZoom={MAP_CONFIG.minZoom}
+        maxZoom={MAP_CONFIG.maxZoom}
         zoomControl={false}
         className="h-full w-full"
         style={{ height: '100%', width: '100%' }}
@@ -161,8 +163,20 @@ export function MapView({
         <MapUpdater center={center} flyTo={flyTo} />
         <MapViewportReporter onChange={handleViewportChange} />
         <MapZoomExecutor zoomIn={zoomIn ?? 0} zoomOut={zoomOut ?? 0} />
-        <TileLayer attribution={MAP_CONFIG.attribution} url={MAP_CONFIG.tileUrl} />
-        <MarkerClusterGroup chunkedLoading showCoverageOnHover={false}>
+        <TileLayer
+          attribution={MAP_CONFIG.attribution}
+          url={MAP_CONFIG.tileUrl}
+          maxZoom={MAP_CONFIG.maxZoom}
+          maxNativeZoom={18}
+        />
+        <MarkerClusterGroup
+          chunkedLoading
+          showCoverageOnHover={false}
+          spiderfyOnMaxZoom
+          zoomToBoundsOnClick
+          maxClusterRadius={50}
+          disableClusteringAtZoom={18}
+        >
           {places.map((place) => (
             <Marker
               key={place.id}

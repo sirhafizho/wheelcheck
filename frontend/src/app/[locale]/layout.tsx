@@ -27,6 +27,9 @@ export default async function LocaleLayout({
     <html lang={locale} className="h-full overflow-hidden">
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
         <meta name="theme-color" content="#059669" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>
@@ -43,14 +46,56 @@ export default async function LocaleLayout({
   );
 }
 
-export async function generateMetadata({ params }: { params: Params }) {
+import type { Metadata } from 'next';
+
+const SITE_URL = 'https://wheelcheck-swart.vercel.app';
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { locale } = await params;
-  
+
+  const title = 'WheelCheck - Find Accessible Places in Malaysia';
+  const description = locale === 'ms' 
+    ? 'Temui tempat mesra kerusi roda di seluruh Malaysia. 71,000+ lokasi dengan ulasan aksesibiliti komuniti.'
+    : 'Discover wheelchair-friendly venues across Malaysia. 71,000+ places with community accessibility reviews.';
+
   return {
-    title: 'WheelCheck - Find Accessible Places',
-    description: locale === 'ms' 
-      ? 'Temui tempat mesra kerusi roda di seluruh Malaysia'
-      : 'Discover wheelchair-friendly venues across Malaysia',
+    title,
+    description,
     manifest: '/manifest.json',
+    icons: {
+      icon: [
+        { url: '/icons/icon-32.png', sizes: '32x32', type: 'image/png' },
+        { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      ],
+      apple: '/apple-touch-icon.png',
+    },
+    openGraph: {
+      type: 'website',
+      locale: locale === 'ms' ? 'ms_MY' : 'en_US',
+      url: SITE_URL,
+      siteName: 'WheelCheck',
+      title,
+      description,
+      images: [
+        {
+          url: `${SITE_URL}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: 'WheelCheck - Find Wheelchair-Accessible Places Across Malaysia',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${SITE_URL}/twitter-image.png`],
+    },
+    other: {
+      'mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-status-bar-style': 'black-translucent',
+      'apple-mobile-web-app-title': 'WheelCheck',
+    },
   };
 }

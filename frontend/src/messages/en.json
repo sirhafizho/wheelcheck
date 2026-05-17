@@ -116,8 +116,11 @@
     "longitude": "Longitude",
     "photos": "Evidence Photos",
     "photosRequired": "At least 1 photo required",
+    "photosOptional": "optional",
     "photosHint": "Upload photos showing the venue's accessibility features (ramps, entrances, parking, etc.)",
     "photosRequiredError": "Please upload at least one photo as evidence",
+    "existingPlaces": "Existing places — select to prefill",
+    "typeNewPlace": "Don't see it? Keep typing to add a new place",
     "photoDescription": "Place evidence photo",
     "submit": "Add Place",
     "success": "Place Added!",
@@ -125,7 +128,8 @@
     "errors": {
       "createPlace": "Failed to create place",
       "uploadPhoto": "Failed to upload photo evidence",
-      "submitFailed": "Failed to add place"
+      "submitFailed": "Failed to add place",
+      "loginRequired": "Please log in first to add a place"
     },
     "categories": {
       "MALL": "Shopping Mall",

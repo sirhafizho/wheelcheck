@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669"/>
+      <stop offset="100%" style="stop-color:#047857"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="96" ry="96" fill="url(#bg)"/>
+  
+  <!-- Wheelchair user icon - modern, clean -->
+  <!-- Head -->
+  <circle cx="232" cy="140" r="36" fill="white"/>
+  
+  <!-- Body/torso -->
+  <path d="M232 176 L232 280 L180 280" 
+        stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Arm reaching forward -->
+  <path d="M232 220 L300 220 L300 280" 
+        stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Wheel -->
+  <circle cx="220" cy="350" r="72" stroke="white" stroke-width="28" fill="none"/>
+  
+  <!-- Small wheel detail -->
+  <circle cx="220" cy="350" r="12" fill="white"/>
+  
+  <!-- Footrest and leg support -->
+  <path d="M300 280 L340 360 L380 360" 
+        stroke="white" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Checkmark overlay (bottom right) -->
+  <circle cx="390" cy="390" r="72" fill="white"/>
+  <circle cx="390" cy="390" r="60" fill="#059669"/>
+  <path d="M358 390 L380 412 L422 368" 
+        stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

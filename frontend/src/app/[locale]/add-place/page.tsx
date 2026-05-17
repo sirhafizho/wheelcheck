@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { use, useState } from 'react';
+import { use, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
@@ -34,6 +34,24 @@ const LocationPicker = dynamic(() => import('@/components/map/LocationPicker').t
   ),
 });
 
+interface PlaceSuggestion {
+  id: string;
+  name: string;
+  address?: string;
+  latitude: number;
+  longitude: number;
+  category?: string;
+}
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
 export default function AddPlacePage({ params }: { params: Params }) {
   const { locale } = use(params);
   const router = useRouter();
@@ -51,6 +69,64 @@ export default function AddPlacePage({ params }: { params: Params }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const debouncedName = useDebounce(formData.name, 300);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Fetch place name suggestions from backend search
+  useEffect(() => {
+    if (debouncedName.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingSuggestions(true);
+
+    fetch(`${API_URL}/places/search?name=${encodeURIComponent(debouncedName)}`)
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: PlaceSuggestion[]) => {
+        if (!cancelled) {
+          setSuggestions(data.slice(0, 8));
+          setShowSuggestions(data.length > 0);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSuggestions([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSuggestions(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [debouncedName]);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const selectSuggestion = useCallback((suggestion: PlaceSuggestion) => {
+    setFormData((prev) => ({
+      ...prev,
+      name: suggestion.name,
+      address: suggestion.address || prev.address,
+      latitude: suggestion.latitude.toFixed(6),
+      longitude: suggestion.longitude.toFixed(6),
+      category: suggestion.category || prev.category,
+    }));
+    setShowSuggestions(false);
+  }, []);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -73,8 +149,7 @@ export default function AddPlacePage({ params }: { params: Params }) {
       formData.address &&
       formData.category &&
       formData.latitude &&
-      formData.longitude &&
-      photos.length > 0
+      formData.longitude
   );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -86,7 +161,10 @@ export default function AddPlacePage({ params }: { params: Params }) {
 
     try {
       const token = localStorage.getItem('wheelcheck_token');
-      const authHeaders: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+      if (!token) {
+        throw new Error(t('errors.loginRequired'));
+      }
+      const authHeaders: HeadersInit = { Authorization: `Bearer ${token}` };
 
       const response = await fetch(`${API_URL}/places`, {
         method: 'POST',
@@ -105,6 +183,10 @@ export default function AddPlacePage({ params }: { params: Params }) {
         }),
       });
 
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(t('errors.loginRequired'));
+      }
+
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.message || t('errors.createPlace'));
@@ -112,21 +194,22 @@ export default function AddPlacePage({ params }: { params: Params }) {
 
       const place = await response.json();
 
+      // Upload photos if any (optional)
       for (const photo of photos) {
-        const form = new FormData();
-        form.append('placeId', place.id);
-        form.append('file', photo);
-        form.append('description', t('photoDescription'));
+        try {
+          const form = new FormData();
+          form.append('placeId', place.id);
+          form.append('file', photo);
+          form.append('description', t('photoDescription'));
 
-        const uploadResponse = await fetch(`${API_URL}/photos/upload`, {
-          method: 'POST',
-          headers: authHeaders,
-          body: form,
-        });
-
-        if (!uploadResponse.ok) {
-          const data = await uploadResponse.json().catch(() => ({}));
-          throw new Error(data.message || t('errors.uploadPhoto'));
+          await fetch(`${API_URL}/photos/upload`, {
+            method: 'POST',
+            headers: authHeaders,
+            body: form,
+          });
+        } catch {
+          // Photo upload is optional — don't fail the whole submission
+          console.warn('Photo upload failed, continuing...');
         }
       }
 
@@ -165,7 +248,7 @@ export default function AddPlacePage({ params }: { params: Params }) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
+        <div className="relative" ref={suggestionsRef}>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             {t('name')} *
           </label>
@@ -173,11 +256,39 @@ export default function AddPlacePage({ params }: { params: Params }) {
             id="name"
             type="text"
             required
+            autoComplete="off"
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
             placeholder={t('namePlaceholder')}
           />
+          {loadingSuggestions && (
+            <div className="absolute right-3 top-[42px]">
+              <LoadingSpinner size="sm" />
+            </div>
+          )}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+              <div className="px-3 py-1.5 text-xs text-gray-500 border-b">
+                {t('existingPlaces')}
+              </div>
+              {suggestions.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => selectSuggestion(s)}
+                  className="w-full text-left px-4 py-3 hover:bg-emerald-50 border-b border-gray-100 last:border-0 min-h-[48px]"
+                >
+                  <div className="font-medium text-gray-900">{s.name}</div>
+                  {s.address && <div className="text-sm text-gray-500 truncate">{s.address}</div>}
+                </button>
+              ))}
+              <div className="px-3 py-2 text-xs text-gray-400 bg-gray-50 rounded-b-lg">
+                {t('typeNewPlace')}
+              </div>
+            </div>
+          )}
         </div>
 
         <div>
@@ -252,11 +363,10 @@ export default function AddPlacePage({ params }: { params: Params }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('photos')} * <span className="text-red-500">({t('photosRequired')})</span>
+            {t('photos')} <span className="text-gray-400">({t('photosOptional')})</span>
           </label>
           <p className="text-sm text-gray-500 mb-2">{t('photosHint')}</p>
           <PhotoUpload onPhotosChange={setPhotos} maxPhotos={5} />
-          {photos.length === 0 && <p className="text-sm text-red-500 mt-1">{t('photosRequiredError')}</p>}
         </div>
 
         <Button type="submit" variant="primary" fullWidth disabled={!canSubmit || submitting} className="min-h-[48px]">

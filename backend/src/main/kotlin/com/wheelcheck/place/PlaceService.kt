@@ -63,7 +63,7 @@ class PlaceService(
 
     @Transactional(readOnly = true)
     fun searchByName(name: String): List<PlaceDto> {
-        return placeRepository.findByNameContainingIgnoreCase(name).map { it.toDto() }
+        return placeRepository.findByNameContainingIgnoreCaseLimited(name).map { it.toDto() }
     }
 
     @Transactional
