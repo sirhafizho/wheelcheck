@@ -66,8 +66,13 @@ class PlaceService(
         return placeRepository.findByNameContainingIgnoreCaseLimited(name).map { it.toDto() }
     }
 
+    @Transactional(readOnly = true)
+    fun findByOwner(userId: UUID): List<PlaceDto> {
+        return placeRepository.findByCreatedBy(userId).map { it.toDto() }
+    }
+
     @Transactional
-    fun create(request: CreatePlaceRequest): PlaceDto {
+    fun create(request: CreatePlaceRequest, userId: UUID? = null): PlaceDto {
         val point = geometryFactory.createPoint(
             Coordinate(request.longitude, request.latitude)
         )
@@ -83,6 +88,7 @@ class PlaceService(
             category = request.category,
             accessibilityLevel = AccessLevel.UNKNOWN,
             reviewCount = 0,
+            createdBy = userId,
             createdAt = Instant.now(),
             updatedAt = Instant.now()
         )
@@ -152,6 +158,7 @@ class PlaceService(
         accessibilityLevel = accessibilityLevel,
         reviewCount = reviewCount,
         createdAt = createdAt,
+        createdBy = createdBy,
         dataSource = dataSource,
         description = osmDescription,
         osmWheelchairTag = osmWheelchairTag,

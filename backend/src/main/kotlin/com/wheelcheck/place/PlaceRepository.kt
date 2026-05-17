@@ -27,7 +27,7 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         SELECT p.*, ST_Distance(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography) as distance 
         FROM places p 
         WHERE ST_DWithin(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography, :radius)
-        AND p.category = CAST(:category AS category_enum)
+        AND p.category = :category
         ORDER BY ST_Distance(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography)
         LIMIT :limit
     """, nativeQuery = true)
@@ -41,7 +41,14 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
     
     @Query(value = """
         SELECT * FROM places 
-        WHERE LOWER(name) LIKE LOWER(CONCAT('%', :name, '%'))
+        WHERE LOWER(REPLACE(name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:name, ' ', ''), '%%'))
+           OR name ILIKE CONCAT('%%', :name, '%%')
+        ORDER BY 
+            CASE WHEN name ILIKE :name THEN 0
+                 WHEN name ILIKE CONCAT(:name, '%%') THEN 1
+                 WHEN name ILIKE CONCAT('%%', :name, '%%') THEN 2
+                 ELSE 3
+            END
         LIMIT 50
     """, nativeQuery = true)
     fun findByNameContainingIgnoreCaseLimited(@Param("name") name: String): List<Place>
@@ -49,4 +56,6 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
     fun findByOsmId(osmId: String): Place?
     
     fun existsByOsmId(osmId: String): Boolean
+    
+    fun findByCreatedBy(userId: UUID): List<Place>
 }

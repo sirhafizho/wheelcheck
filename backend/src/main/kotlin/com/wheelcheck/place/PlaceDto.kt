@@ -20,6 +20,7 @@ data class PlaceDto(
     val accessibilityLevel: AccessLevel,
     val reviewCount: Int,
     val createdAt: Instant,
+    val createdBy: UUID? = null,
     val distance: Double? = null,
     val dataSource: String? = null,
     val description: String? = null,

@@ -2,11 +2,14 @@ package com.wheelcheck.place
 
 import com.wheelcheck.review.ReviewDto
 import com.wheelcheck.review.ReviewService
+import com.wheelcheck.user.UserRepository
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -15,7 +18,8 @@ import java.util.*
 @CrossOrigin(origins = ["*"])
 class PlaceController(
     private val placeService: PlaceService,
-    private val reviewService: ReviewService
+    private val reviewService: ReviewService,
+    private val userRepository: UserRepository
 ) {
     
     @GetMapping
@@ -56,9 +60,72 @@ class PlaceController(
     
     @PostMapping
     fun createPlace(
-        @Valid @RequestBody request: CreatePlaceRequest
+        @Valid @RequestBody request: CreatePlaceRequest,
+        authentication: Authentication?
     ): ResponseEntity<PlaceDto> {
-        val place = placeService.create(request)
+        val userId = authentication?.principal as? UUID
+        val place = placeService.create(request, userId)
         return ResponseEntity.status(HttpStatus.CREATED).body(place)
+    }
+
+    @PutMapping("/{id}")
+    fun updatePlace(
+        @PathVariable id: UUID,
+        @Valid @RequestBody request: CreatePlaceRequest,
+        authentication: Authentication?
+    ): ResponseEntity<PlaceDto> {
+        val userId = authentication?.principal as? UUID
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val existing = placeService.findById(id)
+            ?: return ResponseEntity.notFound().build()
+
+        if (!isOwnerOrAdmin(existing, userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        val updated = placeService.update(id, com.wheelcheck.admin.UpdatePlaceRequest(
+            name = request.name,
+            nameMs = request.nameMs,
+            latitude = request.latitude,
+            longitude = request.longitude,
+            address = request.address,
+            city = request.city,
+            category = request.category,
+            accessibilityLevel = existing.accessibilityLevel
+        ))
+        return ResponseEntity.ok(updated)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deletePlace(
+        @PathVariable id: UUID,
+        authentication: Authentication?
+    ): ResponseEntity<Void> {
+        val userId = authentication?.principal as? UUID
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val existing = placeService.findById(id)
+            ?: return ResponseEntity.notFound().build()
+
+        if (!isOwnerOrAdmin(existing, userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        placeService.delete(id)
+        return ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/my")
+    fun getMyPlaces(authentication: Authentication?): ResponseEntity<List<PlaceDto>> {
+        val userId = authentication?.principal as? UUID
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        return ResponseEntity.ok(placeService.findByOwner(userId))
+    }
+
+    private fun isOwnerOrAdmin(place: PlaceDto, userId: UUID): Boolean {
+        if (place.createdBy == userId) return true
+        val user = userRepository.findByIdOrNull(userId) ?: return false
+        return user.role.uppercase() == "ADMIN"
     }
 }

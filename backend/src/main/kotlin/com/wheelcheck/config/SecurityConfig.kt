@@ -27,8 +27,13 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     // Public endpoints
-                    .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/search").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/places/{id}", "/api/places/{id}/reports").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/places/nearby").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/places/my").authenticated()
+                    .requestMatchers(HttpMethod.PUT, "/api/places/{id}").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/places/{id}").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/places").authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/reviews", "/api/reviews/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/reviews").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/reviews/*/photos").permitAll()

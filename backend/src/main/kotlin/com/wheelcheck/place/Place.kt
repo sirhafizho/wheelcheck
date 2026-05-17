@@ -64,5 +64,8 @@ data class Place(
     val createdAt: Instant = Instant.now(),
     
     @Column(name = "updated_at", nullable = false)
-    val updatedAt: Instant = Instant.now()
+    val updatedAt: Instant = Instant.now(),
+
+    @Column(name = "created_by")
+    val createdBy: UUID? = null
 )
