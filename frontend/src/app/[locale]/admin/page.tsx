@@ -45,7 +45,7 @@ interface PlaceDto {
   nameMs?: string | null;
   latitude: number;
   longitude: number;
-  address: string;
+  address: string | null;
   city: string;
   category: Category;
   accessibilityLevel: AccessLevel;
@@ -457,7 +457,7 @@ export default function AdminPage({ params }: { params: Params }) {
     setPlaceForm({
       name: place.name,
       nameMs: place.nameMs ?? '',
-      address: place.address,
+      address: place.address ?? '',
       city: place.city,
       category: place.category,
     });

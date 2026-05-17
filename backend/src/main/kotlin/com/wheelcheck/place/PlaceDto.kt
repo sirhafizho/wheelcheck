@@ -13,7 +13,7 @@ data class PlaceDto(
     val nameMs: String?,
     val latitude: Double,
     val longitude: Double,
-    val address: String,
+    val address: String? = null,
     val city: String,
     val state: String? = null,
     val category: Category,
@@ -43,8 +43,7 @@ data class CreatePlaceRequest(
     val latitude: Double,
     @field:NotNull(message = "Longitude is required")
     val longitude: Double,
-    @field:NotBlank(message = "Address is required")
-    val address: String,
+    val address: String? = null,
     val city: String = "Kuala Lumpur",
     @field:NotNull(message = "Category is required")
     val category: Category

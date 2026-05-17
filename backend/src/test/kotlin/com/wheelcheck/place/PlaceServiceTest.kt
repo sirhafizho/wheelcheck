@@ -114,11 +114,11 @@ class PlaceServiceTest {
             )
         )
         
-        every { placeRepository.findByNameContainingIgnoreCase("restaurant") } returns places
+        every { placeRepository.findByNameContainingIgnoreCaseLimited("restaurant") } returns places
         
         val results = placeService.searchByName("restaurant")
         
         assertEquals(2, results.size)
-        verify { placeRepository.findByNameContainingIgnoreCase("restaurant") }
+        verify { placeRepository.findByNameContainingIgnoreCaseLimited("restaurant") }
     }
 }

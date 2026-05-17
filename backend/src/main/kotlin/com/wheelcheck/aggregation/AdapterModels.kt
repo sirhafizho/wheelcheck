@@ -33,7 +33,7 @@ data class ExternalPlace(
     val nameMs: String? = null,
     val latitude: Double,
     val longitude: Double,
-    val address: String,
+    val address: String? = null,
     val city: String = "",
     val state: String? = null,
     val category: Category,

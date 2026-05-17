@@ -214,10 +214,10 @@ class GeoapifyAdapterTest {
     }
 
     @Test
-    fun `buildAddress returns fallback when nothing available`() {
+    fun `buildAddress returns null when nothing available`() {
         val props = GeoapifyProperties(place_id = "x", name = "Test")
         val address = invokeBuildAddress(props)
-        assertEquals("Address not available", address)
+        assertNull(address)
     }
 
     // ── rawTags ────────────────────────────────────────────────────────────────
@@ -329,10 +329,10 @@ class GeoapifyAdapterTest {
         return method.invoke(adapter, categories) as Category
     }
 
-    private fun invokeBuildAddress(props: GeoapifyProperties): String {
+    private fun invokeBuildAddress(props: GeoapifyProperties): String? {
         val method = GeoapifyAdapter::class.java
             .getDeclaredMethod("buildAddress", GeoapifyProperties::class.java)
         method.isAccessible = true
-        return method.invoke(adapter, props) as String
+        return method.invoke(adapter, props) as String?
     }
 }

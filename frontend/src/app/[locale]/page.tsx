@@ -486,7 +486,11 @@ export default function HomePage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-gray-900">{place.name}</p>
-                            <p className="mt-1 line-clamp-2 text-xs text-gray-500">{place.address}</p>
+                            <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+                              {(!place.address || place.address === 'Address not available')
+                                ? t('places.addressNotAvailable')
+                                : place.address}
+                            </p>
                           </div>
                           {category && (
                             <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700">
@@ -580,11 +584,15 @@ export default function HomePage() {
               <AccessBadge level={selectedPlaceData.accessibilityLevel} size="sm" />
             </div>
 
-            <p className="text-sm leading-6 text-gray-600">{selectedPlaceData.address}</p>
+            <p className="text-sm leading-6 text-gray-600">
+              {(!selectedPlaceData.address || selectedPlaceData.address === 'Address not available')
+                ? t('places.addressNotAvailable')
+                : selectedPlaceData.address}
+            </p>
 
             <div className="flex flex-wrap gap-2 text-xs font-medium">
               <span className="rounded-full bg-gray-100 px-3 py-1.5 text-gray-700">
-                {selectedPlaceData.reviewCount} {selectedPlaceData.reviewCount === 1 ? 'review' : 'reviews'}
+                {t('places.reviewCount', { count: selectedPlaceData.reviewCount ?? 0 })}
               </span>
               {selectedPlaceDistanceSummary && (
                 <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700">

@@ -38,6 +38,9 @@ class PlaceControllerTest {
     
     @MockkBean
     private lateinit var userService: UserService
+
+    @MockkBean
+    private lateinit var userRepository: com.wheelcheck.user.UserRepository
     
     @MockkBean
     private lateinit var reviewService: com.wheelcheck.review.ReviewService
@@ -59,12 +62,13 @@ class PlaceControllerTest {
                 createdAt = Instant.now()
             )
         )
+        val page = org.springframework.data.domain.PageImpl(places)
         
-        every { placeService.findAll() } returns places
+        every { placeService.findAll(any()) } returns page
         
         mockMvc.perform(get("/api/places"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$[0].name").value("Test Place 1"))
+            .andExpect(jsonPath("$.content[0].name").value("Test Place 1"))
     }
     
     @Test

@@ -23,8 +23,7 @@ data class UpdatePlaceRequest(
     val latitude: Double,
     @field:NotNull(message = "Longitude is required")
     val longitude: Double,
-    @field:NotBlank(message = "Address is required")
-    val address: String,
+    val address: String? = null,
     @field:NotBlank(message = "City is required")
     val city: String,
     @field:NotNull(message = "Category is required")

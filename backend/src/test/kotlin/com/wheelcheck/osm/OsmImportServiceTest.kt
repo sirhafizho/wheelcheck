@@ -91,10 +91,10 @@ class OsmImportServiceTest {
     }
 
     @Test
-    fun `buildAddress returns fallback when no address tags`() {
+    fun `buildAddress returns null when no address tags`() {
         val tags = mapOf("name" to "Some Place")
         val address = osmImportService.buildAddress(tags)
-        assertEquals("Address not available", address)
+        assertNull(address)
     }
 
     @Test

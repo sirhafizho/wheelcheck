@@ -127,7 +127,7 @@ class WikidataAdapter(
             name = first.name,
             latitude = first.latitude,
             longitude = first.longitude,
-            address = "Address not available",
+            address = null,
             city = MalaysiaGeoUtils.city(first.latitude, first.longitude),
             state = MalaysiaGeoUtils.state(first.latitude, first.longitude),
             category = determineCategory(instanceIds, instanceLabels, first.name),

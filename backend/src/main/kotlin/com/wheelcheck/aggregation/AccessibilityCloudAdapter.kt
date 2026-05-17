@@ -87,7 +87,7 @@ class AccessibilityCloudAdapter(
             name = name,
             latitude = coords[1],
             longitude = coords[0],
-            address = props.address?.full ?: "Address not available",
+            address = props.address?.full ?: null,
             city = props.address?.city ?: MalaysiaGeoUtils.city(coords[1], coords[0]),
             state = MalaysiaGeoUtils.state(coords[1], coords[0]),
             category = determineCategory(props.category ?: ""),

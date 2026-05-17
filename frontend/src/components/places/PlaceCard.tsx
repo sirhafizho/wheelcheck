@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 import type { Place } from '@/lib/types';
 import { formatDistance, formatWheelchairDistance } from '@/lib/utils';
 import { AccessBadge } from './AccessBadge';
@@ -20,6 +21,12 @@ function getDistanceSummary(distance?: number | null) {
 }
 
 export function PlaceCard({ place, locale }: PlaceCardProps) {
+  const t = useTranslations('places');
+
+  const addressDisplay =
+    !place.address || place.address === 'Address not available'
+      ? t('addressNotAvailable')
+      : place.address;
   return (
     <Link
       href={`/${locale}/places/${place.id}`}
@@ -39,7 +46,7 @@ export function PlaceCard({ place, locale }: PlaceCardProps) {
 
         <div className="mb-3 flex items-start gap-2 text-sm text-gray-600">
           <MapPinIcon className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
-          <p className="flex-1">{place.address}</p>
+          <p className="flex-1">{addressDisplay}</p>
         </div>
 
         {(place.city || place.state) && (
@@ -57,7 +64,7 @@ export function PlaceCard({ place, locale }: PlaceCardProps) {
 
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>
-            {place.reviewCount} {place.reviewCount === 1 ? 'review' : 'reviews'}
+            {t('reviewCount', { count: place.reviewCount ?? 0 })}
           </span>
         </div>
       </article>

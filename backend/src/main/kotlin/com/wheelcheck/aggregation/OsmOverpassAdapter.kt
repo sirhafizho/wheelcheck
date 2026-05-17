@@ -162,14 +162,14 @@ class OsmOverpassAdapter(
         }
     }
 
-    private fun buildAddress(tags: Map<String, String>): String {
+    private fun buildAddress(tags: Map<String, String>): String? {
         val parts = listOfNotNull(
             tags["addr:housenumber"],
             tags["addr:street"],
             tags["addr:postcode"],
             tags["addr:city"]
         )
-        return if (parts.isNotEmpty()) parts.joinToString(", ") else "Address not available"
+        return if (parts.isNotEmpty()) parts.joinToString(", ") else null
     }
 
     private fun buildEnhancedTags(tags: Map<String, String>): Map<String, String> {

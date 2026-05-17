@@ -1,6 +1,7 @@
 'use client';
 
 import { Marker, Popup } from 'react-leaflet';
+import { useTranslations } from 'next-intl';
 import type { Place } from '@/lib/types';
 import { AccessBadge } from '../places/AccessBadge';
 
@@ -10,6 +11,11 @@ interface PlaceMarkerProps {
 }
 
 export function PlaceMarker({ place, onClick }: PlaceMarkerProps) {
+  const t = useTranslations('places');
+  const addressDisplay = (!place.address || place.address === 'Address not available')
+    ? t('addressNotAvailable')
+    : place.address;
+
   return (
     <Marker
       position={[place.latitude, place.longitude]}
@@ -24,7 +30,7 @@ export function PlaceMarker({ place, onClick }: PlaceMarkerProps) {
           </h3>
           <AccessBadge level={place.accessibilityLevel} size="sm" />
           <p className="text-sm text-gray-600 mt-2">
-            {place.address}
+            {addressDisplay}
           </p>
         </div>
       </Popup>

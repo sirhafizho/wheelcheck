@@ -126,7 +126,7 @@ class PrasaranaGtfsAdapter(
             name = stopName,
             latitude = lat,
             longitude = lng,
-            address = "Address not available",
+            address = null,
             city = MalaysiaGeoUtils.city(lat, lng),
             state = MalaysiaGeoUtils.state(lat, lng),
             category = Category.TRANSPORT,

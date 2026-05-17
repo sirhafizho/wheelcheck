@@ -117,7 +117,11 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
 
         <div className="flex items-start gap-2 text-gray-700 mb-1">
           <MapPinIcon className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
-          <p className="flex-1">{place.address}</p>
+          <p className="flex-1">
+            {!place.address || place.address === 'Address not available'
+              ? tPlaces('addressNotAvailable')
+              : place.address}
+          </p>
         </div>
 
         {locationLine && (

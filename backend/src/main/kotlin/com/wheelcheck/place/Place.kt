@@ -22,8 +22,8 @@ data class Place(
     @Column(columnDefinition = "geometry(Point, 4326)", nullable = false)
     val location: Point,
     
-    @Column(nullable = false)
-    val address: String,
+    @Column
+    val address: String? = null,
     
     @Column(nullable = false)
     val city: String = "",

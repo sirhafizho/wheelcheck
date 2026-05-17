@@ -131,14 +131,14 @@ class GeoapifyAdapter(
         )
     }
 
-    private fun buildAddress(props: GeoapifyProperties): String {
+    private fun buildAddress(props: GeoapifyProperties): String? {
         val parts = listOfNotNull(
             props.housenumber,
             props.street,
             props.postcode,
             props.city
         )
-        return if (parts.isNotEmpty()) parts.joinToString(", ") else props.formatted ?: "Address not available"
+        return if (parts.isNotEmpty()) parts.joinToString(", ") else props.formatted
     }
 
     private fun buildRawTags(props: GeoapifyProperties): Map<String, String> {

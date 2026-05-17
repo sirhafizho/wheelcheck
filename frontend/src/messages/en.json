@@ -42,6 +42,8 @@
     "dataSource": "Data source",
     "category": "Category",
     "notFound": "Place not found",
+    "addressNotAvailable": "Address not available",
+    "reviewCount": "{count, plural, =0 {No reviews} one {# review} other {# reviews}}",
     "dataSources": {
       "OSM": "OpenStreetMap",
       "PRASARANA_GTFS": "Prasarana GTFS (data.gov.my)",

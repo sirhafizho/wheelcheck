@@ -7,7 +7,7 @@ export interface Place {
   nameMs?: string;
   latitude: number;
   longitude: number;
-  address: string;
+  address: string | null;
   city?: string;
   state?: string;
   dataSource?: string;
