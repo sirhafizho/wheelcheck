@@ -35,7 +35,7 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
       <div className="h-full overflow-y-auto pb-16">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4">
-            {error || 'Place not found'}
+            {error || t('places.notFound')}
           </div>
           <Button onClick={() => router.back()}>
             {t('common.back')}
@@ -60,6 +60,7 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
         place={place}
         locale={locale}
         onReportClick={() => router.push(`/${locale}/report/${place.id}`)}
+        onShowOnMapClick={() => router.push(`/${locale}?placeId=${place.id}&lat=${place.latitude}&lng=${place.longitude}`)}
       />
 
       <div className="bg-white rounded-lg shadow-lg p-6">

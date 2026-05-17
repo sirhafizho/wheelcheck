@@ -17,55 +17,69 @@ const levelEmoji: Record<AccessLevel, string> = {
   UNKNOWN: '❓',
 };
 
-const levelLabel: Record<AccessLevel, string> = {
-  FULL: 'Accessible',
-  PARTIAL: 'Partial',
-  NOT_ACCESSIBLE: 'Not Accessible',
-  UNKNOWN: 'Unknown',
-};
-
-function RatingRow({ label, level }: { label: string; level: AccessLevel }) {
+function RatingRow({
+  label,
+  level,
+  levelLabels,
+}: {
+  label: string;
+  level: AccessLevel;
+  levelLabels: Record<AccessLevel, string>;
+}) {
   return (
     <div className="flex items-center justify-between py-1">
       <span className="text-sm text-gray-600">{label}</span>
       <span className="text-sm font-medium">
-        {levelEmoji[level]} {levelLabel[level]}
+        {levelEmoji[level]} {levelLabels[level]}
       </span>
     </div>
   );
 }
 
 export function ReviewsList({ placeId, locale }: ReviewsListProps) {
-  const t = useTranslations();
+  const t = useTranslations('reviews');
+  const tAccess = useTranslations('access');
   const [reviews, setReviews] = useState<AccessReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
 
+  const levelLabels: Record<AccessLevel, string> = {
+    FULL: tAccess('full'),
+    PARTIAL: tAccess('partial'),
+    NOT_ACCESSIBLE: tAccess('notAccessible'),
+    UNKNOWN: tAccess('unknown'),
+  };
+
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+
     api.getPlaceReports(placeId).then((data) => {
       if (!cancelled) {
         setReviews(data);
         setLoading(false);
       }
     }).catch(() => {
-      if (!cancelled) setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+      }
     });
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, [placeId]);
 
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(new Date(dateString));
-  };
+  const formatDate = (dateString: string) => new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(dateString));
 
   if (loading) {
     return (
       <div className="py-4 text-center text-gray-500 text-sm">
-        Loading reports...
+        {t('loading')}
       </div>
     );
   }
@@ -73,7 +87,7 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
   if (reviews.length === 0) {
     return (
       <div className="py-6 text-center">
-        <p className="text-gray-500 text-sm">No reports yet. Be the first to report!</p>
+        <p className="text-gray-500 text-sm">{t('noReports')}</p>
       </div>
     );
   }
@@ -81,7 +95,7 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
   return (
     <div className="space-y-4" data-testid="reviews-list">
       <h2 className="text-lg font-semibold text-gray-900">
-        Accessibility Reports ({reviews.length})
+        {t('title', { count: reviews.length })}
       </h2>
 
       {reviews.map((review) => (
@@ -97,23 +111,23 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {review.userName || 'Anonymous'}
+                  {review.userName || t('anonymous')}
                 </p>
                 <p className="text-xs text-gray-500">{formatDate(review.createdAt)}</p>
               </div>
             </div>
             {review.isVerified && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                ✓ Verified
+                ✓ {t('verified')}
               </span>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-1 mb-3 bg-white rounded-md p-3">
-            <RatingRow label="Entrance" level={review.entrance} />
-            <RatingRow label="Toilet" level={review.toilet} />
-            <RatingRow label="Parking" level={review.parking} />
-            <RatingRow label="Internal" level={review.internalNav} />
+            <RatingRow label={t('entrance')} level={review.entrance} levelLabels={levelLabels} />
+            <RatingRow label={t('toilet')} level={review.toilet} levelLabels={levelLabels} />
+            <RatingRow label={t('parking')} level={review.parking} levelLabels={levelLabels} />
+            <RatingRow label={t('internal')} level={review.internalNav} levelLabels={levelLabels} />
           </div>
 
           {review.notes && (
@@ -125,12 +139,13 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
               {review.photoUrls.map((url, idx) => (
                 <button
                   key={idx}
+                  type="button"
                   onClick={() => setExpandedPhoto(url)}
                   className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-gray-200 hover:ring-2 hover:ring-emerald-500 transition-all"
                 >
                   <img
                     src={url.startsWith('http') ? url : `http://localhost:8080${url}`}
-                    alt={`Evidence photo ${idx + 1}`}
+                    alt={t('evidencePhoto', { number: idx + 1 })}
                     className="w-full h-full object-cover"
                   />
                 </button>
@@ -140,7 +155,6 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
         </div>
       ))}
 
-      {/* Photo lightbox */}
       {expandedPhoto && (
         <div
           className="fixed inset-0 bg-black/80 z-[2000] flex items-center justify-center p-4"
@@ -148,11 +162,13 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
         >
           <img
             src={expandedPhoto.startsWith('http') ? expandedPhoto : `http://localhost:8080${expandedPhoto}`}
-            alt="Full size evidence photo"
+            alt={t('fullSizeEvidencePhoto')}
             className="max-w-full max-h-full rounded-lg"
           />
           <button
+            type="button"
             onClick={() => setExpandedPhoto(null)}
+            aria-label={t('closePhoto')}
             className="absolute top-4 right-4 text-white text-2xl bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
           >
             ✕

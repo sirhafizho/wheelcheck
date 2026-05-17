@@ -79,6 +79,8 @@ export interface PlaceSearchParams {
   accessibilityFeatures?: AccessibilityFeature[];
   limit?: number;
   offset?: number;
+  page?: number;
+  size?: number;
 }
 
 export interface ApiResponse<T> {

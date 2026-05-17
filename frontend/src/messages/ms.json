@@ -32,7 +32,26 @@
     "noResults": "Tiada tempat dijumpai",
     "details": "Butiran",
     "viewOnMap": "Lihat di Peta",
-    "searchPlaceholder": "Cari tempat..."
+    "searchPlaceholder": "Cari tempat...",
+    "showOnMap": "Lihat di Peta",
+    "loadMore": "Muatkan Lagi",
+    "loadingMore": "Memuatkan...",
+    "showing": "Menunjukkan {count} tempat",
+    "reports": "Laporan",
+    "lastUpdated": "Kemaskini Terakhir",
+    "dataSource": "Sumber data",
+    "category": "Kategori",
+    "notFound": "Tempat tidak dijumpai",
+    "dataSources": {
+      "OSM": "OpenStreetMap",
+      "PRASARANA_GTFS": "Prasarana GTFS (data.gov.my)",
+      "DATA_GOV_MY": "data.gov.my",
+      "ACCESSIBILITY_CLOUD": "accessibility.cloud",
+      "WIKIDATA": "Wikidata",
+      "GEOAPIFY": "Geoapify",
+      "COMMUNITY": "Laporan komuniti",
+      "SEED": "Data awal"
+    }
   },
   "report": {
     "title": "Lapor Kebolehcapaian",
@@ -154,7 +173,8 @@
       "HOTEL": "Hotel",
       "CAFE": "Kafe",
       "OTHER": "Lain-lain"
-    }
+    },
+    "cityPlaceholder": "Kuala Lumpur"
   },
   "profile": {
     "title": "Profil",
@@ -244,5 +264,40 @@
       "page": "Halaman",
       "of": "daripada"
     }
+  },
+  "reviews": {
+    "title": "Laporan Kebolehcapaian ({count})",
+    "loading": "Memuatkan laporan...",
+    "noReports": "Tiada laporan lagi. Jadilah yang pertama!",
+    "entrance": "Pintu Masuk",
+    "toilet": "Tandas",
+    "parking": "Tempat Letak Kereta",
+    "internal": "Laluan Dalam",
+    "anonymous": "Tanpa Nama",
+    "verified": "Disahkan",
+    "evidencePhoto": "Foto bukti {number}",
+    "fullSizeEvidencePhoto": "Foto bukti saiz penuh",
+    "closePhoto": "Tutup foto"
+  },
+  "comments": {
+    "title": "Perbincangan",
+    "loading": "Memuatkan komen...",
+    "noComments": "Tiada komen lagi. Mulakan perbincangan!",
+    "placeholder": "Kongsi pengalaman atau tanya soalan...",
+    "loginToComment": "Sila log masuk untuk komen.",
+    "loginToVote": "Sila log masuk untuk mengundi.",
+    "postFailed": "Gagal menghantar komen. Sila cuba lagi.",
+    "cancel": "Batal",
+    "reply": "Balas",
+    "post": "Hantar",
+    "edit": "Sunting",
+    "delete": "Padam",
+    "editPlaceholder": "Sunting komen anda...",
+    "deleteConfirm": "Padam komen ini?",
+    "saveFailed": "Gagal menyimpan. Sila cuba lagi.",
+    "anonymous": "Tanpa Nama",
+    "replyPlaceholder": "Tulis balasan...",
+    "upvote": "Undi naik",
+    "downvote": "Undi turun"
   }
 }

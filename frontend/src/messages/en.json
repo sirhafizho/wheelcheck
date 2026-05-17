@@ -32,7 +32,26 @@
     "noResults": "No places found",
     "details": "Details",
     "viewOnMap": "View on Map",
-    "searchPlaceholder": "Search places..."
+    "searchPlaceholder": "Search places...",
+    "showOnMap": "View on Map",
+    "loadMore": "Load More",
+    "loadingMore": "Loading...",
+    "showing": "Showing {count} places",
+    "reports": "Reports",
+    "lastUpdated": "Last Updated",
+    "dataSource": "Data source",
+    "category": "Category",
+    "notFound": "Place not found",
+    "dataSources": {
+      "OSM": "OpenStreetMap",
+      "PRASARANA_GTFS": "Prasarana GTFS (data.gov.my)",
+      "DATA_GOV_MY": "data.gov.my",
+      "ACCESSIBILITY_CLOUD": "accessibility.cloud",
+      "WIKIDATA": "Wikidata",
+      "GEOAPIFY": "Geoapify",
+      "COMMUNITY": "Community report",
+      "SEED": "Seed data"
+    }
   },
   "report": {
     "title": "Report Accessibility",
@@ -154,7 +173,8 @@
       "HOTEL": "Hotel",
       "CAFE": "Cafe",
       "OTHER": "Other"
-    }
+    },
+    "cityPlaceholder": "Kuala Lumpur"
   },
   "profile": {
     "title": "Profile",
@@ -244,5 +264,40 @@
       "page": "Page",
       "of": "of"
     }
+  },
+  "reviews": {
+    "title": "Accessibility Reports ({count})",
+    "loading": "Loading reports...",
+    "noReports": "No reports yet. Be the first to report!",
+    "entrance": "Entrance",
+    "toilet": "Toilet",
+    "parking": "Parking",
+    "internal": "Internal",
+    "anonymous": "Anonymous",
+    "verified": "Verified",
+    "evidencePhoto": "Evidence photo {number}",
+    "fullSizeEvidencePhoto": "Full size evidence photo",
+    "closePhoto": "Close photo"
+  },
+  "comments": {
+    "title": "Discussion",
+    "loading": "Loading comments...",
+    "noComments": "No comments yet. Start the discussion!",
+    "placeholder": "Share your experience or ask a question...",
+    "loginToComment": "Please log in to comment.",
+    "loginToVote": "Please log in to vote.",
+    "postFailed": "Failed to post comment. Please try again.",
+    "cancel": "Cancel",
+    "reply": "Reply",
+    "post": "Post",
+    "edit": "Edit",
+    "delete": "Delete",
+    "editPlaceholder": "Edit your comment...",
+    "deleteConfirm": "Delete this comment?",
+    "saveFailed": "Failed to save. Please try again.",
+    "anonymous": "Anonymous",
+    "replyPlaceholder": "Write a reply...",
+    "upvote": "Upvote",
+    "downvote": "Downvote"
   }
 }

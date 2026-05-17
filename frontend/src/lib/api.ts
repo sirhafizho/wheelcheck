@@ -62,7 +62,9 @@ class ApiClient {
       return { data: places, total: places.length };
     }
 
-    const response = await this.fetch<{ content: Place[]; totalElements: number }>('/places?page=0&size=50');
+    const page = params.page ?? 0;
+    const size = params.size ?? 20;
+    const response = await this.fetch<{ content: Place[]; totalElements: number }>(`/places?page=${page}&size=${size}`);
     return { data: response.content, total: response.totalElements };
   }
 

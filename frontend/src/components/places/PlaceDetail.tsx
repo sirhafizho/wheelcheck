@@ -6,30 +6,52 @@ import type { Place } from '@/lib/types';
 import { AccessBadge } from './AccessBadge';
 import { Button } from '../ui/Button';
 
-const DATA_SOURCE_LABELS: Record<string, string> = {
-  OSM: 'OpenStreetMap',
-  PRASARANA_GTFS: 'Prasarana GTFS (data.gov.my)',
-  DATA_GOV_MY: 'data.gov.my',
-  ACCESSIBILITY_CLOUD: 'accessibility.cloud',
-  WIKIDATA: 'Wikidata',
-  GEOAPIFY: 'Geoapify',
-  COMMUNITY: 'Community report',
-  SEED: 'Seed data',
+const DATA_SOURCE_TRANSLATION_KEYS: Record<string, string> = {
+  OSM: 'dataSources.OSM',
+  PRASARANA_GTFS: 'dataSources.PRASARANA_GTFS',
+  DATA_GOV_MY: 'dataSources.DATA_GOV_MY',
+  ACCESSIBILITY_CLOUD: 'dataSources.ACCESSIBILITY_CLOUD',
+  WIKIDATA: 'dataSources.WIKIDATA',
+  GEOAPIFY: 'dataSources.GEOAPIFY',
+  COMMUNITY: 'dataSources.COMMUNITY',
+  SEED: 'dataSources.SEED',
 };
 
-function formatDataSource(source: string | undefined): string {
-  if (!source) return 'Community report';
-  return DATA_SOURCE_LABELS[source] ?? source;
+const KNOWN_CATEGORIES = [
+  'MALL',
+  'SHOP',
+  'RESTAURANT',
+  'HOSPITAL',
+  'MOSQUE',
+  'TRANSPORT',
+  'GOVERNMENT',
+  'EDUCATION',
+  'PARK',
+  'HOTEL',
+  'CAFE',
+  'OTHER',
+] as const;
+
+type KnownCategory = (typeof KNOWN_CATEGORIES)[number];
+
+function formatFallbackCategory(category: string) {
+  return category
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 interface PlaceDetailProps {
   place: Place;
   locale: string;
   onReportClick?: () => void;
+  onShowOnMapClick?: () => void;
 }
 
-export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) {
-  const t = useTranslations();
+export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: PlaceDetailProps) {
+  const tCommon = useTranslations('common');
+  const tPlaces = useTranslations('places');
+  const tCategories = useTranslations('addPlace.categories');
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -42,7 +64,27 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
     }).format(date);
   };
 
+  const formatDataSource = (source: string | undefined) => {
+    if (!source) {
+      return tPlaces('dataSources.COMMUNITY');
+    }
+
+    const translationKey = DATA_SOURCE_TRANSLATION_KEYS[source];
+    return translationKey ? tPlaces(translationKey as never) : source;
+  };
+
+  const formatCategory = (category?: string) => {
+    if (!category) {
+      return null;
+    }
+
+    return KNOWN_CATEGORIES.includes(category as KnownCategory)
+      ? tCategories(category as KnownCategory)
+      : formatFallbackCategory(category);
+  };
+
   const locationLine = [place.city, place.state].filter(Boolean).join(', ');
+  const formattedCategory = formatCategory(place.category);
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -60,7 +102,7 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
         </div>
 
         {locationLine && (
-          <p className="text-sm text-gray-500 pl-7 mb-4" aria-label="State">
+          <p className="text-sm text-gray-500 pl-7 mb-4">
             {locationLine}
           </p>
         )}
@@ -77,10 +119,11 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
           </div>
         )}
 
-        {place.category && (
-          <div className="mb-4">
-            <span className="inline-block px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full">
-              {place.category}
+        {formattedCategory && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-gray-500">{tPlaces('category')}</span>
+            <span className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+              {formattedCategory}
             </span>
           </div>
         )}
@@ -88,12 +131,12 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
         <div className="border-t border-gray-200 pt-4 mb-6">
           <dl className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <dt className="font-medium text-gray-500 mb-1">Reports</dt>
+              <dt className="font-medium text-gray-500 mb-1">{tPlaces('reports')}</dt>
               <dd className="text-gray-900">{place.reviewCount}</dd>
             </div>
             {place.lastReportedAt && (
               <div>
-                <dt className="font-medium text-gray-500 mb-1">Last Updated</dt>
+                <dt className="font-medium text-gray-500 mb-1">{tPlaces('lastUpdated')}</dt>
                 <dd className="text-gray-900">
                   <time dateTime={place.lastReportedAt}>
                     {formatDate(place.lastReportedAt)}
@@ -103,7 +146,7 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
             )}
             <div className="col-span-2">
               <dt className="font-medium text-gray-500 mb-1">
-                Data source
+                {tPlaces('dataSource')}
               </dt>
               <dd
                 className="text-gray-700 text-xs"
@@ -115,14 +158,27 @@ export function PlaceDetail({ place, locale, onReportClick }: PlaceDetailProps) 
           </dl>
         </div>
 
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={onReportClick}
-          className="min-h-[48px]"
-        >
-          {t('common.report')}
-        </Button>
+        <div className={`grid gap-3 ${onShowOnMapClick ? 'sm:grid-cols-2' : ''}`}>
+          {onShowOnMapClick && (
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={onShowOnMapClick}
+              className="min-h-[48px] gap-2"
+            >
+              <MapPinIcon className="h-5 w-5" aria-hidden="true" />
+              {tPlaces('showOnMap')}
+            </Button>
+          )}
+          <Button
+            variant="primary"
+            fullWidth
+            onClick={onReportClick}
+            className="min-h-[48px]"
+          >
+            {tCommon('report')}
+          </Button>
+        </div>
       </div>
     </div>
   );

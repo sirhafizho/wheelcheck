@@ -182,7 +182,7 @@ export default function AddPlacePage({ params }: { params: Params }) {
           const form = new FormData();
           form.append('placeId', place.id);
           form.append('file', photo);
-          form.append('description', 'Place photo');
+          form.append('description', t('photoDescription'));
           await fetch(`${API_URL}/photos/upload`, { method: 'POST', headers: authHeaders, body: form });
         } catch { /* photo upload is optional */ }
       }
@@ -377,7 +377,7 @@ export default function AddPlacePage({ params }: { params: Params }) {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[44px]"
-                  placeholder="Kuala Lumpur"
+                  placeholder={t('cityPlaceholder')}
                 />
               </div>
               <div>

@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { PlusIcon, MapPinIcon } from '@heroicons/react/24/outline';
@@ -149,6 +150,10 @@ function getStoredViewport(): FlyToCoordinates | undefined {
 export default function HomePage() {
   const locale = useLocale();
   const t = useTranslations();
+  const urlSearchParams = useSearchParams();
+  const targetPlaceId = urlSearchParams.get('placeId');
+  const targetLat = urlSearchParams.get('lat');
+  const targetLng = urlSearchParams.get('lng');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -173,7 +178,7 @@ export default function HomePage() {
   const debouncedSearch = useDebounce(normalizedQuery, 300);
   const debouncedViewport = useDebounce(mapViewport, 500);
 
-  const searchParams = useMemo(() => {
+  const placeSearchParams = useMemo(() => {
     if (debouncedSearch) {
       return {
         query: debouncedSearch,
@@ -198,7 +203,7 @@ export default function HomePage() {
     };
   }, [activeFilters, debouncedSearch, debouncedViewport, mapCenter]);
 
-  const { places: fetchedPlaces, loading: placesLoading } = usePlaces(searchParams);
+  const { places: fetchedPlaces, loading: placesLoading } = usePlaces(placeSearchParams);
   const places = useMemo(
     () => fetchedPlaces.filter((place) => matchesAccessibilityFilters(place, activeFilters)),
     [activeFilters, fetchedPlaces],
@@ -220,6 +225,34 @@ export default function HomePage() {
       clearTimeout(blurTimeoutRef.current);
     }
   }, []);
+
+  useEffect(() => {
+    if (!targetLat || !targetLng) {
+      return;
+    }
+
+    const lat = parseFloat(targetLat);
+    const lng = parseFloat(targetLng);
+
+    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+      return;
+    }
+
+    setFlyToCoords({ lat, lng, zoom: 17 });
+  }, [targetLat, targetLng]);
+
+  useEffect(() => {
+    if (!targetPlaceId || places.length === 0) {
+      return;
+    }
+
+    const matchedPlace = places.find((place) => place.id === targetPlaceId);
+
+    if (matchedPlace) {
+      setSelectedPlace(matchedPlace);
+      setActivePlaceId(matchedPlace.id);
+    }
+  }, [places, targetPlaceId]);
 
   const closeSuggestions = () => {
     setShowSuggestions(false);

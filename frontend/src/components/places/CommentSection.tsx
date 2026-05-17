@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Comment } from '@/lib/types';
 import { api } from '@/lib/api';
 
@@ -96,15 +97,15 @@ function CommentCard({
   depth?: number;
   locale: string;
 }) {
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(dateString));
-  };
+  const t = useTranslations('comments');
+
+  const formatDate = (dateString: string) => new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(dateString));
 
   const score = comment.upvotes - comment.downvotes;
   const activeVote = userVotes[comment.id] ?? null;
@@ -120,7 +121,7 @@ function CommentCard({
             {(comment.userName || 'A')[0].toUpperCase()}
           </div>
           <span className="text-sm font-medium text-gray-900">
-            {comment.userName || 'Anonymous'}
+            {comment.userName || t('anonymous')}
           </span>
           <span className="text-xs text-gray-400">
             {formatDate(comment.createdAt)}
@@ -132,9 +133,10 @@ function CommentCard({
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={() => onVote(comment.id, 'up')}
               className={`rounded-md p-1 transition-colors ${activeVote === 'up' ? 'bg-emerald-50 text-emerald-600' : 'text-gray-400 hover:text-emerald-600'}`}
-              aria-label="Upvote"
+              aria-label={t('upvote')}
               aria-pressed={activeVote === 'up'}
             >
               ▲
@@ -143,9 +145,10 @@ function CommentCard({
               {score}
             </span>
             <button
+              type="button"
               onClick={() => onVote(comment.id, 'down')}
               className={`rounded-md p-1 transition-colors ${activeVote === 'down' ? 'bg-red-50 text-red-500' : 'text-gray-400 hover:text-red-500'}`}
-              aria-label="Downvote"
+              aria-label={t('downvote')}
               aria-pressed={activeVote === 'down'}
             >
               ▼
@@ -153,10 +156,11 @@ function CommentCard({
           </div>
           {depth === 0 && (
             <button
+              type="button"
               onClick={() => onReply(comment.id)}
               className="text-gray-400 hover:text-blue-600 transition-colors"
             >
-              Reply
+              {t('reply')}
             </button>
           )}
         </div>
@@ -182,6 +186,8 @@ function CommentCard({
 }
 
 export function CommentSection({ placeId, locale }: CommentSectionProps) {
+  const t = useTranslations('comments');
+  const tCommon = useTranslations('common');
   const [comments, setComments] = useState<Comment[]>([]);
   const [userVotes, setUserVotes] = useState<Record<string, VoteState>>({});
   const [loading, setLoading] = useState(true);
@@ -196,13 +202,16 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   };
 
   const fetchComments = useCallback(async () => {
+    setLoading(true);
+
     try {
       const token = getToken() ?? undefined;
       const data = await api.getComments(placeId, token);
       setComments(data);
       setUserVotes(extractUserVotes(data));
     } catch {
-      // silently fail
+      setComments([]);
+      setUserVotes({});
     } finally {
       setLoading(false);
     }
@@ -218,7 +227,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
 
     const token = getToken();
     if (!token) {
-      alert('Please log in to comment.');
+      alert(t('loginToComment'));
       return;
     }
 
@@ -236,7 +245,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
       }
       await fetchComments();
     } catch {
-      alert('Failed to post comment. Please try again.');
+      alert(t('postFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -245,7 +254,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   const handleVote = async (commentId: string, type: 'up' | 'down') => {
     const token = getToken();
     if (!token) {
-      alert('Please log in to vote.');
+      alert(t('loginToVote'));
       return;
     }
 
@@ -276,7 +285,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   if (loading) {
     return (
       <div className="py-4 text-center text-gray-500 text-sm">
-        Loading comments...
+        {t('loading')}
       </div>
     );
   }
@@ -284,14 +293,14 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   return (
     <div data-testid="comment-section">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        Discussion ({comments.length})
+        {t('title')} ({comments.length})
       </h2>
 
       <div className="mb-6">
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Share your experience or ask a question..."
+          placeholder={t('placeholder')}
           className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
           rows={3}
           maxLength={2000}
@@ -300,19 +309,20 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
         <div className="flex justify-between items-center mt-2">
           <span className="text-xs text-gray-400">{newComment.length}/2000</span>
           <button
-            onClick={() => handleSubmit()}
+            type="button"
+            onClick={() => void handleSubmit()}
             disabled={!newComment.trim() || submitting}
             className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[40px]"
             data-testid="comment-submit"
           >
-            {submitting ? 'Posting...' : 'Post Comment'}
+            {submitting ? tCommon('loading') : t('post')}
           </button>
         </div>
       </div>
 
       {comments.length === 0 ? (
         <p className="text-gray-500 text-sm text-center py-4">
-          No comments yet. Start the discussion!
+          {t('noComments')}
         </p>
       ) : (
         <div className="divide-y divide-gray-100">
@@ -330,7 +340,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
                   <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Write a reply..."
+                    placeholder={t('replyPlaceholder')}
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                     rows={2}
                     maxLength={2000}
@@ -338,17 +348,19 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
                   />
                   <div className="flex gap-2 mt-1">
                     <button
-                      onClick={() => handleSubmit(comment.id)}
+                      type="button"
+                      onClick={() => void handleSubmit(comment.id)}
                       disabled={!replyText.trim() || submitting}
                       className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-md hover:bg-emerald-700 disabled:opacity-50 transition-colors"
                     >
-                      Reply
+                      {t('reply')}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setReplyTo(null)}
                       className="px-3 py-1.5 text-gray-500 text-xs hover:text-gray-700 transition-colors"
                     >
-                      Cancel
+                      {t('cancel')}
                     </button>
                   </div>
                 </div>
