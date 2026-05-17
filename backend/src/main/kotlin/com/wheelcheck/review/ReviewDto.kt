@@ -8,6 +8,7 @@ import java.util.*
 data class ReviewDto(
     val id: UUID,
     val placeId: UUID,
+    val placeName: String?,
     val userId: UUID?,
     val userName: String?,
     val entrance: AccessLevel,

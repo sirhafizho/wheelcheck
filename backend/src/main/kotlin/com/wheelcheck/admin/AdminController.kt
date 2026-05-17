@@ -134,6 +134,7 @@ class AdminController(
     private fun AccessibilityReview.toDto() = ReviewDto(
         id = id,
         placeId = place.id,
+        placeName = place.name,
         userId = userId,
         userName = null,
         entrance = entrance,

@@ -91,6 +91,8 @@ export interface Favorite {
   id: string;
   placeId: string;
   placeName?: string | null;
+  placeCategory?: string | null;
+  accessibilityLevel?: string | null;
   createdAt: string;
 }
 

@@ -96,6 +96,7 @@
   "nav": {
     "home": "Home",
     "places": "Places",
+    "saved": "Saved",
     "profile": "Profile",
     "settings": "Settings"
   },
@@ -191,6 +192,8 @@
     "reviewHistory": "Your Reviews",
     "noReviews": "You haven't submitted any reviews yet",
     "startReporting": "Start reporting accessibility →",
+    "savedPlaces": "Saved Places",
+    "savedPlacesSubtext": "View all your bookmarked venues",
     "errors": {
       "invalidCredentials": "Invalid credentials",
       "loginFailed": "Login failed",
@@ -287,7 +290,8 @@
     "loginToSave": "Log in to save places",
     "empty": "No saved places yet",
     "emptySubtext": "Tap the heart icon on any place to save it here",
-    "count": "{count} saved"
+    "count": "{count} saved",
+    "savedOn": "Saved on"
   },
   "comments": {
     "title": "Discussion",

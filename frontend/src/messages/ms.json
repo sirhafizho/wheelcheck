@@ -96,6 +96,7 @@
   "nav": {
     "home": "Utama",
     "places": "Tempat",
+    "saved": "Tersimpan",
     "profile": "Profil",
     "settings": "Tetapan"
   },
@@ -191,6 +192,8 @@
     "reviewHistory": "Ulasan Anda",
     "noReviews": "Anda belum menghantar sebarang ulasan",
     "startReporting": "Mula melaporkan kebolehcapaian →",
+    "savedPlaces": "Tempat Tersimpan",
+    "savedPlacesSubtext": "Lihat semua tempat yang anda simpan",
     "errors": {
       "invalidCredentials": "Maklumat log masuk tidak sah",
       "loginFailed": "Log masuk gagal",
@@ -287,7 +290,8 @@
     "loginToSave": "Log masuk untuk simpan tempat",
     "empty": "Tiada tempat tersimpan lagi",
     "emptySubtext": "Tekan ikon hati pada mana-mana tempat untuk simpan di sini",
-    "count": "{count} tersimpan"
+    "count": "{count} tersimpan",
+    "savedOn": "Disimpan pada"
   },
   "comments": {
     "title": "Perbincangan",

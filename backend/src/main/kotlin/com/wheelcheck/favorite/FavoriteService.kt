@@ -17,6 +17,8 @@ class FavoriteService(
                 id = fav.id,
                 placeId = fav.placeId,
                 placeName = place?.name,
+                placeCategory = place?.category,
+                accessibilityLevel = place?.accessibilityLevel,
                 createdAt = fav.createdAt
             )
         }

@@ -7,12 +7,14 @@ import {
   MapIcon, 
   ListBulletIcon, 
   UserCircleIcon,
+  HeartIcon,
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline';
 import {
   MapIcon as MapIconSolid,
   ListBulletIcon as ListBulletIconSolid,
   UserCircleIcon as UserCircleIconSolid,
+  HeartIcon as HeartIconSolid,
   Cog6ToothIcon as Cog6ToothIconSolid
 } from '@heroicons/react/24/solid';
 
@@ -43,6 +45,12 @@ export function BottomNav({ locale }: BottomNavProps) {
       label: t('places'),
       icon: ListBulletIcon,
       activeIcon: ListBulletIconSolid,
+    },
+    {
+      href: `/${locale}/favorites`,
+      label: t('saved'),
+      icon: HeartIcon,
+      activeIcon: HeartIconSolid,
     },
     {
       href: `/${locale}/profile`,

@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { HeartIcon } from '@heroicons/react/24/solid';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { API_URL } from '@/lib/constants';
@@ -20,6 +21,7 @@ interface UserProfile {
 interface Review {
   id: string;
   placeId: string;
+  placeName?: string;
   entrance: string;
   toilet: string;
   parking: string;
@@ -488,6 +490,24 @@ export default function ProfilePage({ params }: { params: Params }) {
         </Button>
       </div>
 
+      {/* Saved Places quick-link */}
+      <Link
+        href={`/${locale}/favorites`}
+        data-testid="saved-places-link"
+        className="flex items-center justify-between bg-white rounded-lg shadow p-4 mb-6 hover:shadow-md transition-shadow group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="rounded-full bg-red-50 p-2 group-hover:bg-red-100 transition-colors">
+            <HeartIcon className="h-5 w-5 text-red-500" />
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900">{t('savedPlaces')}</p>
+            <p className="text-xs text-gray-500">{t('savedPlacesSubtext')}</p>
+          </div>
+        </div>
+        <span className="text-emerald-600 text-sm font-medium">View →</span>
+      </Link>
+
       <h2 className="text-lg font-bold text-gray-900 mb-4">{t('reviewHistory')}</h2>
       {reviews.length === 0 ? (
         <div className="text-center py-8 bg-white rounded-lg shadow">
@@ -504,6 +524,9 @@ export default function ProfilePage({ params }: { params: Params }) {
               href={`/${locale}/places/${review.placeId}`}
               className="block bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
             >
+              {review.placeName && (
+                <p className="font-semibold text-gray-900 mb-1 truncate">{review.placeName}</p>
+              )}
               <div className="flex items-center gap-2 mb-2 text-lg">
                 <span>{formatAccessLevel(review.entrance)}</span>
                 <span>{formatAccessLevel(review.toilet)}</span>
