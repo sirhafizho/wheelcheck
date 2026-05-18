@@ -69,9 +69,10 @@ export function BottomSheet({ open, onClose, children, ariaLabel = 'Details' }: 
       <div
         aria-hidden="true"
         data-testid="bottom-sheet-backdrop"
-        className="fixed inset-0 z-[1090] bg-black/40"
+        className="fixed inset-0 z-[1090] bg-black/40 cursor-default"
         style={{ transition: 'opacity 0.3s', opacity: translateY > 0 ? 0.3 : 1 }}
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); onClose(); }}
       />
 
       {/* Sheet */}

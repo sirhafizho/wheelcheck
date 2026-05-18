@@ -37,7 +37,8 @@ test.describe('BottomSheet', () => {
     const sheet = await openSheetViaSearch(page);
     await expect(sheet).toBeVisible({ timeout: 8000 });
 
-    await page.locator('[data-testid="bottom-sheet-backdrop"]').click({ force: true });
+    // Click the top portion of the backdrop (above the sheet, so map markers don't re-open)
+    await page.mouse.click(100, 40);
     await expect(sheet).not.toBeVisible({ timeout: 3000 });
   });
 
