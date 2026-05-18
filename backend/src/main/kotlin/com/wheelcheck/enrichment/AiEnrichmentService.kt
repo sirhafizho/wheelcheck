@@ -78,12 +78,13 @@ class AiEnrichmentService(
     }
 
     /**
-     * Enrich all places in a Malaysian state, one at a time with rate limiting.
+     * Enrich places in a Malaysian state, one at a time with rate limiting.
      * Skips already-enriched places unless forceRe = true.
+     * limit = -1 means enrich all; any positive number stops after N places (useful for testing).
      * Runs async so the HTTP response returns immediately.
      */
     @Async
-    fun enrichStateAsync(state: String, forceRe: Boolean = false) {
+    fun enrichStateAsync(state: String, forceRe: Boolean = false, limit: Int = -1) {
         if (!batchRunning.compareAndSet(false, true)) {
             logger.warn("Batch enrichment already running for ${batchState}, ignoring request for $state")
             return
@@ -94,14 +95,16 @@ class AiEnrichmentService(
         batchProgress.set(0)
 
         try {
-            val placeIds: List<UUID> = if (forceRe) {
+            val allIds: List<UUID> = if (forceRe) {
                 placeRepository.findByStateIgnoreCase(state).map { it.id }
             } else {
                 enrichmentRepository.findUnenrichedPlaceIdsByState(state)
             }
 
+            val placeIds = if (limit > 0) allIds.take(limit) else allIds
+
             batchTotal.set(placeIds.size)
-            logger.info("Starting AI enrichment for $state: ${placeIds.size} places to enrich")
+            logger.info("Starting AI enrichment for $state: ${placeIds.size} places to enrich${if (limit > 0) " (limited to $limit)" else ""}")
 
             for (placeId in placeIds) {
                 if (!checkAndIncrementQuota()) {

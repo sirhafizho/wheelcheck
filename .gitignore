@@ -48,3 +48,7 @@ tools/browser-harness/
 .agents/
 supabase/.temp/
 .claude/skills/
+
+# Supabase credentials & DB backups
+.env.supabase
+backups/
