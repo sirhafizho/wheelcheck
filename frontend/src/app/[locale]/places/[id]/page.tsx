@@ -112,6 +112,8 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
       <PlaceDetail
         place={place}
         locale={locale}
+        onDelete={() => router.push(`/${locale}`)}
+        onEdit={() => router.push(`/${locale}/edit-place/${place.id}`)}
         onReportClick={() => router.push(`/${locale}/report/${place.id}`)}
         onShowOnMapClick={() => router.push(`/${locale}?placeId=${place.id}&lat=${place.latitude}&lng=${place.longitude}`)}
       />

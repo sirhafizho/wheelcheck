@@ -17,6 +17,7 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         SELECT p.*, ST_Distance(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography) as distance 
         FROM places p 
         WHERE ST_DWithin(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography, :radius)
+        AND p.status = 'APPROVED'
         ORDER BY ST_Distance(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography)
         LIMIT :limit
     """, nativeQuery = true)
@@ -32,6 +33,7 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         FROM places p 
         WHERE ST_DWithin(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography, :radius)
         AND p.category = :category
+        AND p.status = 'APPROVED'
         ORDER BY ST_Distance(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography)
         LIMIT :limit
     """, nativeQuery = true)
@@ -42,11 +44,33 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         @Param("category") category: String,
         @Param("limit") limit: Int
     ): List<Place>
+
+    /** Find places within [radiusMeters] of a point (any status) — used for duplicate check */
+    @Query(value = """
+        SELECT p.* FROM places p
+        WHERE ST_DWithin(p.location::geography, ST_SetSRID(ST_Point(:lng, :lat), 4326)::geography, :radius)
+        AND p.id != :excludeId
+        LIMIT 5
+    """, nativeQuery = true)
+    fun findNearbyForDuplicateCheck(
+        @Param("lat") lat: Double,
+        @Param("lng") lng: Double,
+        @Param("radius") radius: Int,
+        @Param("excludeId") excludeId: UUID
+    ): List<Place>
+
+    /** All PENDING places for admin review, newest first */
+    @Query("SELECT p FROM Place p WHERE p.status = 'PENDING' ORDER BY p.createdAt DESC")
+    fun findPending(pageable: Pageable): Page<Place>
+
+    @Query("SELECT COUNT(p) FROM Place p WHERE p.status = 'PENDING'")
+    fun countPending(): Long
     
     @Query(value = """
         SELECT * FROM places 
-        WHERE LOWER(REPLACE(name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:name, ' ', ''), '%%'))
-           OR name ILIKE CONCAT('%%', :name, '%%')
+        WHERE (LOWER(REPLACE(name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:name, ' ', ''), '%%'))
+           OR name ILIKE CONCAT('%%', :name, '%%'))
+        AND status = 'APPROVED'
         ORDER BY 
             CASE WHEN name ILIKE :name THEN 0
                  WHEN name ILIKE CONCAT(:name, '%%') THEN 1

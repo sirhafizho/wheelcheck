@@ -47,6 +47,18 @@ class ReviewController(
         return ResponseEntity.status(HttpStatus.CREATED).body(review)
     }
 
+    @PutMapping("/{id}")
+    fun updateReview(
+        @PathVariable id: UUID,
+        @Valid @RequestBody request: UpdateReviewRequest,
+        authentication: Authentication?
+    ): ResponseEntity<ReviewDto> {
+        val userId = authentication?.principal as? UUID
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val updated = reviewService.update(id, request, userId)
+        return ResponseEntity.ok(updated)
+    }
+
     @PostMapping("/{id}/photos")
     fun uploadPhotos(
         @PathVariable id: UUID,

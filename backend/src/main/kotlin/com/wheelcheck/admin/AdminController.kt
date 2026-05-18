@@ -62,6 +62,34 @@ class AdminController(
         return ResponseEntity.noContent().build()
     }
 
+    /** Get all PENDING places awaiting approval */
+    @GetMapping("/places/pending")
+    fun getPendingPlaces(
+        @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC)
+        pageable: Pageable
+    ): ResponseEntity<Page<PlaceDto>> {
+        return ResponseEntity.ok(placeService.findPending(pageable))
+    }
+
+    /** Count of PENDING places — for admin badge */
+    @GetMapping("/places/pending/count")
+    fun getPendingCount(): ResponseEntity<Map<String, Long>> {
+        return ResponseEntity.ok(mapOf("count" to placeService.countPending()))
+    }
+
+    @PostMapping("/places/{id}/approve")
+    fun approvePlace(@PathVariable id: UUID): ResponseEntity<PlaceDto> {
+        return ResponseEntity.ok(placeService.approve(id))
+    }
+
+    @PostMapping("/places/{id}/reject")
+    fun rejectPlace(
+        @PathVariable id: UUID,
+        @RequestBody(required = false) body: Map<String, String>?
+    ): ResponseEntity<PlaceDto> {
+        return ResponseEntity.ok(placeService.reject(id, body?.get("reason")))
+    }
+
     @GetMapping("/reviews")
     fun getAllReviews(
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC)
@@ -126,6 +154,7 @@ class AdminController(
                 totalPlaces = placeService.count(),
                 totalReviews = reviewRepository.count(),
                 totalUsers = userRepository.count(),
+                pendingPlaces = placeService.countPending(),
                 recentReviews = recentReviews
             )
         )

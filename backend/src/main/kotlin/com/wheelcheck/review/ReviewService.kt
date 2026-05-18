@@ -56,6 +56,25 @@ class ReviewService(
     }
 
     @Transactional
+    fun update(reviewId: UUID, request: UpdateReviewRequest, userId: UUID?): ReviewDto {
+        val review = reviewRepository.findByIdOrNull(reviewId)
+            ?: throw NoSuchElementException("Review not found: $reviewId")
+        if (userId != null && review.userId != userId) {
+            throw IllegalArgumentException("Not authorized to modify this review")
+        }
+        val updated = review.copy(
+            entrance = request.entrance,
+            toilet = request.toilet,
+            parking = request.parking,
+            internalNav = request.internalNav,
+            notes = request.notes
+        )
+        val saved = reviewRepository.save(updated)
+        updatePlaceAccessibility(review.place.id)
+        return saved.toDto()
+    }
+
+    @Transactional
     fun addPhotos(reviewId: UUID, photoUrls: List<String>, userId: UUID?): ReviewDto {
         val review = reviewRepository.findByIdOrNull(reviewId)
             ?: throw NoSuchElementException("Review not found: $reviewId")

@@ -177,6 +177,11 @@ class PlaceService(
         )
 
         val geo = MalaysiaGeoUtils.lookup(request.latitude, request.longitude)
+
+        // Community-submitted places start as PENDING (need admin approval)
+        // OSM/seeded data stays APPROVED
+        val status = if (userId != null) "PENDING" else "APPROVED"
+
         val place = Place(
             name = request.name,
             nameMs = request.nameMs,
@@ -188,23 +193,61 @@ class PlaceService(
             accessibilityLevel = AccessLevel.UNKNOWN,
             reviewCount = 0,
             createdBy = userId,
+            status = status,
             createdAt = Instant.now(),
             updatedAt = Instant.now()
         )
 
         val savedPlace = placeRepository.save(place)
+
+        // Check for nearby duplicates (within 100m) and attach warning
+        val nearby = placeRepository.findNearbyForDuplicateCheck(
+            request.latitude, request.longitude, 100, savedPlace.id
+        )
+        val withWarning = if (nearby.isNotEmpty()) {
+            val names = nearby.take(3).joinToString(", ") { it.name }
+            placeRepository.save(savedPlace.copy(
+                nearbyWarning = "Nearby places already exist within 100m: $names"
+            ))
+        } else savedPlace
+
         embeddingService?.let { svc ->
             embeddingRepository?.let { repo ->
                 try {
-                    val text = "${savedPlace.name} ${savedPlace.category.name.lowercase().replace('_', ' ')}"
+                    val text = "${withWarning.name} ${withWarning.category.name.lowercase().replace('_', ' ')}"
                     val vector = svc.embed(text)
-                    if (vector != null) repo.saveEmbedding(savedPlace.id, svc.toVectorString(vector))
-                } catch (_: Exception) {
-                }
+                    if (vector != null) repo.saveEmbedding(withWarning.id, svc.toVectorString(vector))
+                } catch (_: Exception) { }
             }
         }
-        return savedPlace.toDto()
+        return withWarning.toDto()
     }
+
+    @Transactional
+    fun approve(placeId: UUID): PlaceDto {
+        val place = placeRepository.findByIdOrNull(placeId)
+            ?: throw NoSuchElementException("Place not found: $placeId")
+        return placeRepository.save(place.copy(status = "APPROVED", updatedAt = Instant.now())).toDto()
+    }
+
+    @Transactional
+    fun reject(placeId: UUID, reason: String?): PlaceDto {
+        val place = placeRepository.findByIdOrNull(placeId)
+            ?: throw NoSuchElementException("Place not found: $placeId")
+        return placeRepository.save(place.copy(
+            status = "REJECTED",
+            rejectionReason = reason,
+            updatedAt = Instant.now()
+        )).toDto()
+    }
+
+    @Transactional(readOnly = true)
+    fun findPending(pageable: Pageable): org.springframework.data.domain.Page<PlaceDto> {
+        return placeRepository.findPending(pageable).map { it.toDto() }
+    }
+
+    @Transactional(readOnly = true)
+    fun countPending(): Long = placeRepository.countPending()
 
     @Transactional
     fun update(placeId: UUID, request: UpdatePlaceRequest): PlaceDto {
@@ -269,6 +312,9 @@ class PlaceService(
         reviewCount = reviewCount,
         createdAt = createdAt,
         createdBy = createdBy,
+        status = status,
+        nearbyWarning = nearbyWarning,
+        rejectionReason = rejectionReason,
         dataSource = dataSource,
         description = osmDescription,
         osmWheelchairTag = osmWheelchairTag,

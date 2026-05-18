@@ -45,6 +45,7 @@ interface MapViewProps {
   zoomOut?: number;
   onPlaceClick?: (place: Place) => void;
   onViewportChange?: (viewport: MapViewport) => void;
+  onDragStart?: () => void;
   className?: string;
 }
 
@@ -81,7 +82,13 @@ function MapUpdater({
   return null;
 }
 
-function MapViewportReporter({ onChange }: { onChange: (viewport: MapViewport) => void }) {
+function MapViewportReporter({
+  onChange,
+  onDragStart,
+}: {
+  onChange: (viewport: MapViewport) => void;
+  onDragStart?: () => void;
+}) {
   const map = useMap();
   const updateViewport = useCallback(() => {
     const currentCenter = map.getCenter();
@@ -96,6 +103,7 @@ function MapViewportReporter({ onChange }: { onChange: (viewport: MapViewport) =
   useMapEvents({
     moveend: updateViewport,
     zoomend: updateViewport,
+    dragstart: () => onDragStart?.(),
   });
 
   useEffect(() => {
@@ -136,6 +144,7 @@ export function MapView({
   zoomOut,
   onPlaceClick,
   onViewportChange,
+  onDragStart,
   className = '',
 }: MapViewProps) {
   const [viewport, setViewport] = useState<MapViewport>({
@@ -161,7 +170,7 @@ export function MapView({
         style={{ height: '100%', width: '100%' }}
       >
         <MapUpdater center={center} flyTo={flyTo} />
-        <MapViewportReporter onChange={handleViewportChange} />
+        <MapViewportReporter onChange={handleViewportChange} onDragStart={onDragStart} />
         <MapZoomExecutor zoomIn={zoomIn ?? 0} zoomOut={zoomOut ?? 0} />
         <TileLayer
           attribution={MAP_CONFIG.attribution}

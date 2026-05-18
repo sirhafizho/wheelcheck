@@ -35,3 +35,11 @@ data class CreateReviewRequest(
     val notes: String?,
     val comment: String? = null
 )
+
+data class UpdateReviewRequest(
+    val entrance: AccessLevel,
+    val toilet: AccessLevel,
+    val parking: AccessLevel,
+    val internalNav: AccessLevel,
+    val notes: String?
+)

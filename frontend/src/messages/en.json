@@ -31,7 +31,9 @@
       "accessibleToilet": "Accessible Toilet",
       "accessibleParking": "Accessible Parking",
       "wideEntrance": "Wide Entrance"
-    }
+    },
+    "updatingPlaces": "Updating places…",
+    "newPlacesFound": "{count} places found — tap to dismiss"
   },
   "places": {
     "title": "Places",
@@ -71,7 +73,13 @@
         "INFERRED": "Inferred",
         "ASSUMPTION": "Assumption"
       }
-    }
+    },
+    "placeDeleted": "Place deleted successfully",
+    "deleteFailed": "Failed to delete place",
+    "editPlace": "Edit Place",
+    "deletePlace": "Delete Place",
+    "confirmDeleteTitle": "Delete this place?",
+    "confirmDeleteBody": "This action cannot be undone."
   },
   "report": {
     "title": "Report Accessibility",
@@ -258,7 +266,8 @@
       "places": "Places",
       "reviews": "Reviews",
       "users": "Users",
-      "enrichment": "AI Enrichment"
+      "enrichment": "AI Enrichment",
+      "pending": "Pending"
     },
     "table": {
       "name": "Name",
@@ -294,6 +303,16 @@
       "next": "Next",
       "page": "Page",
       "of": "of"
+    },
+    "pending": {
+      "title": "Pending Places",
+      "empty": "No pending places.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectionReason": "Rejection reason",
+      "nearbyWarning": "Nearby place: {warning}",
+      "approveSuccess": "Place approved!",
+      "rejectSuccess": "Place rejected."
     }
   },
   "reviews": {
@@ -308,7 +327,12 @@
     "verified": "Verified",
     "evidencePhoto": "Evidence photo {number}",
     "fullSizeEvidencePhoto": "Full size evidence photo",
-    "closePhoto": "Close photo"
+    "closePhoto": "Close photo",
+    "editReview": "Edit Review",
+    "saveChanges": "Save",
+    "cancelEdit": "Cancel",
+    "editSaved": "Review updated!",
+    "notes": "Notes"
   },
   "favorites": {
     "title": "Saved Places",
@@ -344,5 +368,17 @@
     "upvote": "Upvote",
     "downvote": "Downvote",
     "loginToCommentLink": "Log in to comment"
+  },
+  "editPlace": {
+    "title": "Edit Place",
+    "saveChanges": "Save Changes",
+    "notOwner": "You are not the owner of this place.",
+    "loadFailed": "Failed to load place details.",
+    "saveFailed": "Failed to save changes.",
+    "savedSuccess": "Place updated successfully!",
+    "movePin": "Drag the pin to move this place",
+    "state": "State",
+    "accessibilityLevel": "Accessibility Level",
+    "notes": "Notes"
   }
 }

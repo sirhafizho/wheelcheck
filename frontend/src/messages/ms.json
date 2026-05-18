@@ -31,7 +31,9 @@
       "accessibleToilet": "Tandas Boleh Diakses",
       "accessibleParking": "Parkir OKU",
       "wideEntrance": "Pintu Masuk Lebar"
-    }
+    },
+    "updatingPlaces": "Mengemas kini tempat…",
+    "newPlacesFound": "{count} tempat ditemui — ketik untuk tutup"
   },
   "places": {
     "title": "Tempat",
@@ -71,7 +73,13 @@
         "INFERRED": "Dijangka",
         "ASSUMPTION": "Andaian"
       }
-    }
+    },
+    "placeDeleted": "Tempat berjaya dipadam",
+    "deleteFailed": "Gagal memadamkan tempat",
+    "editPlace": "Edit Tempat",
+    "deletePlace": "Padam Tempat",
+    "confirmDeleteTitle": "Padam tempat ini?",
+    "confirmDeleteBody": "Tindakan ini tidak boleh dibatalkan."
   },
   "report": {
     "title": "Lapor Kebolehcapaian",
@@ -258,7 +266,8 @@
       "places": "Tempat",
       "reviews": "Ulasan",
       "users": "Pengguna",
-      "enrichment": "Pengayaan AI"
+      "enrichment": "Pengayaan AI",
+      "pending": "Tertangguh"
     },
     "table": {
       "name": "Nama",
@@ -294,6 +303,16 @@
       "next": "Seterusnya",
       "page": "Halaman",
       "of": "daripada"
+    },
+    "pending": {
+      "title": "Tempat Tertangguh",
+      "empty": "Tiada tempat tertangguh.",
+      "approve": "Lulus",
+      "reject": "Tolak",
+      "rejectionReason": "Sebab penolakan",
+      "nearbyWarning": "Tempat berdekatan: {warning}",
+      "approveSuccess": "Tempat diluluskan!",
+      "rejectSuccess": "Tempat ditolak."
     }
   },
   "reviews": {
@@ -308,7 +327,12 @@
     "verified": "Disahkan",
     "evidencePhoto": "Foto bukti {number}",
     "fullSizeEvidencePhoto": "Foto bukti saiz penuh",
-    "closePhoto": "Tutup foto"
+    "closePhoto": "Tutup foto",
+    "editReview": "Edit Ulasan",
+    "saveChanges": "Simpan",
+    "cancelEdit": "Batal",
+    "editSaved": "Ulasan dikemaskini!",
+    "notes": "Nota"
   },
   "favorites": {
     "title": "Tempat Tersimpan",
@@ -344,5 +368,17 @@
     "upvote": "Undi naik",
     "downvote": "Undi turun",
     "loginToCommentLink": "Log masuk untuk komen"
+  },
+  "editPlace": {
+    "title": "Edit Tempat",
+    "saveChanges": "Simpan Perubahan",
+    "notOwner": "Anda bukan pemilik tempat ini.",
+    "loadFailed": "Gagal memuatkan butiran tempat.",
+    "saveFailed": "Gagal menyimpan perubahan.",
+    "savedSuccess": "Tempat berjaya dikemaskini!",
+    "movePin": "Seret pin untuk memindahkan tempat ini",
+    "state": "Negeri",
+    "accessibilityLevel": "Tahap Kebolehcapaian",
+    "notes": "Nota"
   }
 }

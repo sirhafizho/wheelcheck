@@ -12,6 +12,7 @@ data class AdminStatsDto(
     val totalPlaces: Long,
     val totalReviews: Long,
     val totalUsers: Long,
+    val pendingPlaces: Long = 0,
     val recentReviews: List<ReviewDto>
 )
 

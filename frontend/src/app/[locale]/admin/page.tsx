@@ -8,10 +8,12 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { API_URL } from '@/lib/constants';
 
 type Params = Promise<{ locale: string }>;
-type TabKey = 'places' | 'reviews' | 'users' | 'enrichment';
+type TabKey = 'places' | 'pending' | 'reviews' | 'users' | 'enrichment';
 type AccessLevel = 'FULL' | 'PARTIAL' | 'NOT_ACCESSIBLE' | 'UNKNOWN';
 type Category =
   | 'RESTAURANT'
+  | 'CAFE'
+  | 'SHOP'
   | 'MALL'
   | 'HOSPITAL'
   | 'MOSQUE'
@@ -47,10 +49,19 @@ interface PlaceDto {
   longitude: number;
   address: string | null;
   city: string;
+  state?: string | null;
   category: Category;
   accessibilityLevel: AccessLevel;
   reviewCount: number;
   createdAt: string;
+  createdBy?: string | null;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  nearbyWarning?: string | null;
+  rejectionReason?: string | null;
+}
+
+interface PendingCountResponse {
+  count: number;
 }
 
 interface ReviewDto {
@@ -95,6 +106,8 @@ const TOKEN_KEY = 'wheelcheck_token';
 const PAGE_SIZE = 20;
 const CATEGORIES: Category[] = [
   'RESTAURANT',
+  'CAFE',
+  'SHOP',
   'MALL',
   'HOSPITAL',
   'MOSQUE',
@@ -210,6 +223,14 @@ function ErrorBanner({ message }: { message: string }) {
   );
 }
 
+function SuccessBanner({ message }: { message: string }) {
+  return (
+    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-700" role="status">
+      {message}
+    </div>
+  );
+}
+
 function PaginationControls({
   page,
   totalPages,
@@ -263,15 +284,19 @@ export default function AdminPage({ params }: { params: Params }) {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('places');
   const [placesPage, setPlacesPage] = useState<SpringPage<PlaceDto> | null>(null);
+  const [pendingPlaces, setPendingPlaces] = useState<PlaceDto[] | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
   const [reviewsPage, setReviewsPage] = useState<SpringPage<ReviewDto> | null>(null);
   const [usersPage, setUsersPage] = useState<SpringPage<AdminUserDto> | null>(null);
   const [tabLoading, setTabLoading] = useState<Record<TabKey, boolean>>({
     places: false,
+    pending: false,
     reviews: false,
     users: false,
     enrichment: false,
   });
   const [actionKey, setActionKey] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const [placeForm, setPlaceForm] = useState<EditablePlaceForm | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -279,6 +304,8 @@ export default function AdminPage({ params }: { params: Params }) {
   const [filterCity, setFilterCity] = useState('');
   const [filterAccess, setFilterAccess] = useState('');
   const [searchDebounce, setSearchDebounce] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [pendingRejectPlaceId, setPendingRejectPlaceId] = useState<string | null>(null);
+  const [pendingRejectReason, setPendingRejectReason] = useState('');
 
   // ── Enrichment state ────────────────────────────────────────────────────────
   const [enrichmentStats, setEnrichmentStats] = useState<EnrichmentStateStats[] | null>(null);
@@ -313,8 +340,11 @@ export default function AdminPage({ params }: { params: Params }) {
       setToken(storedToken);
 
       try {
-        const statsData = await adminRequest<AdminStats>(storedToken, '/admin/stats');
-        const initialPlaces = await adminRequest<SpringPage<PlaceDto>>(storedToken, `/admin/places?page=0&size=${PAGE_SIZE}`);
+        const [statsData, initialPlaces, pendingCountData] = await Promise.all([
+          adminRequest<AdminStats>(storedToken, '/admin/stats'),
+          adminRequest<SpringPage<PlaceDto>>(storedToken, `/admin/places?page=0&size=${PAGE_SIZE}`),
+          adminRequest<PendingCountResponse>(storedToken, '/admin/places/pending/count'),
+        ]);
 
         if (!isMounted) {
           return;
@@ -322,6 +352,7 @@ export default function AdminPage({ params }: { params: Params }) {
 
         setStats(statsData);
         setPlacesPage(initialPlaces);
+        setPendingCount(Number(pendingCountData.count ?? 0));
       } catch (requestError) {
         if (!isMounted) {
           return;
@@ -346,11 +377,23 @@ export default function AdminPage({ params }: { params: Params }) {
     };
   }, [tCommon]);
 
+  useEffect(() => {
+    if (!successMessage) {
+      return;
+    }
+
+    const timer = setTimeout(() => setSuccessMessage(null), 2500);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
+
   const handleAccessDenied = () => {
     setAccessDenied(true);
     setError(null);
+    setSuccessMessage(null);
     setEditingPlaceId(null);
     setPlaceForm(null);
+    setPendingRejectPlaceId(null);
+    setPendingRejectReason('');
   };
 
   const refreshStats = async (authToken = token) => {
@@ -361,6 +404,24 @@ export default function AdminPage({ params }: { params: Params }) {
 
     const data = await adminRequest<AdminStats>(authToken, '/admin/stats');
     setStats(data);
+  };
+
+  const loadPendingCount = async (authToken = token) => {
+    if (!authToken) {
+      handleAccessDenied();
+      return;
+    }
+
+    try {
+      const data = await adminRequest<PendingCountResponse>(authToken, '/admin/places/pending/count');
+      setPendingCount(Number(data.count ?? 0));
+    } catch (requestError) {
+      if (requestError instanceof AccessDeniedError) {
+        handleAccessDenied();
+      } else {
+        setError(getErrorMessage(requestError, tCommon('error')));
+      }
+    }
   };
 
   const loadPlaces = async (page: number, authToken = token, filters?: { query?: string; category?: string; city?: string; accessLevel?: string }) => {
@@ -445,12 +506,45 @@ export default function AdminPage({ params }: { params: Params }) {
     }
   };
 
+  const loadPendingPlaces = async (authToken = token) => {
+    if (!authToken) {
+      handleAccessDenied();
+      return;
+    }
+
+    setTabLoading((prev) => ({ ...prev, pending: true }));
+    setError(null);
+
+    try {
+      const data = await adminRequest<SpringPage<PlaceDto>>(authToken, `/admin/places/pending?page=0&size=${PAGE_SIZE}`);
+      setPendingPlaces(data.content);
+      await loadPendingCount(authToken);
+    } catch (requestError) {
+      if (requestError instanceof AccessDeniedError) {
+        handleAccessDenied();
+      } else {
+        setError(getErrorMessage(requestError, tCommon('error')));
+      }
+    } finally {
+      setTabLoading((prev) => ({ ...prev, pending: false }));
+    }
+  };
+
   const handleTabChange = async (nextTab: TabKey) => {
     setActiveTab(nextTab);
 
     if (nextTab !== 'places') {
       setEditingPlaceId(null);
       setPlaceForm(null);
+    }
+
+    if (nextTab !== 'pending') {
+      setPendingRejectPlaceId(null);
+      setPendingRejectReason('');
+    }
+
+    if (nextTab === 'pending' && !pendingPlaces) {
+      await loadPendingPlaces();
     }
 
     if (nextTab === 'reviews' && !reviewsPage) {
@@ -629,6 +723,65 @@ export default function AdminPage({ params }: { params: Params }) {
       await refreshStats();
       const nextPage = usersPage && usersPage.content.length === 1 && usersPage.number > 0 ? usersPage.number - 1 : usersPage?.number ?? 0;
       await loadUsers(nextPage);
+    } catch (requestError) {
+      if (requestError instanceof AccessDeniedError) {
+        handleAccessDenied();
+      } else {
+        setError(getErrorMessage(requestError, tCommon('error')));
+      }
+    } finally {
+      setActionKey(null);
+    }
+  };
+
+  const handleApprovePendingPlace = async (placeId: string) => {
+    if (!token) {
+      handleAccessDenied();
+      return;
+    }
+
+    setActionKey(`approve-pending-${placeId}`);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      await adminRequest<PlaceDto>(token, `/admin/places/${placeId}/approve`, { method: 'POST' });
+      setPendingPlaces((prev) => prev ? prev.filter((place) => place.id !== placeId) : prev);
+      setPendingCount((prev) => Math.max(prev - 1, 0));
+      setSuccessMessage(t('pending.approveSuccess'));
+      await refreshStats();
+    } catch (requestError) {
+      if (requestError instanceof AccessDeniedError) {
+        handleAccessDenied();
+      } else {
+        setError(getErrorMessage(requestError, tCommon('error')));
+      }
+    } finally {
+      setActionKey(null);
+    }
+  };
+
+  const handleRejectPendingPlace = async (placeId: string) => {
+    if (!token) {
+      handleAccessDenied();
+      return;
+    }
+
+    setActionKey(`reject-pending-${placeId}`);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      await adminRequest<PlaceDto>(token, `/admin/places/${placeId}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason: pendingRejectReason.trim() }),
+      });
+      setPendingPlaces((prev) => prev ? prev.filter((place) => place.id !== placeId) : prev);
+      setPendingCount((prev) => Math.max(prev - 1, 0));
+      setPendingRejectPlaceId(null);
+      setPendingRejectReason('');
+      setSuccessMessage(t('pending.rejectSuccess'));
+      await refreshStats();
     } catch (requestError) {
       if (requestError instanceof AccessDeniedError) {
         handleAccessDenied();
@@ -1081,6 +1234,126 @@ export default function AdminPage({ params }: { params: Params }) {
     );
   };
 
+  const renderPendingTab = () => {
+    if (tabLoading.pending && !pendingPlaces) {
+      return (
+        <div className="flex min-h-[240px] items-center justify-center rounded-xl bg-white shadow-sm">
+          <LoadingSpinner size="lg" />
+        </div>
+      );
+    }
+
+    if (!pendingPlaces || pendingPlaces.length === 0) {
+      return (
+        <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900">{t('pending.title')}</h2>
+          <p className="mt-2 text-sm text-gray-500">{t('pending.empty')}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">{t('pending.title')}</h2>
+              <p className="mt-1 text-sm text-gray-500">{pendingCount}</p>
+            </div>
+            <Button type="button" variant="ghost" onClick={() => void loadPendingPlaces()}>↻</Button>
+          </div>
+        </div>
+
+        {pendingPlaces.map((place) => {
+          const isApproving = actionKey === `approve-pending-${place.id}`;
+          const isRejecting = actionKey === `reject-pending-${place.id}`;
+          const showRejectForm = pendingRejectPlaceId === place.id;
+          const location = [place.city, place.state].filter(Boolean).join(', ');
+
+          return (
+            <div key={place.id} className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-2">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{place.name}</h3>
+                    {place.address && <p className="text-sm text-gray-600">{place.address}</p>}
+                    {location && <p className="text-sm text-gray-500">{location}</p>}
+                  </div>
+                  <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                    {tCategories(place.category)}
+                  </span>
+                  {place.nearbyWarning && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      {t('pending.nearbyWarning', { warning: place.nearbyWarning })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => void handleApprovePendingPlace(place.id)}
+                    disabled={isApproving || isRejecting}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    {isApproving ? '...' : t('pending.approve')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPendingRejectPlaceId(place.id);
+                      setPendingRejectReason('');
+                    }}
+                    disabled={isApproving || isRejecting}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {t('pending.reject')}
+                  </button>
+                </div>
+              </div>
+
+              {showRejectForm && (
+                <div className="mt-4 space-y-3 rounded-lg border border-red-100 bg-red-50 p-4">
+                  <label htmlFor={`reject-reason-${place.id}`} className="block text-sm font-medium text-red-900">
+                    {t('pending.rejectionReason')}
+                  </label>
+                  <input
+                    id={`reject-reason-${place.id}`}
+                    type="text"
+                    value={pendingRejectReason}
+                    onChange={(event) => setPendingRejectReason(event.target.value)}
+                    className="min-h-[44px] w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void handleRejectPendingPlace(place.id)}
+                      disabled={!pendingRejectReason.trim() || isRejecting}
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {isRejecting ? '...' : t('pending.reject')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPendingRejectPlaceId(null);
+                        setPendingRejectReason('');
+                      }}
+                      disabled={isRejecting}
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      {tCommon('cancel')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   // ── Enrichment helpers ──────────────────────────────────────────────────────
   const loadEnrichmentStats = async (authToken = token) => {
     if (!authToken) return;
@@ -1271,7 +1544,7 @@ export default function AdminPage({ params }: { params: Params }) {
       </div>
 
       <div className="mb-6 flex flex-wrap gap-3 rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-100" role="tablist" aria-label={t('title')}>
-        {(['places', 'reviews', 'users', 'enrichment'] as TabKey[]).map((tab) => {
+        {(['places', 'pending', 'reviews', 'users', 'enrichment'] as TabKey[]).map((tab) => {
           const isActive = activeTab === tab;
 
           return (
@@ -1282,11 +1555,18 @@ export default function AdminPage({ params }: { params: Params }) {
               aria-selected={isActive}
               aria-label={t(`tabs.${tab}`)}
               onClick={() => void handleTabChange(tab)}
-              className={`min-h-[48px] rounded-lg px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
+              className={`inline-flex min-h-[48px] items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
                 isActive ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-700 hover:bg-emerald-50'
               }`}
             >
-              {t(`tabs.${tab}`)}
+              <span>{t(`tabs.${tab}`)}</span>
+              {tab === 'pending' && pendingCount > 0 && (
+                <span className={`inline-flex min-w-[1.5rem] items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                }`}>
+                  {pendingCount}
+                </span>
+              )}
             </button>
           );
         })}
@@ -1294,7 +1574,9 @@ export default function AdminPage({ params }: { params: Params }) {
 
       <div className="space-y-4">
         {error && <ErrorBanner message={error} />}
+        {successMessage && <SuccessBanner message={successMessage} />}
         {activeTab === 'places' && renderPlacesTable()}
+        {activeTab === 'pending' && renderPendingTab()}
         {activeTab === 'reviews' && renderReviewsTable()}
         {activeTab === 'users' && renderUsersTable()}
         {activeTab === 'enrichment' && renderEnrichmentTab()}

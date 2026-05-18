@@ -26,6 +26,8 @@ export interface Place {
   lastReportedAt?: string;
   distance?: number | null;
   isLive?: boolean;
+  createdBy?: string | null;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 export interface AccessReport {

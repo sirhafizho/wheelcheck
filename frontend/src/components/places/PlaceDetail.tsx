@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { MapPinIcon, InformationCircleIcon, HeartIcon, ArrowTopRightOnSquareIcon, SparklesIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, InformationCircleIcon, HeartIcon, ArrowTopRightOnSquareIcon, SparklesIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import type { Place } from '@/lib/types';
 import { AccessBadge } from './AccessBadge';
@@ -82,9 +82,11 @@ interface PlaceDetailProps {
   locale: string;
   onReportClick?: () => void;
   onShowOnMapClick?: () => void;
+  onDelete?: () => void;
+  onEdit?: () => void;
 }
 
-export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: PlaceDetailProps) {
+export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, onDelete, onEdit }: PlaceDetailProps) {
   const tCommon = useTranslations('common');
   const tPlaces = useTranslations('places');
   const tCategories = useTranslations('addPlace.categories');
@@ -93,6 +95,13 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [enrichment, setEnrichment] = useState<AiEnrichmentData | null>(null);
   const [showReasoning, setShowReasoning] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  useEffect(() => {
+    setCurrentUserId(localStorage.getItem('wheelcheck_user_id'));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +125,29 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
       type: 'success',
     });
   }, [favorited, toggle, tFav]);
+
+  const handleDelete = useCallback(async () => {
+    const token = localStorage.getItem('wheelcheck_token');
+    if (!token) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/places/${place.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok || res.status === 204) {
+        setToast({ message: tPlaces('placeDeleted'), type: 'success' });
+        setTimeout(() => onDelete?.(), 1200);
+      } else {
+        setToast({ message: tPlaces('deleteFailed'), type: 'error' });
+      }
+    } catch {
+      setToast({ message: tPlaces('deleteFailed'), type: 'error' });
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [place.id, onDelete, tPlaces]);
 
   const directionsUrl = `https://maps.google.com/maps?q=${place.latitude},${place.longitude}`;
 
@@ -180,6 +212,28 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
                 : <HeartIcon className="h-6 w-6 text-gray-400 hover:text-red-400" />
               }
             </button>
+            {currentUserId && place.createdBy && currentUserId === place.createdBy && (
+              <>
+                <button
+                  type="button"
+                  onClick={onEdit}
+                  data-testid="edit-place-btn"
+                  className="rounded-full p-2 transition-colors hover:bg-blue-50"
+                  aria-label={tPlaces('editPlace')}
+                >
+                  <PencilIcon className="h-5 w-5 text-gray-500 hover:text-blue-600" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  data-testid="delete-place-btn"
+                  className="rounded-full p-2 transition-colors hover:bg-red-50"
+                  aria-label={tPlaces('deletePlace')}
+                >
+                  <TrashIcon className="h-5 w-5 text-gray-500 hover:text-red-600" />
+                </button>
+              </>
+            )}
             <AccessBadge level={place.accessibilityLevel} size="lg" />
           </div>
         </div>
@@ -373,6 +427,29 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick }: 
           </Button>
         </div>
       </div>
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{tPlaces('confirmDeleteTitle')}</h3>
+            <p className="text-sm text-gray-600 mb-6">{tPlaces('confirmDeleteBody')}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium"
+              >
+                {tCommon('cancel')}
+              </button>
+              <button
+                onClick={() => void handleDelete()}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 text-sm font-medium"
+              >
+                {deleteLoading ? '...' : tPlaces('deletePlace')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

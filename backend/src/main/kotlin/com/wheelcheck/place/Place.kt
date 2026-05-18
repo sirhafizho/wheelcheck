@@ -79,5 +79,14 @@ data class Place(
     val updatedAt: Instant = Instant.now(),
 
     @Column(name = "created_by")
-    val createdBy: UUID? = null
+    val createdBy: UUID? = null,
+
+    @Column(name = "status", nullable = false)
+    val status: String = "APPROVED",
+
+    @Column(name = "nearby_warning")
+    val nearbyWarning: String? = null,
+
+    @Column(name = "rejection_reason")
+    val rejectionReason: String? = null
 )

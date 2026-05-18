@@ -2,12 +2,12 @@
 
 import { type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { PlusIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { AccessBadge } from '@/components/places/AccessBadge';
+import { PlaceDetail } from '@/components/places/PlaceDetail';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -149,6 +149,7 @@ function getStoredViewport(): FlyToCoordinates | undefined {
 
 export default function HomePage() {
   const locale = useLocale();
+  const router = useRouter();
   const t = useTranslations();
   const tFilters = useTranslations('home.filters');
   const urlSearchParams = useSearchParams();
@@ -209,6 +210,20 @@ export default function HomePage() {
     () => fetchedPlaces.filter((place) => matchesAccessibilityFilters(place, activeFilters)),
     [activeFilters, fetchedPlaces],
   );
+
+  // Background fetch indicator: track previous place count to detect new arrivals
+  const prevPlacesCountRef = useRef<number>(0);
+  const [showRefreshBanner, setShowRefreshBanner] = useState(false);
+  useEffect(() => {
+    if (!placesLoading && places.length !== prevPlacesCountRef.current && prevPlacesCountRef.current > 0) {
+      setShowRefreshBanner(true);
+      const t = setTimeout(() => setShowRefreshBanner(false), 6000);
+      return () => clearTimeout(t);
+    }
+    if (!placesLoading) {
+      prevPlacesCountRef.current = places.length;
+    }
+  }, [places.length, placesLoading]);
   const selectedPlaceData = useMemo(() => {
     if (!selectedPlace) {
       return null;
@@ -401,6 +416,7 @@ export default function HomePage() {
           zoomOut={zoomOutCount}
           onPlaceClick={handlePlaceClick}
           onViewportChange={handleViewportChange}
+          onDragStart={() => setSelectedPlace(null)}
           className="w-full h-full"
         />
       </div>
@@ -551,7 +567,27 @@ export default function HomePage() {
         </div>
       </div>
 
-      {!placesLoading && (
+      {/* Places count / loading / refresh banner */}
+      {placesLoading && places.length > 0 && (
+        <div className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2">
+          <div className="flex items-center gap-2 rounded-full bg-gray-900/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md">
+            <LoadingSpinner size="sm" />
+            <span>{t('home.updatingPlaces')}</span>
+          </div>
+        </div>
+      )}
+      {!placesLoading && showRefreshBanner && (
+        <div className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2">
+          <button
+            onClick={() => { setShowRefreshBanner(false); prevPlacesCountRef.current = places.length; }}
+            className="flex items-center gap-2 rounded-full bg-emerald-700/90 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md hover:bg-emerald-600 transition-colors"
+          >
+            <span>↻</span>
+            <span>{t('home.newPlacesFound', { count: places.length })}</span>
+          </button>
+        </div>
+      )}
+      {!placesLoading && !showRefreshBanner && (
         <div className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2">
           <div className="rounded-full bg-gray-900/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md">
             {places.length} {places.length === 1 ? (isSearching ? 'result' : 'place') : (isSearching ? 'results' : 'places')} {isSearching ? 'found' : 'nearby'}
@@ -587,65 +623,19 @@ export default function HomePage() {
           }}
         >
           <div className="space-y-4 pb-2">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-semibold text-gray-900">{selectedPlaceData.name}</h2>
-                {selectedPlaceData.category && (
-                  <p className="mt-1 text-sm text-gray-500">{formatCategory(selectedPlaceData.category)}</p>
-                )}
-              </div>
-              <AccessBadge level={selectedPlaceData.accessibilityLevel} size="sm" />
-            </div>
-
-            <p className="text-sm leading-6 text-gray-600">
-              {(!selectedPlaceData.address || selectedPlaceData.address === 'Address not available')
-                ? t('places.addressNotAvailable')
-                : selectedPlaceData.address}
-            </p>
-
-            <div className="flex flex-wrap gap-2 text-xs font-medium">
-              <span className="rounded-full bg-gray-100 px-3 py-1.5 text-gray-700">
-                {t('places.reviewCount', { count: selectedPlaceData.reviewCount ?? 0 })}
-              </span>
-              {selectedPlaceDistanceSummary && (
-                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700">
-                  {selectedPlaceDistanceSummary}
-                </span>
-              )}
-              {selectedPlaceData.dataSource && (
-                <span className="rounded-full bg-blue-50 px-3 py-1.5 text-blue-700">
-                  📊 {formatDataSourceShort(selectedPlaceData.dataSource)}
-                </span>
-              )}
-            </div>
-
-            {(selectedPlaceData.osmWheelchairTag || selectedPlaceData.osmToiletAccessible != null || selectedPlaceData.osmTactilePaving != null) && (
-              <div className="space-y-1 rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
-                <p className="font-medium text-gray-700">Accessibility Evidence:</p>
-                {selectedPlaceData.osmWheelchairTag && <p>♿ Wheelchair: {selectedPlaceData.osmWheelchairTag}</p>}
-                {selectedPlaceData.osmToiletAccessible != null && (
-                  <p>🚻 Accessible toilet: {selectedPlaceData.osmToiletAccessible ? 'Yes' : 'No'}</p>
-                )}
-                {selectedPlaceData.osmTactilePaving != null && (
-                  <p>🔲 Tactile paving: {selectedPlaceData.osmTactilePaving ? 'Yes' : 'No'}</p>
-                )}
-              </div>
-            )}
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Link
-                href={`/${locale}/places/${selectedPlaceData.id}`}
-                className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
-              >
-                View Details
-              </Link>
-              <Link
-                href={`/${locale}/report/${selectedPlaceData.id}`}
-                className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
-              >
-                Report
-              </Link>
-            </div>
+            <PlaceDetail
+              place={selectedPlaceData}
+              locale={locale}
+              onDelete={() => setSelectedPlace(null)}
+              onEdit={() => router.push(`/${locale}/edit-place/${selectedPlaceData.id}`)}
+              onReportClick={() => router.push(`/${locale}/report/${selectedPlaceData.id}`)}
+            />
+            <Link
+              href={`/${locale}/places/${selectedPlaceData.id}`}
+              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              {t('places.details')}
+            </Link>
           </div>
         </BottomSheet>
       )}
