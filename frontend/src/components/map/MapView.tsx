@@ -163,9 +163,11 @@ function MapUpdater({
       return;
     }
 
-    map.flyTo([flyTo.lat, flyTo.lng], flyTo.zoom ?? map.getZoom(), {
+    // Never zoom out: use whichever is greater — requested zoom or current zoom
+    const targetZoom = Math.max(flyTo.zoom ?? map.getZoom(), map.getZoom());
+    map.flyTo([flyTo.lat, flyTo.lng], targetZoom, {
       animate: true,
-      duration: 1.5,
+      duration: 1.2,
     });
   }, [flyTo, map]);
 
