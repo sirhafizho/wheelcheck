@@ -108,68 +108,25 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
   const hasMore = debouncedSearch.length === 0 && places.length < total;
 
-  if (loading && places.length === 0) {
-    return (
-      <div className="h-full overflow-y-auto pb-16">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          {/* Header skeleton — matches h1 text-3xl + subtitle */}
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="h-9 w-40 rounded-lg bg-gray-200 animate-pulse mb-2" />
-              <div className="h-4 w-28 rounded bg-gray-200 animate-pulse" />
-            </div>
-          </div>
-          {/* SearchInput skeleton */}
-          <div className="mb-6 h-12 w-full rounded-lg bg-gray-200 animate-pulse" />
-          {/* Card grid — matches grid gap-4 md:grid-cols-2 lg:grid-cols-3 + PlaceCard */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-lg bg-white shadow-md overflow-hidden">
-                <div className="p-4">
-                  {/* Row 1: title + access badge */}
-                  <div className="mb-2 flex items-start justify-between gap-3">
-                    <div className="h-6 flex-1 rounded bg-gray-200 animate-pulse" />
-                    <div className="h-6 w-8 rounded-full bg-gray-200 animate-pulse shrink-0" />
-                  </div>
-                  {/* Row 2: pin icon + address */}
-                  <div className="mb-3 flex items-start gap-2">
-                    <div className="mt-0.5 h-4 w-4 rounded bg-gray-200 animate-pulse shrink-0" />
-                    <div className="h-4 flex-1 rounded bg-gray-200 animate-pulse" />
-                  </div>
-                  {/* Row 3: city/state */}
-                  <div className="mb-3 h-4 w-32 rounded bg-gray-200 animate-pulse" />
-                  {/* Row 4: review count */}
-                  <div className="h-3 w-20 rounded bg-gray-200 animate-pulse" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && places.length === 0) {
-    return (
-      <div className="h-full overflow-y-auto pb-16">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-            {error}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isInitialLoad = loading && places.length === 0 && !debouncedSearch;
 
   return (
     <div className="h-full overflow-y-auto pb-16">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="mt-1 text-sm text-gray-500">{t('showing', { count: places.length })}</p>
+            {isInitialLoad ? (
+              <>
+                <div className="h-9 w-40 rounded-lg bg-gray-200 animate-pulse mb-2" />
+                <div className="h-4 w-28 rounded bg-gray-200 animate-pulse" />
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
+                <p className="mt-1 text-sm text-gray-500">{t('showing', { count: places.length })}</p>
+              </>
+            )}
           </div>
-          {/* Desktop: show inline; hidden on mobile (FAB used instead) */}
           <Link
             href={`/${locale}/add-place`}
             className="hidden sm:inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
@@ -179,6 +136,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
           </Link>
         </div>
 
+        {/* Search input always stays visible */}
         <div className="mb-6">
           <SearchInput
             placeholder={t('searchPlaceholder')}
@@ -187,13 +145,33 @@ export default function PlacesPage({ params }: PlacesPageProps) {
           />
         </div>
 
-        {error && places.length > 0 && (
+        {error && (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
             {error}
           </div>
         )}
 
-        {places.length === 0 ? (
+        {/* Cards area: skeleton on initial load, spinner overlay while searching, or results */}
+        {loading && places.length === 0 ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-lg bg-white shadow-md overflow-hidden">
+                <div className="p-4">
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <div className="h-6 flex-1 rounded bg-gray-200 animate-pulse" />
+                    <div className="h-6 w-8 rounded-full bg-gray-200 animate-pulse shrink-0" />
+                  </div>
+                  <div className="mb-3 flex items-start gap-2">
+                    <div className="mt-0.5 h-4 w-4 rounded bg-gray-200 animate-pulse shrink-0" />
+                    <div className="h-4 flex-1 rounded bg-gray-200 animate-pulse" />
+                  </div>
+                  <div className="mb-3 h-4 w-32 rounded bg-gray-200 animate-pulse" />
+                  <div className="h-3 w-20 rounded bg-gray-200 animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : places.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">{t('noResults')}</p>
           </div>
@@ -220,7 +198,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
           </>
         )}
       </div>
-      {/* Mobile FAB — only shown on small screens */}
+      {/* Mobile FAB */}
       <Link
         href={`/${locale}/add-place`}
         aria-label={tAddPlace('title')}
