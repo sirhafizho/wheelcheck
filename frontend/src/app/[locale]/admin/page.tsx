@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, use, useEffect, useMemo, useState } from 'react';
+import { Fragment, use, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
@@ -8,7 +8,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { API_URL } from '@/lib/constants';
 
 type Params = Promise<{ locale: string }>;
-type TabKey = 'places' | 'reviews' | 'users';
+type TabKey = 'places' | 'reviews' | 'users' | 'enrichment';
 type AccessLevel = 'FULL' | 'PARTIAL' | 'NOT_ACCESSIBLE' | 'UNKNOWN';
 type Category =
   | 'RESTAURANT'
@@ -83,6 +83,13 @@ interface EditablePlaceForm {
   city: string;
   category: Category;
 }
+
+interface EnrichmentStateStats {
+  state: string; total: number; enriched: number; unenriched: number;
+  verifiedCount: number; inferredCount: number; assumptionCount: number;
+}
+
+interface EnrichmentBatchProgress { running: boolean; processed: number; total: number; currentState: string; }
 
 const TOKEN_KEY = 'wheelcheck_token';
 const PAGE_SIZE = 20;
@@ -262,6 +269,7 @@ export default function AdminPage({ params }: { params: Params }) {
     places: false,
     reviews: false,
     users: false,
+    enrichment: false,
   });
   const [actionKey, setActionKey] = useState<string | null>(null);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
@@ -271,6 +279,12 @@ export default function AdminPage({ params }: { params: Params }) {
   const [filterCity, setFilterCity] = useState('');
   const [filterAccess, setFilterAccess] = useState('');
   const [searchDebounce, setSearchDebounce] = useState<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Enrichment state ────────────────────────────────────────────────────────
+  const [enrichmentStats, setEnrichmentStats] = useState<EnrichmentStateStats[] | null>(null);
+  const [enrichmentProgress, setEnrichmentProgress] = useState<EnrichmentBatchProgress | null>(null);
+  const [enrichmentError, setEnrichmentError] = useState<string | null>(null);
+  const enrichmentPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const dateFormatter = useMemo(
     () =>
@@ -449,6 +463,10 @@ export default function AdminPage({ params }: { params: Params }) {
 
     if (nextTab === 'places' && !placesPage) {
       await loadPlaces(0);
+    }
+
+    if (nextTab === 'enrichment' && !enrichmentStats) {
+      await loadEnrichmentStats();
     }
   };
 
@@ -1063,6 +1081,156 @@ export default function AdminPage({ params }: { params: Params }) {
     );
   };
 
+  // ── Enrichment helpers ──────────────────────────────────────────────────────
+  const loadEnrichmentStats = async (authToken = token) => {
+    if (!authToken) return;
+    setTabLoading(prev => ({ ...prev, enrichment: true }));
+    setEnrichmentError(null);
+    try {
+      const data = await adminRequest<EnrichmentStateStats[]>(authToken, '/admin/enrich/stats');
+      setEnrichmentStats(data);
+      const prog = await adminRequest<EnrichmentBatchProgress>(authToken, '/admin/enrich/progress');
+      setEnrichmentProgress(prog);
+    } catch (e) {
+      setEnrichmentError(getErrorMessage(e, 'Failed to load enrichment stats'));
+    } finally {
+      setTabLoading(prev => ({ ...prev, enrichment: false }));
+    }
+  };
+
+  const startEnrichment = async (state: string) => {
+    if (!token) return;
+    setEnrichmentError(null);
+    try {
+      await adminRequest(token, `/admin/enrich/state/${encodeURIComponent(state)}`, { method: 'POST' });
+      if (enrichmentPollRef.current) clearInterval(enrichmentPollRef.current);
+      enrichmentPollRef.current = setInterval(async () => {
+        if (!token) return;
+        try {
+          const prog = await adminRequest<EnrichmentBatchProgress>(token, '/admin/enrich/progress');
+          setEnrichmentProgress(prog);
+          if (!prog.running) {
+            clearInterval(enrichmentPollRef.current!);
+            enrichmentPollRef.current = null;
+            await loadEnrichmentStats(token);
+          }
+        } catch { /* ignore poll errors */ }
+      }, 5000);
+      const prog = await adminRequest<EnrichmentBatchProgress>(token, '/admin/enrich/progress');
+      setEnrichmentProgress(prog);
+    } catch (e) {
+      setEnrichmentError(getErrorMessage(e, `Failed to start enrichment for ${state}`));
+    }
+  };
+
+  const MALAYSIAN_STATES = [
+    'Johor','Kedah','Kelantan','Melaka','Negeri Sembilan',
+    'Pahang','Perak','Perlis','Pulau Pinang','Sabah',
+    'Sarawak','Selangor','Terengganu','Kuala Lumpur','Labuan','Putrajaya',
+  ];
+
+  const renderEnrichmentTab = () => {
+    if (tabLoading.enrichment && !enrichmentStats) {
+      return (
+        <div className="flex min-h-[240px] items-center justify-center rounded-xl bg-white shadow-sm">
+          <LoadingSpinner size="lg" />
+        </div>
+      );
+    }
+
+    const progress = enrichmentProgress;
+    const statsMap = new Map(enrichmentStats?.map(s => [s.state.toLowerCase(), s]));
+
+    return (
+      <div className="space-y-6">
+        {enrichmentError && <ErrorBanner message={enrichmentError} />}
+
+        {/* Progress banner */}
+        {progress?.running && (
+          <div className="rounded-xl bg-emerald-50 ring-1 ring-emerald-200 p-4">
+            <div className="flex items-center justify-between gap-4 mb-2">
+              <span className="text-sm font-semibold text-emerald-800">
+                ✨ Enriching <strong>{progress.currentState}</strong>…
+              </span>
+              <span className="text-sm text-emerald-700">
+                {progress.processed} / {progress.total}
+              </span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-emerald-200">
+              <div
+                className="h-2 rounded-full bg-emerald-500 transition-all duration-500"
+                style={{ width: progress.total > 0 ? `${Math.round((progress.processed / progress.total) * 100)}%` : '0%' }}
+              />
+            </div>
+            <p className="mt-1 text-xs text-emerald-600">Rate-limited to ~8 calls/min (Gemini free tier)</p>
+          </div>
+        )}
+
+        {/* State table */}
+        <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-100">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px] divide-y divide-gray-200 text-sm">
+              <thead className="bg-emerald-50 text-left text-gray-700">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">State</th>
+                  <th className="px-4 py-3 font-semibold text-right">Total</th>
+                  <th className="px-4 py-3 font-semibold text-right">Enriched</th>
+                  <th className="px-4 py-3 font-semibold text-right">🟢 Verified</th>
+                  <th className="px-4 py-3 font-semibold text-right">🟡 Inferred</th>
+                  <th className="px-4 py-3 font-semibold text-right">⚪ Assumption</th>
+                  <th className="px-4 py-3 font-semibold text-right">Pending</th>
+                  <th className="px-4 py-3 font-semibold"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {MALAYSIAN_STATES.map(state => {
+                  const s = statsMap.get(state.toLowerCase());
+                  const isRunning = progress?.running && progress.currentState.toLowerCase() === state.toLowerCase();
+                  const pct = s && s.total > 0 ? Math.round((s.enriched / s.total) * 100) : 0;
+                  return (
+                    <tr key={state} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium text-gray-900">{state}</td>
+                      <td className="px-4 py-3 text-right text-gray-600">{s?.total ?? '—'}</td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-medium text-emerald-600">{s?.enriched ?? '—'}</span>
+                        {s && s.total > 0 && (
+                          <span className="ml-1 text-xs text-gray-400">({pct}%)</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-green-700">{s?.verifiedCount ?? '—'}</td>
+                      <td className="px-4 py-3 text-right text-yellow-600">{s?.inferredCount ?? '—'}</td>
+                      <td className="px-4 py-3 text-right text-gray-500">{s?.assumptionCount ?? '—'}</td>
+                      <td className="px-4 py-3 text-right text-red-500">{s ? s.unenriched : '—'}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          variant="outline"
+                          onClick={() => void startEnrichment(state)}
+                          disabled={isRunning || progress?.running}
+                          className="min-h-[36px] px-3 py-1.5 text-xs"
+                        >
+                          {isRunning ? <LoadingSpinner size="sm" /> : (s?.unenriched === 0 ? 'Re-enrich' : 'Enrich')}
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="border-t border-gray-100 px-4 py-3 text-right">
+            <Button variant="ghost" onClick={() => void loadEnrichmentStats()} className="text-sm">
+              ↻ Refresh
+            </Button>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-400">
+          Powered by Gemini 1.5 Flash with Google Search Grounding · Free tier: 1,500 req/day, 15 req/min · Batch rate: ~8/min
+        </p>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center pb-16">
@@ -1103,7 +1271,7 @@ export default function AdminPage({ params }: { params: Params }) {
       </div>
 
       <div className="mb-6 flex flex-wrap gap-3 rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-100" role="tablist" aria-label={t('title')}>
-        {(['places', 'reviews', 'users'] as TabKey[]).map((tab) => {
+        {(['places', 'reviews', 'users', 'enrichment'] as TabKey[]).map((tab) => {
           const isActive = activeTab === tab;
 
           return (
@@ -1129,6 +1297,7 @@ export default function AdminPage({ params }: { params: Params }) {
         {activeTab === 'places' && renderPlacesTable()}
         {activeTab === 'reviews' && renderReviewsTable()}
         {activeTab === 'users' && renderUsersTable()}
+        {activeTab === 'enrichment' && renderEnrichmentTab()}
       </div>
     </div>
     </div>

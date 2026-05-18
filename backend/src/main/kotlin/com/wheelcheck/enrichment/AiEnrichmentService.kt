@@ -80,19 +80,18 @@ class AiEnrichmentService(
         batchProgress.set(0)
 
         try {
-            val places = placeRepository.findByStateIgnoreCase(state)
-            val toEnrich = if (forceRe) places else {
-                val enrichedIds = enrichmentRepository.findAll()
-                    .filter { e -> places.any { p -> p.id == e.placeId } }
-                    .map { it.placeId }.toSet()
-                places.filter { it.id !in enrichedIds }
+            val placeIds: List<UUID> = if (forceRe) {
+                placeRepository.findByStateIgnoreCase(state).map { it.id }
+            } else {
+                enrichmentRepository.findUnenrichedPlaceIdsByState(state)
             }
 
-            batchTotal.set(toEnrich.size)
-            logger.info("Starting AI enrichment for $state: ${toEnrich.size} places to enrich")
+            batchTotal.set(placeIds.size)
+            logger.info("Starting AI enrichment for $state: ${placeIds.size} places to enrich")
 
-            for (place in toEnrich) {
+            for (placeId in placeIds) {
                 try {
+                    val place = placeRepository.findByIdOrNull(placeId) ?: continue
                     enrichAndSave(place)
                     batchProgress.incrementAndGet()
                     Thread.sleep(delayBetweenCallsMs)
@@ -101,12 +100,12 @@ class AiEnrichmentService(
                     logger.warn("Enrichment batch interrupted for $state")
                     break
                 } catch (e: Exception) {
-                    logger.error("Failed to enrich ${place.name} (${place.id}): ${e.message}")
+                    logger.error("Failed to enrich place $placeId: ${e.message}")
                     batchProgress.incrementAndGet()
                 }
             }
 
-            logger.info("Enrichment complete for $state: ${batchProgress.get()}/${toEnrich.size} processed")
+            logger.info("Enrichment complete for $state: ${batchProgress.get()}/${placeIds.size} processed")
         } finally {
             batchRunning.set(false)
         }
@@ -127,9 +126,9 @@ class AiEnrichmentService(
             total = total,
             enriched = enriched,
             unenriched = total - enriched,
-            verifiedCount = enrichmentRepository.countByTier("VERIFIED"),
-            inferredCount = enrichmentRepository.countByTier("INFERRED"),
-            assumptionCount = enrichmentRepository.countByTier("ASSUMPTION")
+            verifiedCount = enrichmentRepository.countByStateAndTier(state, "VERIFIED"),
+            inferredCount = enrichmentRepository.countByStateAndTier(state, "INFERRED"),
+            assumptionCount = enrichmentRepository.countByStateAndTier(state, "ASSUMPTION")
         )
     }
 

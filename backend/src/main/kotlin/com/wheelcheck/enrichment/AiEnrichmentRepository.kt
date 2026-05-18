@@ -15,20 +15,34 @@ interface AiEnrichmentRepository : JpaRepository<AiEnrichment, UUID> {
 
     @Query(value = """
         SELECT COUNT(*) FROM places p
+        INNER JOIN ai_enrichment ae ON ae.place_id = p.id
+        WHERE LOWER(p.state) = LOWER(:state) AND ae.confidence_tier = :tier
+    """, nativeQuery = true)
+    fun countByStateAndTier(@Param("state") state: String, @Param("tier") tier: String): Long
+
+    @Query(value = """
+        SELECT p.id FROM places p
         LEFT JOIN ai_enrichment ae ON ae.place_id = p.id
-        WHERE p.state = :state AND ae.id IS NULL
+        WHERE LOWER(p.state) = LOWER(:state) AND ae.id IS NULL
+    """, nativeQuery = true)
+    fun findUnenrichedPlaceIdsByState(@Param("state") state: String): List<UUID>
+
+    @Query(value = """
+        SELECT COUNT(*) FROM places p
+        LEFT JOIN ai_enrichment ae ON ae.place_id = p.id
+        WHERE LOWER(p.state) = LOWER(:state) AND ae.id IS NULL
     """, nativeQuery = true)
     fun countUnenrichedByState(@Param("state") state: String): Long
 
     @Query(value = """
         SELECT COUNT(*) FROM places p
         INNER JOIN ai_enrichment ae ON ae.place_id = p.id
-        WHERE p.state = :state
+        WHERE LOWER(p.state) = LOWER(:state)
     """, nativeQuery = true)
     fun countEnrichedByState(@Param("state") state: String): Long
 
     @Query(value = """
-        SELECT COUNT(*) FROM places p WHERE p.state = :state
+        SELECT COUNT(*) FROM places p WHERE LOWER(p.state) = LOWER(:state)
     """, nativeQuery = true)
     fun countTotalByState(@Param("state") state: String): Long
 }

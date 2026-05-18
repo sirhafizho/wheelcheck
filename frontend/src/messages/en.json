@@ -257,7 +257,8 @@
     "tabs": {
       "places": "Places",
       "reviews": "Reviews",
-      "users": "Users"
+      "users": "Users",
+      "enrichment": "AI Enrichment"
     },
     "table": {
       "name": "Name",

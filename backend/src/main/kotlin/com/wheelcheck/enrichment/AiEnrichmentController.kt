@@ -60,4 +60,16 @@ class AiEnrichmentController(
     fun getStats(@PathVariable state: String): ResponseEntity<AiEnrichmentService.StateStats> {
         return ResponseEntity.ok(enrichmentService.getStateStats(state))
     }
+
+    /** Returns enrichment stats for all Malaysian states in one call. */
+    @GetMapping("/stats")
+    fun getAllStats(): ResponseEntity<List<AiEnrichmentService.StateStats>> {
+        val states = listOf(
+            "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan",
+            "Pahang", "Perak", "Perlis", "Pulau Pinang", "Sabah",
+            "Sarawak", "Selangor", "Terengganu", "Kuala Lumpur",
+            "Labuan", "Putrajaya"
+        )
+        return ResponseEntity.ok(states.map { enrichmentService.getStateStats(it) })
+    }
 }
