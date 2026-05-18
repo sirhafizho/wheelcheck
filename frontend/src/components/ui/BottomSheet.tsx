@@ -239,7 +239,7 @@ export function BottomSheet({
       <div
         aria-hidden="true"
         data-testid="bottom-sheet-backdrop"
-        className="fixed inset-0 z-[1090] bg-slate-950/30 backdrop-blur-[2px] transition-opacity duration-300 pointer-events-none"
+        className="fixed inset-0 z-[1090] bg-slate-950/30 transition-opacity duration-300 pointer-events-none"
         style={{ opacity: backdropOpacity }}
       />
 
