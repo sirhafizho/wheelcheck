@@ -61,11 +61,25 @@ PGPASSWORD="$SUPABASE_DB_PASSWORD" pg_dump \
   --no-owner \
   --no-acl \
   --exclude-table='schema_migrations' \
-  --exclude-table='flyway_schema_history' \
   -f "$DUMP_FILE"
 
 echo "✅  Dump saved to: $DUMP_FILE ($(du -sh "$DUMP_FILE" | cut -f1))"
 echo ""
+
+# Terminate active connections before dropping
+echo "🔌  Terminating existing connections to '${LOCAL_DB_NAME}'..."
+PGPASSWORD="$LOCAL_DB_PASSWORD" psql \
+  -h "$LOCAL_DB_HOST" -p "$LOCAL_DB_PORT" \
+  -U "$LOCAL_DB_USER" -d postgres \
+  -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${LOCAL_DB_NAME}' AND pid != pg_backend_pid();" \
+  > /dev/null 2>&1 || true
+
+# Fix collation version mismatch (common with Docker)
+PGPASSWORD="$LOCAL_DB_PASSWORD" psql \
+  -h "$LOCAL_DB_HOST" -p "$LOCAL_DB_PORT" \
+  -U "$LOCAL_DB_USER" -d postgres \
+  -c "ALTER DATABASE template1 REFRESH COLLATION VERSION; ALTER DATABASE postgres REFRESH COLLATION VERSION;" \
+  > /dev/null 2>&1 || true
 
 # Drop & recreate local DB cleanly
 echo "🗑️   Resetting local database '${LOCAL_DB_NAME}'..."
@@ -87,9 +101,12 @@ PGPASSWORD="$LOCAL_DB_PASSWORD" pg_restore \
   --no-acl \
   --if-exists \
   -c \
-  "$DUMP_FILE"
+  "$DUMP_FILE" 2>&1 | grep -v "supabase_vault\|transaction_timeout" || true
 
 echo ""
 echo "✅  Done! Local DB is now in sync with Supabase demo."
 echo "    Dump file kept at: $DUMP_FILE"
 echo "    (Delete it when no longer needed)"
+echo ""
+echo "💡  Next: start the backend with ./gradlew bootRun"
+echo "    Flyway will only run migrations newer than V20."
