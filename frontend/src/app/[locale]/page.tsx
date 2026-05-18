@@ -456,6 +456,7 @@ export default function HomePage() {
           flyTo={flyToCoords}
           zoomIn={zoomInCount}
           zoomOut={zoomOutCount}
+          selectedPlaceId={selectedPlace?.id}
           onPlaceClick={handlePlaceClick}
           onViewportChange={handleViewportChange}
           onDragStart={() => setSelectedPlace(null)}

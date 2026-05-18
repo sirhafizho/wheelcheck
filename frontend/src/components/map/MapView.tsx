@@ -83,6 +83,36 @@ function createAccessibilityIcon(level: AccessLevel | null): L.DivIcon {
   });
 }
 
+function createSelectedIcon(level: AccessLevel | null): L.DivIcon {
+  const color = (level && MARKER_COLORS[level]) ?? MARKER_COLORS.UNKNOWN;
+  return L.divIcon({
+    className: '',
+    html: `
+      <div style="position:relative;width:36px;height:36px;">
+        <div class="marker-pulse-ring" style="
+          position:absolute;inset:0;
+          border-radius:50%;
+          background:${color};
+          opacity:0.6;
+        "></div>
+        <div data-testid="map-marker-selected" style="
+          position:absolute;
+          top:6px;left:6px;
+          width:24px;height:24px;
+          background:${color};
+          border:3px solid white;
+          border-radius:50% 50% 50% 0;
+          transform:rotate(-45deg);
+          box-shadow:0 3px 10px rgba(0,0,0,0.5);
+        "></div>
+      </div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 34],
+    popupAnchor: [0, -36],
+    tooltipAnchor: [0, -36],
+  });
+}
+
 interface FlyToCoordinates {
   lat: number;
   lng: number;
@@ -102,6 +132,7 @@ interface MapViewProps {
   flyTo?: FlyToCoordinates;
   zoomIn?: number;
   zoomOut?: number;
+  selectedPlaceId?: string | null;
   onPlaceClick?: (place: Place) => void;
   onViewportChange?: (viewport: MapViewport) => void;
   onDragStart?: () => void;
@@ -201,6 +232,7 @@ export function MapView({
   flyTo,
   zoomIn,
   zoomOut,
+  selectedPlaceId,
   onPlaceClick,
   onViewportChange,
   onDragStart,
@@ -251,27 +283,33 @@ export function MapView({
           maxClusterRadius={50}
           disableClusteringAtZoom={18}
         >
-          {places.map((place) => (
-            <Marker
-              key={place.id}
-              position={[place.latitude, place.longitude]}
-              icon={createAccessibilityIcon(place.accessibilityLevel)}
-              eventHandlers={{
-                click: () => onPlaceClick?.(place),
-              }}
-            >
-              <Tooltip direction="top" offset={[0, -4]} opacity={1}>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-medium">{place.name}</span>
-                  {place.aiAccessible !== null && place.aiAccessible !== undefined && (
-                    <span className={`text-[10px] font-semibold ${place.aiAccessible ? 'text-sky-600' : 'text-red-500'}`}>
-                      {place.aiAccessible ? '✦ AI Accessible' : '✦ AI Inaccessible'}
-                    </span>
-                  )}
-                </div>
-              </Tooltip>
-            </Marker>
-          ))}
+          {places.map((place) => {
+            const isSelected = place.id === selectedPlaceId;
+            return (
+              <Marker
+                key={place.id}
+                position={[place.latitude, place.longitude]}
+                icon={isSelected
+                  ? createSelectedIcon(place.accessibilityLevel)
+                  : createAccessibilityIcon(place.accessibilityLevel)}
+                zIndexOffset={isSelected ? 1000 : 0}
+                eventHandlers={{
+                  click: () => onPlaceClick?.(place),
+                }}
+              >
+                <Tooltip direction="top" offset={[0, -4]} opacity={1} permanent={isSelected}>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-medium">{place.name}</span>
+                    {place.aiAccessible !== null && place.aiAccessible !== undefined && (
+                      <span className={`text-[10px] font-semibold ${place.aiAccessible ? 'text-sky-600' : 'text-red-500'}`}>
+                        {place.aiAccessible ? '✦ AI Accessible' : '✦ AI Inaccessible'}
+                      </span>
+                    )}
+                  </div>
+                </Tooltip>
+              </Marker>
+            );
+          })}
         </MarkerClusterGroup>
       </MapContainer>
 
