@@ -110,24 +110,40 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
   if (loading && places.length === 0) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="px-4 pt-4 pb-2">
-          <div className="h-10 w-full rounded-xl bg-gray-200 animate-pulse mb-2" />
-          <div className="h-4 w-32 rounded bg-gray-200 animate-pulse" />
-        </div>
-        <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-3 pt-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 space-y-2">
-                  <div className="h-5 w-3/4 rounded bg-gray-200 animate-pulse" />
-                  <div className="h-4 w-1/2 rounded bg-gray-200 animate-pulse" />
-                  <div className="h-4 w-2/3 rounded bg-gray-200 animate-pulse" />
-                </div>
-                <div className="h-8 w-20 rounded-full bg-gray-200 animate-pulse shrink-0" />
-              </div>
+      <div className="h-full overflow-y-auto pb-16">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Header skeleton — matches h1 text-3xl + subtitle */}
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="h-9 w-40 rounded-lg bg-gray-200 animate-pulse mb-2" />
+              <div className="h-4 w-28 rounded bg-gray-200 animate-pulse" />
             </div>
-          ))}
+          </div>
+          {/* SearchInput skeleton */}
+          <div className="mb-6 h-12 w-full rounded-lg bg-gray-200 animate-pulse" />
+          {/* Card grid — matches grid gap-4 md:grid-cols-2 lg:grid-cols-3 + PlaceCard */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-lg bg-white shadow-md overflow-hidden">
+                <div className="p-4">
+                  {/* Row 1: title + access badge */}
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <div className="h-6 flex-1 rounded bg-gray-200 animate-pulse" />
+                    <div className="h-6 w-8 rounded-full bg-gray-200 animate-pulse shrink-0" />
+                  </div>
+                  {/* Row 2: pin icon + address */}
+                  <div className="mb-3 flex items-start gap-2">
+                    <div className="mt-0.5 h-4 w-4 rounded bg-gray-200 animate-pulse shrink-0" />
+                    <div className="h-4 flex-1 rounded bg-gray-200 animate-pulse" />
+                  </div>
+                  {/* Row 3: city/state */}
+                  <div className="mb-3 h-4 w-32 rounded bg-gray-200 animate-pulse" />
+                  {/* Row 4: review count */}
+                  <div className="h-3 w-20 rounded bg-gray-200 animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
