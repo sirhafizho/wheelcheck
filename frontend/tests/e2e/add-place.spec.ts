@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { API_BASE, loginAsUser } from './helpers';
+import { API_BASE, loginAsUser, getAuthToken, ADMIN_EMAIL, ADMIN_PASSWORD } from './helpers';
 
 test.describe('Add Place — Login Gate', () => {
   test('shows login required screen for unauthenticated users', async ({ page }) => {
@@ -171,6 +171,26 @@ test.describe('Add Place — Navigation', () => {
 });
 
 test.describe('Add Place — Full Submit Flow (Demo)', () => {
+  let createdPlaceName: string;
+
+  test.afterAll(async ({ request }) => {
+    if (!createdPlaceName) return;
+    try {
+      const token = await getAuthToken(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+      const search = await request.get(
+        `${API_BASE}/places/search?name=${encodeURIComponent(createdPlaceName)}&size=10`,
+      );
+      const places: any[] = await search.json();
+      for (const p of Array.isArray(places) ? places : []) {
+        if (p.name === createdPlaceName) {
+          await request.delete(`${API_BASE}/places/${p.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        }
+      }
+    } catch { /* best-effort cleanup */ }
+  });
+
   test('create a place via the form (under 1 min)', async ({ page }) => {
     // Login
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
@@ -179,6 +199,7 @@ test.describe('Add Place — Full Submit Flow (Demo)', () => {
     await expect(page.getByRole('heading', { name: /add a place/i })).toBeVisible({ timeout: 10000 });
 
     const testName = `E2E Test Place ${Date.now()}`;
+    createdPlaceName = testName;
 
     // Step 1: Type name
     const nameInput = page.locator('#name');

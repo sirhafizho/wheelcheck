@@ -68,7 +68,7 @@ test.describe('Profile Page', () => {
 
     await page.getByRole('button', { name: /create account/i }).click();
 
-    const uniqueEmail = `testuser+${Date.now()}@example.com`;
+    const uniqueEmail = `e2euser+${Date.now()}@example.com`;
     await page.getByLabel(/display name/i).fill('Test User');
     await page.getByLabel(/email/i).first().fill(uniqueEmail);
     await page.getByLabel(/password/i).first().fill('testpass123');
@@ -85,7 +85,7 @@ test.describe('Profile Page', () => {
     await page.goto('/en/profile', { waitUntil: 'domcontentloaded' });
     await page.getByRole('button', { name: /create account/i }).click();
 
-    const uniqueEmail = `statsuser+${Date.now()}@example.com`;
+    const uniqueEmail = `e2euser+${Date.now()}@example.com`;
     await page.getByLabel(/display name/i).fill('Stats User');
     await page.getByLabel(/email/i).first().fill(uniqueEmail);
     await page.getByLabel(/password/i).first().fill('testpass123');
@@ -101,7 +101,7 @@ test.describe('Profile Page', () => {
     await page.goto('/en/profile', { waitUntil: 'domcontentloaded' });
     await page.getByRole('button', { name: /create account/i }).click();
 
-    const uniqueEmail = `logoutuser+${Date.now()}@example.com`;
+    const uniqueEmail = `e2euser+${Date.now()}@example.com`;
     await page.getByLabel(/display name/i).fill('Logout User');
     await page.getByLabel(/email/i).first().fill(uniqueEmail);
     await page.getByLabel(/password/i).first().fill('testpass123');
