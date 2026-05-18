@@ -197,23 +197,24 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
           onClose={() => setToast(null)}
         />
       )}
-      <div className="p-6">
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">
+      <div className={flat ? 'px-4 pt-2 pb-4' : 'p-6'}>
+        {/* ── Header: name + icons + badge ── */}
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <h1 className={`font-bold text-gray-900 leading-tight ${flat ? 'text-xl' : 'text-2xl'}`}>
             {place.name}
           </h1>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={() => void handleFavoriteToggle()}
               disabled={favLoading}
               aria-label={favorited ? tFav('remove') : tFav('save')}
               data-testid="favorite-toggle"
-              className="rounded-full p-2 transition-colors hover:bg-red-50 disabled:opacity-50"
+              className="rounded-full p-1.5 transition-colors hover:bg-red-50 disabled:opacity-50"
             >
               {favorited
-                ? <HeartSolidIcon className="h-6 w-6 text-red-500" />
-                : <HeartIcon className="h-6 w-6 text-gray-400 hover:text-red-400" />
+                ? <HeartSolidIcon className="h-5 w-5 text-red-500" />
+                : <HeartIcon className="h-5 w-5 text-gray-400 hover:text-red-400" />
               }
             </button>
             {currentUserId && place.createdBy && currentUserId === place.createdBy && (
@@ -222,48 +223,87 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
                   type="button"
                   onClick={onEdit}
                   data-testid="edit-place-btn"
-                  className="rounded-full p-2 transition-colors hover:bg-blue-50"
+                  className="rounded-full p-1.5 transition-colors hover:bg-blue-50"
                   aria-label={tPlaces('editPlace')}
                 >
-                  <PencilIcon className="h-5 w-5 text-gray-500 hover:text-blue-600" />
+                  <PencilIcon className="h-4 w-4 text-gray-500 hover:text-blue-600" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
                   data-testid="delete-place-btn"
-                  className="rounded-full p-2 transition-colors hover:bg-red-50"
+                  className="rounded-full p-1.5 transition-colors hover:bg-red-50"
                   aria-label={tPlaces('deletePlace')}
                 >
-                  <TrashIcon className="h-5 w-5 text-gray-500 hover:text-red-600" />
+                  <TrashIcon className="h-4 w-4 text-gray-500 hover:text-red-600" />
                 </button>
               </>
             )}
-            <AccessBadge level={place.accessibilityLevel} size="lg" />
+            <AccessBadge level={place.accessibilityLevel} size={flat ? 'sm' : 'lg'} />
           </div>
         </div>
 
-        <div className="flex items-start gap-2 text-gray-700 mb-1">
-          <MapPinIcon className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
-          <p className="flex-1">
+        {/* ── Address ── */}
+        <div className="flex items-start gap-2 text-gray-700 mb-0.5">
+          <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <p className="flex-1 text-sm">
             {!place.address || place.address === 'Address not available'
               ? tPlaces('addressNotAvailable')
               : place.address}
           </p>
         </div>
-
         {locationLine && (
-          <p className="text-sm text-gray-500 pl-7 mb-4">
+          <p className="text-xs text-gray-500 pl-6 mb-3">
             {locationLine}
           </p>
         )}
 
+        {/* ── Category ── */}
+        {formattedCategory && (
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="inline-block rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+              {formattedCategory}
+            </span>
+          </div>
+        )}
+
+        {/* ── Action buttons — always visible at half state ── */}
+        <div className="grid gap-2 mb-4">
+          <div className="grid gap-2 grid-cols-2">
+            <a
+              href={directionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="get-directions-btn"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[44px]"
+            >
+              <ArrowTopRightOnSquareIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {tPlaces('getDirections')}
+            </a>
+            {detailsHref ? (
+              <a
+                href={detailsHref}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[44px]"
+              >
+                {tPlaces('details')}
+              </a>
+            ) : onShowOnMapClick ? (
+              <Button variant="outline" fullWidth onClick={onShowOnMapClick} className="min-h-[44px] gap-1.5">
+                <MapPinIcon className="h-4 w-4" aria-hidden="true" />
+                {tPlaces('showOnMap')}
+              </Button>
+            ) : null}
+          </div>
+          <Button variant="primary" fullWidth onClick={onReportClick} className="min-h-[44px]">
+            {tCommon('report')}
+          </Button>
+        </div>
+
+        {/* ── Below fold: description, AI panel, metadata ── */}
         {place.description && (
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-start gap-2">
-              <InformationCircleIcon
-                className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
-                aria-hidden="true"
-              />
+              <InformationCircleIcon className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-sm text-gray-700">{place.description}</p>
             </div>
           </div>
@@ -321,13 +361,11 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
                     <p className="text-sm leading-relaxed">{enrichment.aiReasoning}</p>
                   </div>
                 )}
-
                 {enrichment.disclaimer && (
                   <div className="p-2 rounded bg-white/60 border border-current/20 text-xs">
                     ⚠️ {enrichment.disclaimer}
                   </div>
                 )}
-
                 {enrichment.photoUrl && (
                   <img
                     src={enrichment.photoUrl}
@@ -336,7 +374,6 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
                     loading="lazy"
                   />
                 )}
-
                 {enrichment.sources.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide mb-1 opacity-70">
@@ -345,23 +382,16 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
                     <ul className="space-y-1">
                       {enrichment.sources.map((src, i) => (
                         <li key={i}>
-                          <a
-                            href={src.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs underline underline-offset-2 break-all hover:opacity-80"
-                          >
+                          <a href={src.url} target="_blank" rel="noopener noreferrer"
+                             className="text-xs underline underline-offset-2 break-all hover:opacity-80">
                             {src.title}
                           </a>
-                          {src.snippet && (
-                            <p className="text-xs opacity-70 mt-0.5">{src.snippet}</p>
-                          )}
+                          {src.snippet && <p className="text-xs opacity-70 mt-0.5">{src.snippet}</p>}
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
-
                 <p className="text-xs opacity-60 pt-1">
                   {tPlaces('aiReasoning.poweredBy', { model: enrichment.modelUsed ?? 'AI' })}
                 </p>
@@ -370,16 +400,7 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
           </div>
         )}
 
-        {formattedCategory && (
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-gray-500">{tPlaces('category')}</span>
-            <span className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-              {formattedCategory}
-            </span>
-          </div>
-        )}
-
-        <div className="border-t border-gray-200 pt-4 mb-6">
+        <div className="border-t border-gray-200 pt-4">
           <dl className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <dt className="font-medium text-gray-500 mb-1">{tPlaces('reports')}</dt>
@@ -389,66 +410,17 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
               <div>
                 <dt className="font-medium text-gray-500 mb-1">{tPlaces('lastUpdated')}</dt>
                 <dd className="text-gray-900">
-                  <time dateTime={place.lastReportedAt}>
-                    {formatDate(place.lastReportedAt)}
-                  </time>
+                  <time dateTime={place.lastReportedAt}>{formatDate(place.lastReportedAt)}</time>
                 </dd>
               </div>
             )}
             <div className="col-span-2">
-              <dt className="font-medium text-gray-500 mb-1">
-                {tPlaces('dataSource')}
-              </dt>
-              <dd
-                className="text-gray-700 text-xs"
-                data-testid="data-source-label"
-              >
+              <dt className="font-medium text-gray-500 mb-1">{tPlaces('dataSource')}</dt>
+              <dd className="text-gray-700 text-xs" data-testid="data-source-label">
                 {formatDataSource(place.dataSource)}
               </dd>
             </div>
           </dl>
-        </div>
-
-        <div className="grid gap-3">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <a
-              href={directionsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="get-directions-btn"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
-            >
-              <ArrowTopRightOnSquareIcon className="h-5 w-5" aria-hidden="true" />
-              {tPlaces('getDirections')}
-            </a>
-            {detailsHref && (
-              <a
-                href={detailsHref}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
-              >
-                {tPlaces('details')}
-              </a>
-            )}
-            {!detailsHref && onShowOnMapClick && (
-              <Button
-                variant="outline"
-                fullWidth
-                onClick={onShowOnMapClick}
-                className="min-h-[48px] gap-2"
-              >
-                <MapPinIcon className="h-5 w-5" aria-hidden="true" />
-                {tPlaces('showOnMap')}
-              </Button>
-            )}
-          </div>
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={onReportClick}
-            className="min-h-[48px]"
-          >
-            {tCommon('report')}
-          </Button>
         </div>
       </div>
       {showDeleteConfirm && (
