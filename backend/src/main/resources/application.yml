@@ -94,3 +94,4 @@ wheelcheck:
     api-key: ${GEMINI_API_KEY:}
     model: gemini-1.5-flash
     enabled: ${GEMINI_ENABLED:true}
+    daily-cap: ${GEMINI_DAILY_CAP:1400}

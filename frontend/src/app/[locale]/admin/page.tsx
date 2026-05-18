@@ -100,7 +100,7 @@ interface EnrichmentStateStats {
   verifiedCount: number; inferredCount: number; assumptionCount: number;
 }
 
-interface EnrichmentBatchProgress { running: boolean; processed: number; total: number; currentState: string; }
+interface EnrichmentBatchProgress { running: boolean; processed: number; total: number; currentState: string; quotaUsedToday: number; quotaCap: number; quotaRemaining: number; }
 
 const TOKEN_KEY = 'wheelcheck_token';
 const PAGE_SIZE = 20;
@@ -1419,23 +1419,43 @@ export default function AdminPage({ params }: { params: Params }) {
         {enrichmentError && <ErrorBanner message={enrichmentError} />}
 
         {/* Progress banner */}
-        {progress?.running && (
+        {progress && (progress.running || progress.quotaUsedToday > 0) && (
           <div className="rounded-xl bg-emerald-50 ring-1 ring-emerald-200 p-4">
-            <div className="flex items-center justify-between gap-4 mb-2">
-              <span className="text-sm font-semibold text-emerald-800">
-                ✨ Enriching <strong>{progress.currentState}</strong>…
-              </span>
-              <span className="text-sm text-emerald-700">
-                {progress.processed} / {progress.total}
+            {progress.running && (
+              <div className="flex items-center justify-between gap-4 mb-2">
+                <span className="text-sm font-semibold text-emerald-800">
+                  ✨ Enriching <strong>{progress.currentState}</strong>…
+                </span>
+                <span className="text-sm text-emerald-700">
+                  {progress.processed} / {progress.total}
+                </span>
+              </div>
+            )}
+            {progress.running && (
+              <div className="h-2 w-full rounded-full bg-emerald-200 mb-2">
+                <div
+                  className="h-2 rounded-full bg-emerald-500 transition-all duration-500"
+                  style={{ width: progress.total > 0 ? `${Math.round((progress.processed / progress.total) * 100)}%` : '0%' }}
+                />
+              </div>
+            )}
+            {/* Daily quota meter */}
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span className="text-xs text-emerald-700 font-medium">Daily quota</span>
+              <span className={`text-xs font-semibold ${progress.quotaRemaining < 200 ? 'text-red-600' : 'text-emerald-700'}`}>
+                {progress.quotaUsedToday} / {progress.quotaCap} used · {progress.quotaRemaining} remaining
               </span>
             </div>
-            <div className="h-2 w-full rounded-full bg-emerald-200">
+            <div className="h-1.5 w-full rounded-full bg-emerald-200">
               <div
-                className="h-2 rounded-full bg-emerald-500 transition-all duration-500"
-                style={{ width: progress.total > 0 ? `${Math.round((progress.processed / progress.total) * 100)}%` : '0%' }}
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  progress.quotaUsedToday / progress.quotaCap > 0.85 ? 'bg-red-400' :
+                  progress.quotaUsedToday / progress.quotaCap > 0.6 ? 'bg-yellow-400' : 'bg-emerald-400'
+                }`}
+                style={{ width: `${Math.min(Math.round((progress.quotaUsedToday / progress.quotaCap) * 100), 100)}%` }}
               />
             </div>
-            <p className="mt-1 text-xs text-emerald-600">Rate-limited to ~8 calls/min (Gemini free tier)</p>
+            <p className="mt-1 text-xs text-emerald-600">Rate-limited to ~8 calls/min · resets at midnight</p>
           </div>
         )}
 

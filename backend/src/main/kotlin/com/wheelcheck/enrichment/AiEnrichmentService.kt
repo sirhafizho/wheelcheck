@@ -5,11 +5,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.wheelcheck.place.Place
 import com.wheelcheck.place.PlaceRepository
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -19,7 +21,8 @@ class AiEnrichmentService(
     private val geminiService: GeminiEnrichmentService,
     private val enrichmentRepository: AiEnrichmentRepository,
     private val placeRepository: PlaceRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("\${wheelcheck.gemini.daily-cap:1400}") private val dailyCap: Int
 ) {
     private val logger = LoggerFactory.getLogger(AiEnrichmentService::class.java)
 
@@ -30,11 +33,18 @@ class AiEnrichmentService(
     private val batchTotal = AtomicInteger(0)
     private val batchState = StringBuilder()
 
+    // Daily quota tracking — resets automatically when date changes
+    private val quotaCallsToday = AtomicInteger(0)
+    @Volatile private var quotaDate: LocalDate = LocalDate.now()
+
     data class EnrichmentProgress(
         val running: Boolean,
         val processed: Int,
         val total: Int,
-        val currentState: String
+        val currentState: String,
+        val quotaUsedToday: Int,
+        val quotaCap: Int,
+        val quotaRemaining: Int
     )
 
     data class StateStats(
@@ -50,6 +60,10 @@ class AiEnrichmentService(
     /** Enrich a single place by ID. Returns the saved enrichment DTO. */
     @Transactional
     fun enrichPlace(placeId: UUID): AiEnrichmentDto? {
+        if (!checkAndIncrementQuota()) {
+            logger.warn("Daily Gemini quota cap ($dailyCap) reached — skipping single enrichment for $placeId")
+            return null
+        }
         val place = placeRepository.findByIdOrNull(placeId) ?: run {
             logger.warn("Place not found: $placeId")
             return null
@@ -90,6 +104,10 @@ class AiEnrichmentService(
             logger.info("Starting AI enrichment for $state: ${placeIds.size} places to enrich")
 
             for (placeId in placeIds) {
+                if (!checkAndIncrementQuota()) {
+                    logger.warn("Daily Gemini quota cap ($dailyCap) reached after ${batchProgress.get()} places — stopping batch for $state")
+                    break
+                }
                 try {
                     val place = placeRepository.findByIdOrNull(placeId) ?: continue
                     enrichAndSave(place)
@@ -115,8 +133,40 @@ class AiEnrichmentService(
         running = batchRunning.get(),
         processed = batchProgress.get(),
         total = batchTotal.get(),
-        currentState = batchState.toString()
+        currentState = batchState.toString(),
+        quotaUsedToday = currentDayQuota(),
+        quotaCap = dailyCap,
+        quotaRemaining = (dailyCap - currentDayQuota()).coerceAtLeast(0)
     )
+
+    /**
+     * Returns true and increments the counter if we are within today's cap.
+     * Resets the counter if the date has changed (new day).
+     */
+    private fun checkAndIncrementQuota(): Boolean {
+        val today = LocalDate.now()
+        if (today != quotaDate) {
+            synchronized(this) {
+                if (today != quotaDate) {
+                    logger.info("New day — resetting Gemini daily quota counter")
+                    quotaCallsToday.set(0)
+                    quotaDate = today
+                }
+            }
+        }
+        val current = quotaCallsToday.incrementAndGet()
+        if (current > dailyCap) {
+            quotaCallsToday.decrementAndGet()
+            return false
+        }
+        return true
+    }
+
+    private fun currentDayQuota(): Int {
+        val today = LocalDate.now()
+        if (today != quotaDate) return 0
+        return quotaCallsToday.get()
+    }
 
     fun getStateStats(state: String): StateStats {
         val total = enrichmentRepository.countTotalByState(state)
