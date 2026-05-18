@@ -5,6 +5,7 @@ import {
   MapContainer,
   Marker,
   TileLayer,
+  Tooltip,
   useMap,
   useMapEvents,
 } from 'react-leaflet';
@@ -13,7 +14,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
-import type { Place } from '@/lib/types';
+import type { Place, AccessLevel } from '@/lib/types';
 import { MAP_CONFIG } from '@/lib/constants';
 
 // Fix for default marker icon
@@ -23,6 +24,33 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
+
+// Accessibility-colour-coded pin markers
+const MARKER_COLORS: Record<string, string> = {
+  FULL: '#10b981',          // emerald — fully accessible
+  PARTIAL: '#f59e0b',       // amber   — partially accessible
+  NOT_ACCESSIBLE: '#ef4444', // red     — not accessible
+  UNKNOWN: '#6b7280',       // gray    — unknown
+};
+
+function createAccessibilityIcon(level: AccessLevel | null): L.DivIcon {
+  const color = (level && MARKER_COLORS[level]) ?? MARKER_COLORS.UNKNOWN;
+  return L.divIcon({
+    className: '',
+    html: `<div data-testid="map-marker" style="
+      width:24px;height:24px;
+      background:${color};
+      border:2.5px solid white;
+      border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      box-shadow:0 2px 6px rgba(0,0,0,0.35);
+    "></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -26],
+    tooltipAnchor: [0, -26],
+  });
+}
 
 interface FlyToCoordinates {
   lat: number;
@@ -190,10 +218,15 @@ export function MapView({
             <Marker
               key={place.id}
               position={[place.latitude, place.longitude]}
+              icon={createAccessibilityIcon(place.accessibilityLevel)}
               eventHandlers={{
                 click: () => onPlaceClick?.(place),
               }}
-            />
+            >
+              <Tooltip direction="top" offset={[0, -4]} opacity={0.95}>
+                <span className="text-xs font-medium">{place.name}</span>
+              </Tooltip>
+            </Marker>
           ))}
         </MarkerClusterGroup>
       </MapContainer>

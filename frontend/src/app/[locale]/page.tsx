@@ -14,7 +14,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { usePlaces } from '@/hooks/usePlaces';
 import { MAP_CONFIG } from '@/lib/constants';
-import type { AccessibilityFeature, Place } from '@/lib/types';
+import type { AccessibilityFeature, Place, AccessLevel } from '@/lib/types';
 import { formatDistance, formatWheelchairDistance } from '@/lib/utils';
 
 const MAX_SUGGESTIONS = 8;
@@ -76,6 +76,25 @@ function formatCategory(category?: string) {
     .replace(/_/g, ' ')
     .toLowerCase()
     .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+const ACCESS_BADGE: Record<string, { label: string; cls: string }> = {
+  FULL:           { label: '♿ Accessible',    cls: 'bg-emerald-100 text-emerald-700' },
+  PARTIAL:        { label: '⚠️ Partial',       cls: 'bg-amber-100 text-amber-700'   },
+  NOT_ACCESSIBLE: { label: '✗ Not accessible', cls: 'bg-red-100 text-red-700'        },
+  UNKNOWN:        { label: '? Unknown',         cls: 'bg-gray-100 text-gray-500'      },
+};
+
+function AccessBadge({ level }: { level: AccessLevel | null }) {
+  const badge = level ? ACCESS_BADGE[level] : ACCESS_BADGE.UNKNOWN;
+  return (
+    <span
+      data-testid="search-suggestion-access-badge"
+      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badge.cls}`}
+    >
+      {badge.label}
+    </span>
+  );
 }
 
 function formatDataSourceShort(source?: string | null) {
@@ -515,17 +534,20 @@ export default function HomePage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-gray-900">{place.name}</p>
-                            <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+                            <p className="mt-0.5 line-clamp-1 text-xs text-gray-500">
                               {(!place.address || place.address === 'Address not available')
                                 ? t('places.addressNotAvailable')
                                 : place.address}
                             </p>
+                            <div className="mt-1.5 flex items-center gap-1.5">
+                              <AccessBadge level={place.accessibilityLevel} />
+                              {category && (
+                                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                                  {category}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          {category && (
-                            <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700">
-                              {category}
-                            </span>
-                          )}
                         </div>
                       </button>
                     </li>
