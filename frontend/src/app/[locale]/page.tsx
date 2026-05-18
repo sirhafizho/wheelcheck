@@ -10,6 +10,7 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { PlaceDetail } from '@/components/places/PlaceDetail';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { PlacesListPanel } from '@/components/ui/PlacesListPanel';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { usePlaces } from '@/hooks/usePlaces';
@@ -196,6 +197,7 @@ export default function HomePage() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [activePlaceId, setActivePlaceId] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<AccessibilityFeature[]>([]);
+  const [aiFilter, setAiFilter] = useState<'accessible' | 'not_accessible' | null>(null);
   const [flyToCoords, setFlyToCoords] = useState<FlyToCoordinates | undefined>(() => getStoredViewport());
   const [mapViewport, setMapViewport] = useState<MapViewport | null>(null);
   const [zoomInCount, setZoomInCount] = useState(0);
@@ -241,8 +243,14 @@ export default function HomePage() {
 
   const { places: fetchedPlaces, loading: placesLoading } = usePlaces(placeSearchParams);
   const places = useMemo(
-    () => fetchedPlaces.filter((place) => matchesAccessibilityFilters(place, activeFilters)),
-    [activeFilters, fetchedPlaces],
+    () => fetchedPlaces
+      .filter((place) => matchesAccessibilityFilters(place, activeFilters))
+      .filter((place) => {
+        if (aiFilter === 'accessible') return place.aiAccessible === true;
+        if (aiFilter === 'not_accessible') return place.aiAccessible === false;
+        return true;
+      }),
+    [activeFilters, aiFilter, fetchedPlaces],
   );
 
   // Background fetch indicator: track previous place count to detect new arrivals
@@ -511,6 +519,31 @@ export default function HomePage() {
                 </button>
               );
             })}
+            {/* AI filters */}
+            <button
+              type="button"
+              aria-pressed={aiFilter === 'accessible'}
+              onClick={() => setAiFilter(f => f === 'accessible' ? null : 'accessible')}
+              className={`whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors ${
+                aiFilter === 'accessible'
+                  ? 'bg-sky-600 text-white shadow-sm'
+                  : 'bg-gray-100/90 text-gray-700 hover:bg-gray-200/90'
+              }`}
+            >
+              ✦ AI Accessible
+            </button>
+            <button
+              type="button"
+              aria-pressed={aiFilter === 'not_accessible'}
+              onClick={() => setAiFilter(f => f === 'not_accessible' ? null : 'not_accessible')}
+              className={`whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors ${
+                aiFilter === 'not_accessible'
+                  ? 'bg-red-600 text-white shadow-sm'
+                  : 'bg-gray-100/90 text-gray-700 hover:bg-gray-200/90'
+              }`}
+            >
+              ✦ AI Inaccessible
+            </button>
           </div>
         </div>
 
@@ -648,6 +681,17 @@ export default function HomePage() {
       >
         <PlusIcon className="h-7 w-7" />
       </Link>
+
+      {/* Places list sidebar (desktop) / drawer toggle (mobile) */}
+      <PlacesListPanel
+        places={places}
+        onPlaceClick={(place) => {
+          setSelectedPlace(place);
+          setFlyToCoords({ lat: place.latitude, lng: place.longitude, zoom: SEARCH_FLY_TO_ZOOM });
+        }}
+        selectedPlaceId={selectedPlace?.id}
+        loading={placesLoading}
+      />
 
       {selectedPlaceData && (
         <BottomSheet
