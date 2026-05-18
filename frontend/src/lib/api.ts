@@ -1,4 +1,5 @@
 import { API_URL } from './constants';
+import { setBackendStatus } from './backendStatus';
 import type {
   Place,
   AccessReport,
@@ -22,9 +23,19 @@ export async function semanticSearchPlaces(
   const params = new URLSearchParams({ q: query, radius: String(radius), limit: String(limit) });
   if (lat !== undefined) params.set('lat', String(lat));
   if (lng !== undefined) params.set('lng', String(lng));
-  const response = await fetch(`${API_URL}/places/semantic-search?${params}`);
-  if (!response.ok) return [];
-  return response.json();
+  try {
+    const response = await fetch(`${API_URL}/places/semantic-search?${params}`);
+    if (response.status === 503 || response.status === 502) {
+      setBackendStatus('booting');
+      return [];
+    }
+    if (!response.ok) return [];
+    setBackendStatus('online');
+    return response.json();
+  } catch {
+    setBackendStatus('booting');
+    return [];
+  }
 }
 
 class ApiClient {
@@ -49,13 +60,23 @@ class ApiClient {
         },
       });
 
+      if (response.status === 503 || response.status === 502) {
+        setBackendStatus('booting');
+        throw new Error(`HTTP ${response.status} — backend starting up`);
+      }
+
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
         throw new Error(error.message || `HTTP ${response.status}`);
       }
 
+      setBackendStatus('online');
       return await response.json();
     } catch (error) {
+      // Network-level failure (connection refused, DNS, etc.) also means booting/offline
+      if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('network'))) {
+        setBackendStatus('booting');
+      }
       console.error(`API Error [${endpoint}]:`, error);
       throw error;
     }

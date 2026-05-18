@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { BackendStatusBanner } from '@/components/ui/BackendStatusBanner';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -42,6 +43,7 @@ export default async function LocaleLayout({
       <body className="h-full flex flex-col overflow-hidden bg-gray-50">
         <NextIntlClientProvider messages={messages}>
           <Header locale={locale} />
+          <BackendStatusBanner />
           <main id="main-content" className="flex-1 min-h-0 overflow-hidden">
             {children}
           </main>
