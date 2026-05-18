@@ -66,7 +66,7 @@ class GeminiEnrichmentService(
             ),
             "generationConfig" to mapOf(
                 "temperature" to 0.1,
-                "maxOutputTokens" to 1024
+                "maxOutputTokens" to 2048
             )
         )
 
@@ -141,10 +141,16 @@ Be honest about confidence. Most results will be INFERRED or ASSUMPTION.
             .firstOrNull { it.isNotBlank() }
             ?: throw RuntimeException("No text in Gemini response parts")
 
-        val jsonText = text
-            .replace(Regex("^```json\\s*", RegexOption.MULTILINE), "")
-            .replace(Regex("^```\\s*", RegexOption.MULTILINE), "")
-            .trim()
+        val jsonText = run {
+            val raw = text
+                .replace(Regex("^```json\\s*", RegexOption.MULTILINE), "")
+                .replace(Regex("^```\\s*$", RegexOption.MULTILINE), "")
+                .trim()
+            // Extract JSON object robustly: first '{' to last '}'
+            val start = raw.indexOf('{')
+            val end = raw.lastIndexOf('}')
+            if (start >= 0 && end > start) raw.substring(start, end + 1) else raw
+        }
 
         val parsed = try {
             objectMapper.readValue<Map<String, Any?>>(jsonText)

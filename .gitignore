@@ -52,3 +52,4 @@ supabase/.temp/
 # Supabase credentials & DB backups
 .env.supabase
 backups/
+backend/.kotlin
