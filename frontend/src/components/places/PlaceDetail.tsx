@@ -32,13 +32,13 @@ interface AiEnrichmentData {
 
 const CONFIDENCE_COLORS = {
   VERIFIED: 'bg-emerald-50 border-emerald-200 text-emerald-800',
-  INFERRED: 'bg-amber-50 border-amber-200 text-amber-800',
+  INFERRED: 'bg-sky-50 border-sky-200 text-sky-800',
   ASSUMPTION: 'bg-gray-50 border-gray-200 text-gray-700',
 } as const;
 
 const CONFIDENCE_BADGE = {
   VERIFIED: 'bg-emerald-100 text-emerald-700',
-  INFERRED: 'bg-amber-100 text-amber-700',
+  INFERRED: 'bg-sky-100 text-sky-700',
   ASSUMPTION: 'bg-gray-100 text-gray-600',
 } as const;
 
@@ -286,6 +286,18 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${CONFIDENCE_BADGE[enrichment.confidenceTier]}`}>
                   {tPlaces(`aiReasoning.tier.${enrichment.confidenceTier}`)}
                 </span>
+                {enrichment.isAccessible !== null && (
+                  <span
+                    data-testid="ai-verdict-badge"
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
+                      enrichment.isAccessible
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {enrichment.isAccessible ? '✓ Likely Accessible' : '✗ Likely Not Accessible'}
+                  </span>
+                )}
               </div>
               {showReasoning
                 ? <ChevronUpIcon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />

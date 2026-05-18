@@ -35,7 +35,9 @@ data class PlaceDto(
     val osmEntranceWheelchair: String? = null,
     val osmKerbTactile: Boolean? = null,
     val lastReportedAt: Instant? = null,
-    val isLive: Boolean = false
+    val isLive: Boolean = false,
+    val aiAccessible: Boolean? = null,
+    val aiConfidenceTier: String? = null
 )
 
 data class CreatePlaceRequest(

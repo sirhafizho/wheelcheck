@@ -28,8 +28,20 @@ export function PlaceMarker({ place, onClick }: PlaceMarkerProps) {
           <h3 className="font-semibold text-gray-900 mb-2">
             {place.name}
           </h3>
-          <AccessBadge level={place.accessibilityLevel} size="sm" />
-          <p className="text-sm text-gray-600 mt-2">
+          <div className="flex flex-wrap items-center gap-1.5 mb-2">
+            <AccessBadge level={place.accessibilityLevel} size="sm" />
+            {place.aiAccessible !== null && place.aiAccessible !== undefined && (
+              <span
+                data-testid="marker-ai-verdict-badge"
+                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  place.aiAccessible ? 'bg-sky-100 text-sky-700' : 'bg-red-100 text-red-600'
+                }`}
+              >
+                {place.aiAccessible ? '✦ AI Accessible' : '✦ AI Inaccessible'}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-600">
             {addressDisplay}
           </p>
         </div>

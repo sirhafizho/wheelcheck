@@ -5,6 +5,7 @@ import com.wheelcheck.aggregation.LiveEnrichmentService
 import com.wheelcheck.aggregation.MalaysiaGeoUtils
 import com.wheelcheck.common.AccessLevel
 import com.wheelcheck.common.Category
+import com.wheelcheck.enrichment.AiEnrichmentRepository
 import com.wheelcheck.search.EmbeddingService
 import com.wheelcheck.search.PlaceEmbeddingRepository
 import org.locationtech.jts.geom.Coordinate
@@ -24,23 +25,27 @@ class PlaceService(
     private val placeRepository: PlaceRepository,
     private val liveEnrichmentService: LiveEnrichmentService? = null,
     private val embeddingService: EmbeddingService? = null,
-    private val embeddingRepository: PlaceEmbeddingRepository? = null
+    private val embeddingRepository: PlaceEmbeddingRepository? = null,
+    private val aiEnrichmentRepository: AiEnrichmentRepository? = null
 ) {
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
 
     @Transactional(readOnly = true)
     fun findById(id: UUID): PlaceDto? {
-        return placeRepository.findByIdOrNull(id)?.toDto()
+        val place = placeRepository.findByIdOrNull(id) ?: return null
+        val enrichment = aiEnrichmentRepository?.findByPlaceId(place.id)
+        val enrichmentMap = enrichment?.let { mapOf(place.id to Pair(it.isAccessible, it.confidenceTier)) } ?: emptyMap()
+        return place.toDto(enrichmentMap)
     }
 
     @Transactional(readOnly = true)
     fun findAll(): List<PlaceDto> {
-        return placeRepository.findAll().map { it.toDto() }
+        return placeRepository.findAll().withEnrichment()
     }
 
     @Transactional(readOnly = true)
     fun findAll(pageable: Pageable): Page<PlaceDto> {
-        return placeRepository.findAll(pageable).map { it.toDto() }
+        return placeRepository.findAll(pageable).withEnrichment()
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +71,7 @@ class PlaceService(
                 request.limit
             )
         }
-        val dbDtos = dbPlaces.map { it.toDto() }
+        val dbDtos = dbPlaces.withEnrichment()
 
         // Fire-and-forget background shadow enrichment (never blocks the response)
         // This seeds new OSM places into DB for future requests
@@ -77,7 +82,7 @@ class PlaceService(
 
     @Transactional(readOnly = true)
     fun searchByName(name: String): List<PlaceDto> {
-        return placeRepository.findByNameContainingIgnoreCaseLimited(expandAbbreviations(name)).map { it.toDto() }
+        return placeRepository.findByNameContainingIgnoreCaseLimited(expandAbbreviations(name)).withEnrichment()
     }
 
     @Transactional(readOnly = true)
@@ -93,7 +98,7 @@ class PlaceService(
 
         if (results.isEmpty()) return searchByName(query)
 
-        return results.mapNotNull { result -> placeRepository.findByIdOrNull(result.id)?.toDto() }
+        return results.mapNotNull { result -> placeRepository.findByIdOrNull(result.id) }.withEnrichment()
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +128,7 @@ class PlaceService(
             else -> placeRepository.findAll(pageable)
         }
 
-        return result.map(java.util.function.Function { place: Place -> place.toDto() })
+        return result.withEnrichment()
     }
 
     /**
@@ -298,7 +303,7 @@ class PlaceService(
         placeRepository.save(updated)
     }
 
-    private fun Place.toDto() = PlaceDto(
+    private fun Place.toDto(enrichmentMap: Map<UUID, Pair<Boolean?, String?>> = emptyMap()) = PlaceDto(
         id = id,
         name = name,
         nameMs = nameMs,
@@ -324,6 +329,26 @@ class PlaceService(
         osmIncline = osmIncline,
         osmEntranceWheelchair = osmEntranceWheelchair,
         osmKerbTactile = osmKerbTactile,
-        lastReportedAt = updatedAt
+        lastReportedAt = updatedAt,
+        aiAccessible = enrichmentMap[id]?.first,
+        aiConfidenceTier = enrichmentMap[id]?.second
     )
+
+    private fun List<Place>.withEnrichment(): List<PlaceDto> {
+        val ids = map { it.id }
+        val enrichmentMap = aiEnrichmentRepository
+            ?.findByPlaceIdIn(ids)
+            ?.associate { it.placeId to Pair(it.isAccessible, it.confidenceTier) }
+            ?: emptyMap()
+        return map { it.toDto(enrichmentMap) }
+    }
+
+    private fun Page<Place>.withEnrichment(): Page<PlaceDto> {
+        val ids = content.map { it.id }
+        val enrichmentMap = aiEnrichmentRepository
+            ?.findByPlaceIdIn(ids)
+            ?.associate { it.placeId to Pair(it.isAccessible, it.confidenceTier) }
+            ?: emptyMap()
+        return map { it.toDto(enrichmentMap) }
+    }
 }

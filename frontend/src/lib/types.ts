@@ -28,6 +28,8 @@ export interface Place {
   isLive?: boolean;
   createdBy?: string | null;
   status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  aiAccessible?: boolean | null;
+  aiConfidenceTier?: string | null;
 }
 
 export interface AccessReport {

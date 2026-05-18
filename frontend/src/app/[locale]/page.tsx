@@ -97,6 +97,21 @@ function AccessBadge({ level }: { level: AccessLevel | null }) {
   );
 }
 
+function AiVerdictBadge({ aiAccessible, aiConfidenceTier }: { aiAccessible?: boolean | null; aiConfidenceTier?: string | null }) {
+  if (aiAccessible === null || aiAccessible === undefined) return null;
+  return (
+    <span
+      data-testid="search-suggestion-ai-badge"
+      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+        aiAccessible ? 'bg-sky-100 text-sky-700' : 'bg-red-100 text-red-600'
+      }`}
+      title={`AI ${aiConfidenceTier?.toLowerCase() ?? 'assessment'}`}
+    >
+      {aiAccessible ? '✦ AI Accessible' : '✦ AI Inaccessible'}
+    </span>
+  );
+}
+
 function formatDataSourceShort(source?: string | null) {
   if (!source) {
     return 'Community';
@@ -541,6 +556,7 @@ export default function HomePage() {
                             </p>
                             <div className="mt-1.5 flex items-center gap-1.5">
                               <AccessBadge level={place.accessibilityLevel} />
+                              <AiVerdictBadge aiAccessible={place.aiAccessible} aiConfidenceTier={place.aiConfidenceTier} />
                               {category && (
                                 <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
                                   {category}

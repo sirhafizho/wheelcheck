@@ -10,6 +10,8 @@ import java.util.UUID
 interface AiEnrichmentRepository : JpaRepository<AiEnrichment, UUID> {
     fun findByPlaceId(placeId: UUID): AiEnrichment?
 
+    fun findByPlaceIdIn(placeIds: Collection<UUID>): List<AiEnrichment>
+
     @Query("SELECT COUNT(a) FROM AiEnrichment a WHERE a.confidenceTier = :tier")
     fun countByTier(@Param("tier") tier: String): Long
 

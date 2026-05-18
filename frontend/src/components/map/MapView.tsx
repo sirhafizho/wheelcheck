@@ -261,7 +261,14 @@ export function MapView({
               }}
             >
               <Tooltip direction="top" offset={[0, -4]} opacity={1}>
-                <span className="text-xs font-medium">{place.name}</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-medium">{place.name}</span>
+                  {place.aiAccessible !== null && place.aiAccessible !== undefined && (
+                    <span className={`text-[10px] font-semibold ${place.aiAccessible ? 'text-sky-600' : 'text-red-500'}`}>
+                      {place.aiAccessible ? '✦ AI Accessible' : '✦ AI Inaccessible'}
+                    </span>
+                  )}
+                </div>
               </Tooltip>
             </Marker>
           ))}
