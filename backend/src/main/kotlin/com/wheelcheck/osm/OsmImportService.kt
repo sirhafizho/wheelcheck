@@ -119,11 +119,15 @@ class OsmImportService(
         val tourism = tags["tourism"]
         val leisure = tags["leisure"]
         val building = tags["building"]
+        val religion = tags["religion"]?.lowercase()
 
         return when {
             amenity == "restaurant" || amenity == "cafe" -> Category.RESTAURANT
-            amenity == "hospital" || amenity == "clinic" -> Category.HOSPITAL
-            amenity == "place_of_worship" -> Category.MOSQUE
+            amenity == "hospital" -> Category.HOSPITAL
+            amenity == "clinic" -> Category.CLINIC
+            amenity == "place_of_worship" ->
+                if (religion == "muslim" || religion == "islam") Category.MOSQUE
+                else Category.PLACE_OF_WORSHIP
             amenity == "pharmacy" || amenity == "bank" -> Category.OTHER
             amenity == "library" || amenity == "cinema" || amenity == "theatre" -> Category.OTHER
             shop == "mall" || shop == "department_store" -> Category.MALL

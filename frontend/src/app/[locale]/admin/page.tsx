@@ -16,7 +16,9 @@ type Category =
   | 'SHOP'
   | 'MALL'
   | 'HOSPITAL'
+  | 'CLINIC'
   | 'MOSQUE'
+  | 'PLACE_OF_WORSHIP'
   | 'GOVERNMENT'
   | 'TRANSPORT'
   | 'HOTEL'
@@ -110,7 +112,9 @@ const CATEGORIES: Category[] = [
   'SHOP',
   'MALL',
   'HOSPITAL',
+  'CLINIC',
   'MOSQUE',
+  'PLACE_OF_WORSHIP',
   'GOVERNMENT',
   'TRANSPORT',
   'HOTEL',

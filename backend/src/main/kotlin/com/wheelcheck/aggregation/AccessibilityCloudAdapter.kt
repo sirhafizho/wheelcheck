@@ -101,8 +101,12 @@ class AccessibilityCloudAdapter(
         val lower = category.lowercase()
         return when {
             "restaurant" in lower || "cafe" in lower || "food" in lower -> Category.RESTAURANT
-            "hospital" in lower || "clinic" in lower || "health" in lower -> Category.HOSPITAL
-            "mosque" in lower || "worship" in lower || "church" in lower -> Category.MOSQUE
+            "clinic" in lower -> Category.CLINIC
+            "hospital" in lower || "health" in lower -> Category.HOSPITAL
+            // mosque/surau/masjid only
+            "mosque" in lower || "masjid" in lower || "surau" in lower -> Category.MOSQUE
+            // all other places of worship (church, temple, etc.)
+            "worship" in lower || "church" in lower || "temple" in lower || "cathedral" in lower -> Category.PLACE_OF_WORSHIP
             "mall" in lower -> Category.MALL
             "shop" in lower || "store" in lower || "supermarket" in lower -> Category.SHOP
             "hotel" in lower || "accommodation" in lower -> Category.HOTEL

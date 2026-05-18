@@ -136,13 +136,18 @@ class OsmOverpassAdapter(
         val building = tags["building"]
         val railway = tags["railway"]
         val publicTransport = tags["public_transport"]
+        val religion = tags["religion"]?.lowercase()
 
         return when {
             amenity == "restaurant" -> Category.RESTAURANT
             amenity == "cafe" || amenity == "ice_cream" -> Category.CAFE
             amenity == "fast_food" || amenity == "bar" -> Category.RESTAURANT
-            amenity == "hospital" || amenity == "clinic" -> Category.HOSPITAL
-            amenity == "place_of_worship" -> Category.MOSQUE
+            amenity == "hospital" -> Category.HOSPITAL
+            amenity == "clinic" -> Category.CLINIC
+            // Use religion tag to differentiate Islamic vs other places of worship
+            amenity == "place_of_worship" ->
+                if (religion == "muslim" || religion == "islam") Category.MOSQUE
+                else Category.PLACE_OF_WORSHIP
             amenity == "pharmacy" || amenity == "bank" -> Category.SHOP
             amenity == "library" || amenity == "cinema" || amenity == "theatre" -> Category.OTHER
             amenity in listOf("school", "college", "university") -> Category.EDUCATION

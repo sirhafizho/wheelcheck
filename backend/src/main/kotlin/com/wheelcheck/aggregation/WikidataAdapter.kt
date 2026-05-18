@@ -182,8 +182,13 @@ class WikidataAdapter(
 
         return when {
             "restaurant" in searchableText || "cafe" in searchableText || "food court" in searchableText -> Category.RESTAURANT
-            "hospital" in searchableText || "clinic" in searchableText || "medical center" in searchableText -> Category.HOSPITAL
-            "mosque" in searchableText || "masjid" in searchableText || "surau" in searchableText || "place of worship" in searchableText -> Category.MOSQUE
+            "clinic" in searchableText -> Category.CLINIC
+            "hospital" in searchableText || "medical center" in searchableText -> Category.HOSPITAL
+            "mosque" in searchableText || "masjid" in searchableText || "surau" in searchableText -> Category.MOSQUE
+            // church/temple/other places of worship must NOT map to MOSQUE
+            "church" in searchableText || "cathedral" in searchableText || "temple" in searchableText ||
+                "mandir" in searchableText || "gurdwara" in searchableText || "vihara" in searchableText ||
+                "place of worship" in searchableText -> Category.PLACE_OF_WORSHIP
             "mall" in searchableText || "shopping centre" in searchableText || "shopping center" in searchableText -> Category.MALL
             "shop" in searchableText || "store" in searchableText || "market" in searchableText || "kedai" in searchableText -> Category.SHOP
             "hotel" in searchableText || "resort" in searchableText -> Category.HOTEL
@@ -221,7 +226,13 @@ class WikidataAdapter(
         private val INSTANCE_CATEGORY_MAP = mapOf(
             "Q11707" to Category.RESTAURANT,
             "Q16917" to Category.HOSPITAL,
+            "Q35922" to Category.CLINIC,        // medical clinic
+            "Q4159" to Category.CLINIC,          // polyclinic
             "Q32815" to Category.MOSQUE,
+            "Q16970" to Category.PLACE_OF_WORSHIP, // church building
+            "Q44539" to Category.PLACE_OF_WORSHIP, // temple
+            "Q4166" to Category.PLACE_OF_WORSHIP,  // chapel
+            "Q23413" to Category.PLACE_OF_WORSHIP, // gurdwara
             "Q55488" to Category.TRANSPORT,
             "Q180174" to Category.MALL,
             "Q27686" to Category.HOTEL,

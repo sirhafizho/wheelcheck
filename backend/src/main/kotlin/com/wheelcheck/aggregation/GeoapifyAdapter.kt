@@ -153,8 +153,11 @@ class GeoapifyAdapter(
         val joined = categories.joinToString(" ").lowercase()
         return when {
             "catering" in joined -> Category.RESTAURANT
-            "hospital" in joined || "clinic" in joined || "healthcare" in joined -> Category.HOSPITAL
-            "worship" in joined || "religion" in joined -> Category.MOSQUE
+            "clinic" in joined -> Category.CLINIC
+            "hospital" in joined || "healthcare" in joined -> Category.HOSPITAL
+            // Geoapify returns e.g. religion.place_of_worship.mosque vs religion.place_of_worship.church
+            "mosque" in joined || "masjid" in joined -> Category.MOSQUE
+            "worship" in joined || "religion" in joined -> Category.PLACE_OF_WORSHIP
             "shopping_mall" in joined || "mall" in joined -> Category.MALL
             "commercial" in joined || "shop" in joined || "supermarket" in joined -> Category.SHOP
             "hotel" in joined || "accommodation" in joined -> Category.HOTEL
