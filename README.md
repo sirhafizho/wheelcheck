@@ -2,30 +2,23 @@
 
 **Malaysia's open-source wheelchair accessibility checker.**
 
-Crowd-sourced venue accessibility data with Waze-style reporting. Check if a place is wheelchair-accessible before you visit.
+Crowd-sourced venue accessibility data with Waze-style reporting. Check if a place is wheelchair-accessible before you visit — for the Malaysian OKU community.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
 
-## 🎯 What is WheelCheck?
+## 🎯 Why WheelCheck?
 
-WheelCheck helps people with mobility impairments find accessible venues in Malaysia. Users can:
-
-- **Search** venues with smart abbreviation support (KL, KB, KK, JB…) and semantic understanding
-- **Check** accessibility with AI-researched summaries + cited sources per venue
-- **Report** accessibility info in under 30 seconds (Waze-style 6-step wizard)
-- **Upload photos** as evidence (ramps, doorways, toilets, parking)
-- **Bookmark** favourites and review them from their profile
-- **Browse** via map or accessible list view, with real-time shadow discovery from OSM
-
-## 🤔 Why?
-
-- Google Maps accessibility data is inconsistent and not granular enough
+- Google Maps accessibility data is inconsistent and not granular enough for wheelchair users
 - No open-source, SEA-focused accessibility checker exists
+- Malaysia's Persons with Disabilities Act 2008 requires accessible buildings, but compliance varies
 - 15% of the world's population lives with a disability
-- Malaysia's Persons with Disabilities Act 2008 requires accessible buildings, but compliance varies greatly
+
+Users can **search** venues with smart abbreviation support (KL, KB, JB…), **check** AI-researched accessibility summaries, **report** in under 30 seconds (Waze-style wizard), **upload photos** as evidence, and **bookmark** favourites — all in English or Bahasa Malaysia.
+
+---
 
 ## 🏗️ Tech Stack
 
@@ -39,437 +32,226 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | **i18n** | next-intl (English + Bahasa Malaysia) |
 | **AI Enrichment** | Gemini 2.5 Flash (knowledge-based, free tier) |
 | **Semantic Search** | HuggingFace Embeddings + pgvector cosine similarity |
-| **API Docs** | Swagger / OpenAPI 3.0 |
-
-## 📋 Current Features
-
-### ✅ Phase 1 — Core Platform
-
-| Feature | Status |
-|---------|--------|
-| REST API with full CRUD for places | ✅ Done |
-| Spatial "nearby" search (PostGIS ST_DWithin) | ✅ Done |
-| Text-based venue search with suggestions | ✅ Done |
-| Accessibility review submission | ✅ Done |
-| Accessibility scoring algorithm | ✅ Done |
-| Photo evidence upload (with validation) | ✅ Done |
-| JWT authentication (register/login) | ✅ Done |
-| Anonymous contributions (no sign-up required) | ✅ Done |
-| Rate limiting (per IP + per user) | ✅ Done |
-| Interactive map with Leaflet + OSM tiles | ✅ Done |
-| Bilingual UI (EN + BM) | ✅ Done |
-| Mobile-responsive PWA layout | ✅ Done |
-| Swagger API documentation | ✅ Done |
-
-### ✅ Phase 2 — Features & UX
-
-| Feature | Status |
-|---------|--------|
-| Add Place with mandatory photo evidence | ✅ Done |
-| Interactive map picker for location (no manual lat/lng) | ✅ Done |
-| Debounced search with live suggestions | ✅ Done |
-| User profile (register, login, stats, review history) | ✅ Done |
-| Settings (language switch, high contrast, large text, dark mode) | ✅ Done |
-| Floating Action Button for quick place adding | ✅ Done |
-| **Show/hide password toggle** on login & register forms | ✅ Done |
-| Chrome autofill-friendly form attributes (`name`, `autocomplete`) | ✅ Done |
-
-### ✅ Phase 3 — Admin & Access Control
-
-| Feature | Status |
-|---------|--------|
-| Admin dashboard with stats overview | ✅ Done |
-| Admin datatable for Places/Reviews/Users | ✅ Done |
-| Role-based access control (USER / ADMIN) | ✅ Done |
-| JWT role claims with Spring Security @PreAuthorize | ✅ Done |
-| Admin-only import endpoints | ✅ Done |
-| **Demo account protection** (admin demo limited to read-only deletes, backup guard) | ✅ Done |
-| **Rate limiting + CORS hardening** on all sensitive endpoints | ✅ Done |
-
-### ✅ Phase 4 — Reviews, Comments & Social
-
-| Feature | Status |
-|---------|--------|
-| Review display with emoji ratings + photo gallery | ✅ Done |
-| Threaded comment system (Reddit-style) | ✅ Done |
-| Comment upvote/downvote with spam prevention | ✅ Done |
-| Vote toggle logic (per-user, one vote per comment) | ✅ Done |
-| **Favourites / bookmarks** for places (toggle heart, favourites page) | ✅ Done |
-| **Favourite auth gate** — prompts login instead of silently failing | ✅ Done |
-| **Comment login gate** — shows login link for unauthenticated users | ✅ Done |
-| **Show on Map** — button on place detail jumps map to that venue | ✅ Done |
-| **Places pagination** (Load More, shows count) | ✅ Done |
-
-### ✅ Phase 5 — Map UX & Accessibility
-
-| Feature | Status |
-|---------|--------|
-| Bottom sheet place details (swipe up/down, mobile-friendly) | ✅ Done |
-| Accessibility filter chips with i18n labels + scroll fade gradient | ✅ Done |
-| Wheelchair distance display (~X min roll at 4km/h) | ✅ Done |
-| Marker clustering (10,000+ markers performant) | ✅ Done |
-| **Real-time OSM shadow discovery** — new places appear as you pan the map | ✅ Done |
-| Search suggestions with fly-to on Enter | ✅ Done |
-| **Malaysian abbreviation search** (KL, KB, KK, JB, PG, PJ…) | ✅ Done |
-| **Semantic search** via HuggingFace embeddings + pgvector | ✅ Done |
-| **Dark mode** (toggle in header, full coverage, anti-FOUC) | ✅ Done |
-| High contrast mode with glass-morphism overrides | ✅ Done |
-| Large text mode | ✅ Done |
-| **Get Directions** button on place detail (opens Google Maps) | ✅ Done |
-| **Mobile FAB** for adding places on small screens | ✅ Done |
-| **Toast notifications** for save/remove favourites, auth prompts | ✅ Done |
-| **Report wizard** — cancel button, optional steps (5–6), Submit Now shortcut | ✅ Done |
-
-### ✅ Phase 6 — Malaysia-Wide Coverage
-
-| Feature | Status |
-|---------|--------|
-| Malaysia-wide import (all 16 states/territories) | ✅ Done |
-| MalaysiaGeoUtils (city/state lookup for entire country) | ✅ Done |
-| DataGovMyFacilitiesAdapter (MOH hospitals + clinics) | ✅ Done |
-| State field on places (city + state display) | ✅ Done |
-| Data source provenance on place details | ✅ Done |
-| Region-based import endpoints | ✅ Done |
-| **~71,354 places imported from OpenStreetMap** | ✅ Done |
-| **Enhanced OSM tags** — surface, incline, entrance:wheelchair, kerb:tactile_paving | ✅ Done |
-
-### ✅ Phase 7 — AI Accessibility Enrichment
-
-| Feature | Status |
-|---------|--------|
-| **Gemini 2.5 Flash (knowledge-based, free tier)** — researches each venue online | ✅ Done |
-| **Confidence tiers** — VERIFIED (🟢) / INFERRED (🟡) / ASSUMPTION (⚪) | ✅ Done |
-| **Cited sources** — real URLs Gemini found during its Google search | ✅ Done |
-| **Fallback chain** — Gemini → OSM rule-based → UBBL assumption | ✅ Done |
-| **AI Reasoning panel** on place cards (collapsed by default, expand to read) | ✅ Done |
-| **Admin batch enrichment** — enrich one state at a time (rate-limited to 8 req/min) | ✅ Done |
-| **Batch progress endpoint** — poll live progress during enrichment runs | ✅ Done |
-
-See [`docs/AI_ENRICHMENT_SETUP.md`](docs/AI_ENRICHMENT_SETUP.md) for setup guide and recommended enrichment order.
 
 ---
 
-### ✅ Aggregation Service (Adapter Pattern)
+## 📋 Features
 
-WheelCheck's backend uses an **adapter pattern** to aggregate accessibility data from multiple free sources:
+### Core Platform
+- REST API with full CRUD, spatial "nearby" search (PostGIS `ST_DWithin`), fuzzy + semantic search
+- Accessibility review wizard (6-step, optional steps, photo evidence), scoring algorithm
+- JWT auth with anonymous contributions, rate limiting, CORS hardening
+- Interactive Leaflet/OSM map with marker clustering (10,000+ markers performant)
 
-| Adapter | Source | Data | API Key |
-|---------|--------|------|---------|
-| **OsmOverpassAdapter** | OpenStreetMap Overpass API | Wheelchair tags, ramps, kerbs, surfaces, elevators | Free |
-| **WikidataAdapter** | Wikidata SPARQL | P2846 accessibility property for landmarks | Free |
-| **AccessibilityCloudAdapter** | accessibility.cloud | GeoJSON accessibility data | Free (optional) |
-| **GeoapifyAdapter** | Geoapify Places API | Points of interest with accessibility | Free tier |
-| **OrsRoutingAdapter** | OpenRouteService | Wheelchair-friendly route planning | Free tier |
-| **PrasaranaGtfsAdapter** | Prasarana GTFS (Malaysia) | KL rail/bus transit wheelchair boarding | Free |
-| **DataGovMyFacilitiesAdapter** | data.gov.my | MOH hospitals & clinics nationwide | Free |
+### UX & Map
+- Bottom sheet place details, filter chips, wheelchair roll-time estimate (~4 km/h)
+- Real-time OSM shadow discovery — new places appear as you pan the map
+- Malaysian abbreviation search (KL, KB, KK, JB, PG, PJ…) + semantic pgvector search
+- Dark mode, high contrast, large text, mobile-responsive PWA, bilingual UI
 
-Admin import endpoints:
-- `/api/aggregation/import/kl` — KL area
-- `/api/aggregation/import/selangor` — Selangor state
-- `/api/aggregation/import/malaysia` — All 16 states
-- `/api/aggregation/import/peninsular` — Peninsular Malaysia
-- `/api/aggregation/import/{state}` — Any specific state (e.g., `penang`, `johor`)
+### Community & Social
+- Threaded comments with upvote/downvote spam prevention
+- Favourites/bookmarks with auth gate, user profile + contribution stats
+- **Own place management** — edit location/details, delete your submission, edit your own review
+- **Admin approval workflow** — new community places go PENDING → admin approves/rejects with nearby duplicate warning
 
-### ✅ Testing
+### AI Accessibility Enrichment
+- **Gemini 2.5 Flash** researches each venue based on its training knowledge
+- **Confidence tiers** — VERIFIED 🟢 / INFERRED 🟡 / ASSUMPTION ⚪
+- **Fallback chain** — Gemini → OSM tag rules → UBBL assumption
+- **Admin batch enrichment** — enrich one state at a time, rate-limited 8 req/min, hard-capped 1,400/day
+- AI reasoning panel on place cards; quota meter in admin UI
 
-| Type | Count | Status |
-|------|-------|--------|
-| Backend unit tests | 53+ | ✅ All passing |
-| Frontend unit tests | 40 | ✅ All passing |
-| Playwright E2E tests (TS) | 261+ | ✅ All passing |
-| CDP map tests (Python) | 14 | ✅ All passing |
-| browser-use AI visual tests | 9 | ✅ Ready (needs LLM API key) |
-| Manual API verification | All endpoints | ✅ Verified |
+### Data Coverage
+- ~80,000+ places across all 16 Malaysian states + territories (OSM + data.gov.my)
+- Enhanced OSM tags: surface, incline, entrance:wheelchair, tactile paving
+- Multiple data adapters: OSM Overpass, Wikidata, data.gov.my MOH, Prasarana GTFS, Geoapify, OpenRouteService, accessibility.cloud
 
-**Three test layers** provide complementary coverage:
-- **Playwright TypeScript** — functional E2E: routes, filters, search, reports, i18n, dark mode, favourites, AI panel, password toggle, Malaysia coverage
-- **CDP Python** (`tools/` + `frontend/tests/browser-harness/`) — low-level map interaction via raw `Input.dispatchMouseEvent`: marker clicks through Leaflet clusters, map pan, ARIA audit, viewport scroll, UI overlap detection
-- **browser-use AI visual** (`frontend/tests/visual/`) — LLM vision tests for layout overlap, WCAG contrast, accessibility, and exploratory UX; requires `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`
+### Testing
+| Type | Count |
+|------|-------|
+| Backend unit tests | 53+ ✅ |
+| Frontend unit tests | 40 ✅ |
+| Playwright E2E (TypeScript) | 261+ ✅ |
+| CDP map tests (Python) | 14 ✅ |
+| browser-use AI visual tests | 9 ✅ (needs LLM API key) |
 
-### 🔜 Roadmap
-
-- [ ] Offline access for saved venues (service worker caching with smart invalidation)
+### Roadmap
+- [ ] Offline access for saved venues (service worker caching)
 - [ ] "I'm Here" quick report (long-press FAB → auto-fill GPS)
 - [ ] Gamification (badges, contributor levels)
-- [ ] Venue owner self-certification
 - [ ] Additional languages (Mandarin, Tamil)
+
+---
 
 ## 🌐 Live Demo
 
 | Service | URL |
 |---------|-----|
 | **Frontend** | [wheelcheck-swart.vercel.app](https://wheelcheck-swart.vercel.app) |
-| **Backend API** | [sirhafizho-wheelcheck-api.hf.space](https://sirhafizho-wheelcheck-api.hf.space/api/places?page=0&size=5) |
+| **Backend API** | [sirhafizho-wheelcheck-api.hf.space/api](https://sirhafizho-wheelcheck-api.hf.space/api/places?page=0&size=5) |
 | **API Docs** | [Swagger UI](https://sirhafizho-wheelcheck-api.hf.space/swagger-ui.html) |
 
-> **Note:** The backend runs on HuggingFace Spaces (free tier) — first request may take ~10s if the container is cold-starting.
+> First request may take ~10s if the HuggingFace container is cold-starting.
 
-## 🚀 Quick Start
-
-### 🧪 Demo Accounts
+### Demo Accounts
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | `admin@wheelcheck.demo` | `demo1234` |
-| **User** | `user@wheelcheck.demo` | `demo1234` |
+| Admin | `admin@wheelcheck.demo` | `demo1234` |
+| User | `user@wheelcheck.demo` | `demo1234` |
 
-Or register a new account from the Profile page.
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Java 21+ (tested with Java 24)
-- Node.js 20+ (tested with Node 22)
-- Docker & Docker Compose
+- Java 21+, Node.js 20+, Docker & Docker Compose
 
-### Run with Docker
+### Run locally
 
 ```bash
 git clone https://github.com/sirhafizho/wheelcheck.git
 cd wheelcheck
-docker compose up -d
+docker compose up -d          # starts PostGIS + pgvector on :5432
+
+cd backend && ./gradlew bootRun     # http://localhost:8080
+cd frontend && npm install && npm run dev  # http://localhost:3000
 ```
 
-This starts PostGIS + pgvector on port 5432 with the database pre-configured.
-
-### Load Seed Data (Optional but Recommended)
-
-The repo includes a compressed seed dump of **~71,000 accessibility places** across all 16 Malaysian states. Load it after starting the database:
+### Load Seed Data
 
 ```bash
-# After docker compose up -d and backend has run migrations once:
-gunzip -c data/places-seed.sql.gz | docker exec -i $(docker ps -qf "name=postgis\|name=wheelcheck-db") psql -U wheelcheck -d wheelcheck
-```
+# ~71,000 places from the included compressed dump:
+gunzip -c data/places-seed.sql.gz | docker exec -i wheelcheck-db psql -U wheelcheck -d wheelcheck
 
-Or re-import fresh data from OSM + data.gov.my via the admin API (takes ~30 min):
-```bash
+# Or sync from the live demo Supabase (80k+ places):
+cp .env.supabase.example .env.supabase   # fill in SUPABASE_DB_PASSWORD
+./scripts/db-pull-demo.sh
+
+# Or re-import fresh from OSM (takes ~30 min):
 curl -X POST http://localhost:8080/api/aggregation/import/malaysia \
   -H "Authorization: Bearer <admin-token>"
 ```
 
-**Or sync directly from the live demo database (80k+ places, latest data):**
-```bash
-cp .env.supabase.example .env.supabase
-# Fill in SUPABASE_DB_PASSWORD from Supabase Dashboard → Settings → Database
-./scripts/db-pull-demo.sh
-```
-
-See [`data/README.md`](data/README.md) for full coverage breakdown.
-
-### Run Backend
-
-```bash
-cd backend
-./gradlew bootRun
-```
-
-Backend: http://localhost:8080
-API Docs: http://localhost:8080/swagger-ui.html
-
-### Run Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend: http://localhost:3000
+See [`data/README.md`](data/README.md) for coverage breakdown.
 
 ### AI Enrichment (Optional)
 
-Get a free Gemini API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey), then:
+Get a free key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — add to `backend/.env` (auto-loaded by `./gradlew bootRun`):
 
 ```bash
-# Add to backend/.env
 GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-2.5-flash   # default
-GEMINI_DAILY_CAP=1400           # stays under free tier (1,500/day)
-
-# Test with just 3 places first (Penang)
-./scripts/enrich-test.sh 3
-
-# Full state enrichment via the admin UI, or:
-curl -X POST "http://localhost:8080/api/admin/enrich/state/Pulau%20Pinang?limit=10" \
-  -H "Authorization: Bearer <admin-token>"
-
-# Monitor progress
-curl http://localhost:8080/api/admin/enrich/progress \
-  -H "Authorization: Bearer <admin-token>"
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_DAILY_CAP=1400
 ```
 
-The enrichment pipeline uses **gemini-2.5-flash** (standard text generation, no search grounding required, works fully on the free tier). Rate-limited to ~8 calls/min, hard-capped at 1,400/day.
+```bash
+./scripts/enrich-test.sh 5    # test with 5 Penang places first
+# Then use the admin UI → AI Enrichment tab for full state runs
+```
+
+See [`docs/AI_ENRICHMENT_SETUP.md`](docs/AI_ENRICHMENT_SETUP.md) for setup guide.
 
 ### Run Tests
 
 ```bash
-# Backend tests
 cd backend && ./gradlew test
 
-# Frontend unit tests
-cd frontend && npm test
+cd frontend && npm test                         # unit tests
+cd frontend && npx playwright test              # E2E (needs backend + frontend running)
 
-# E2E tests — Playwright TypeScript (requires backend + frontend running)
-cd frontend && npx playwright test
-
-# CDP map tests — Playwright Python + raw CDP events (no LLM needed)
 source tools/venv/bin/activate
-python frontend/tests/browser-harness/test_cdp_map.py
-
-# AI visual tests — browser-use (requires ANTHROPIC_API_KEY or OPENAI_API_KEY)
-source tools/venv/bin/activate
-cd frontend && pytest tests/visual/ -v
+python frontend/tests/browser-harness/test_cdp_map.py   # CDP map tests
+cd frontend && pytest tests/visual/ -v                  # AI visual (needs LLM key)
 ```
 
-See [`tools/README.md`](tools/README.md) for Python venv setup and browser-use/browser-harness details.
+See [`tools/README.md`](tools/README.md) for Python venv setup.
 
-## 🔌 API Endpoints
+---
+
+## 🔌 API Reference
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/api/places` | List all places (paginated) | No |
-| GET | `/api/places/{id}` | Get place details | No |
-| POST | `/api/places/nearby` | Find places within radius (triggers shadow OSM discovery) | No |
-| GET | `/api/places/search?name=` | Fuzzy search by name (abbrev. aware: KL, KB…) | No |
-| GET | `/api/places/semantic-search` | Semantic vector search (pgvector) | No |
-| POST | `/api/places` | Create a place | No |
-| GET | `/api/places/{id}/reports` | Get reviews for a place | No |
-| GET | `/api/places/{id}/enrichment` | Get AI enrichment for a place | No |
+| GET | `/api/places` | List places (paginated) | No |
+| GET | `/api/places/{id}` | Place details | No |
+| POST | `/api/places/nearby` | Find within radius (triggers OSM shadow discovery) | No |
+| GET | `/api/places/search?name=` | Fuzzy search (abbrev. aware) | No |
+| GET | `/api/places/semantic-search` | Vector search (pgvector) | No |
+| POST | `/api/places` | Create place | No |
+| GET | `/api/places/{id}/enrichment` | AI enrichment for a place | No |
 | POST | `/api/reviews` | Submit accessibility review | No |
+| POST | `/api/reviews/{id}` | Update own review | Yes |
 | POST | `/api/reviews/{id}/photos` | Upload review photos | Yes |
-| POST | `/api/photos/upload` | Upload photo evidence | No |
-| GET | `/api/comments/place/{id}` | Get comments for a place | No |
-| POST | `/api/comments` | Post a comment | Yes |
-| POST | `/api/comments/{id}/vote?type=` | Upvote/downvote a comment | Yes |
-| GET | `/api/favorites` | Get user's favourite places | Yes |
-| POST | `/api/favorites/{placeId}` | Toggle favourite (add/remove) | Yes |
-| GET | `/api/favorites/{placeId}/status` | Check favourite status + count | No |
-| POST | `/api/routing/wheelchair` | Wheelchair route planning (ORS) | Yes |
-| POST | `/api/auth/register` | Register account | No |
-| POST | `/api/auth/login` | Login (returns JWT) | No |
-| GET | `/api/users/me` | Get current user profile | Yes |
-| GET | `/api/users/{id}/stats` | Get user stats | No |
-| GET | `/api/aggregation/adapters` | List active adapters | Admin |
-| POST | `/api/aggregation/import/kl` | Import KL places | Admin |
-| POST | `/api/aggregation/import/selangor` | Import Selangor places | Admin |
-| POST | `/api/aggregation/import/malaysia` | Import all Malaysia | Admin |
-| POST | `/api/aggregation/import/peninsular` | Import Peninsular MY | Admin |
-| POST | `/api/aggregation/import/{state}` | Import by state (e.g. `penang`) | Admin |
-| POST | `/api/admin/enrich/place/{id}` | AI-enrich one place (Gemini) | Admin |
-| POST | `/api/admin/enrich/state/{state}` | Batch AI-enrich a state (async) | Admin |
-| GET | `/api/admin/enrich/progress` | Check live batch enrichment progress | Admin |
-| GET | `/api/admin/enrich/stats/{state}` | Enrichment stats per state | Admin |
+| GET | `/api/comments/place/{id}` | Get comments | No |
+| POST | `/api/comments` | Post comment | Yes |
+| POST | `/api/comments/{id}/vote?type=` | Upvote/downvote | Yes |
+| GET/POST | `/api/favorites` / `/api/favorites/{placeId}` | Bookmarks | Yes |
+| POST | `/api/routing/wheelchair` | Wheelchair route (ORS) | Yes |
+| POST | `/api/auth/register` / `/api/auth/login` | Auth | No |
+| GET | `/api/users/me` | Current user profile | Yes |
+| POST | `/api/aggregation/import/{state}` | Import by state (e.g. `penang`, `malaysia`) | Admin |
+| POST | `/api/admin/enrich/state/{state}?limit=N` | Batch AI-enrich a state | Admin |
+| GET | `/api/admin/enrich/progress` | Live batch enrichment progress | Admin |
+| GET | `/api/admin/enrich/stats/{state}` | Enrichment stats | Admin |
+| GET/POST | `/api/admin/places/pending` | Pending place approvals | Admin |
+
+Full Swagger docs: `/swagger-ui.html`
+
+---
 
 ## ♿ Accessibility
 
-This app is built **for** people with disabilities, so accessibility of the app itself is non-negotiable:
+Built **for** people with disabilities, so the app itself must be accessible:
 
-- WCAG 2.2 Level AA compliance target
-- 48×48dp minimum touch targets
-- List view alternative to map (for screen reader users)
-- Single-finger operation for all interactions
-- Large text support (200% font scale)
-- **Dark mode** (header toggle, anti-FOUC, full page coverage)
-- High contrast mode support
-- No time limits on any interaction
-- Bilingual support (EN / BM)
+- WCAG 2.2 Level AA target, 48×48dp minimum touch targets
+- List view alternative to map (screen reader friendly)
+- Dark mode, high contrast, large text (200%), no time limits
+- Single-finger operation, bilingual (EN / BM)
+
+---
 
 ## 🧮 Scoring Algorithm
 
-Reviews rate venues across categories (entrance, toilet, parking, internal navigation):
+Reviews rate venues across entrance, toilet, parking, and internal navigation:
 
 | Rating | Score |
 |--------|-------|
-| FULL (fully accessible) | 3 |
-| PARTIAL (partially accessible) | 2 |
+| FULL | 3 |
+| PARTIAL | 2 |
 | NOT_ACCESSIBLE | 1 |
-| UNKNOWN | Excluded from calculation |
+| UNKNOWN | Excluded |
 
-**Verdict:**
-- Average ≥ 2.5 → ✅ FULL
-- Average ≥ 1.5 → ⚠️ PARTIAL
-- Average < 1.5 → ❌ NOT_ACCESSIBLE
+Average ≥ 2.5 → ✅ FULL · ≥ 1.5 → ⚠️ PARTIAL · < 1.5 → ❌ NOT_ACCESSIBLE
+
+---
 
 ## 🗂️ Project Structure
 
 ```
 wheelcheck/
-├── backend/                    # Spring Boot Kotlin API
-│   ├── src/main/kotlin/com/wheelcheck/
-│   │   ├── admin/             # Admin dashboard controller
-│   │   ├── aggregation/       # Data aggregation adapters
-│   │   │   ├── OsmOverpassAdapter         # OpenStreetMap wheelchair data
-│   │   │   ├── WikidataAdapter            # Wikidata SPARQL P2846
-│   │   │   ├── GeoapifyAdapter            # Geoapify POI data
-│   │   │   ├── OrsRoutingAdapter          # Wheelchair route planning
-│   │   │   ├── PrasaranaGtfsAdapter       # Malaysian transit GTFS
-│   │   │   ├── DataGovMyFacilitiesAdapter # MOH hospitals/clinics
-│   │   │   ├── AccessibilityCloudAdapter  # accessibility.cloud
-│   │   │   ├── LiveEnrichmentService      # Real-time OSM shadow discovery
-│   │   │   ├── MalaysiaGeoUtils           # State/city lookup (16 states)
-│   │   │   └── AggregationService         # Coordinator + deduplication
-│   │   ├── auth/              # JWT authentication
-│   │   ├── comment/           # Threaded comments + voting
-│   │   ├── config/            # Security, rate limiting, CORS
-│   │   ├── enrichment/        # AI enrichment pipeline (Gemini + OSM fallback)
-│   │   │   ├── GeminiEnrichmentService    # Gemini 1.5 Flash + Search Grounding
-│   │   │   ├── AiEnrichmentService        # Batch runner + upsert logic
-│   │   │   └── AiEnrichmentController     # Admin REST endpoints
-│   │   ├── favorite/          # Bookmark/favourite places
-│   │   ├── place/             # Place CRUD + spatial queries
-│   │   ├── review/            # Accessibility reviews + photos
-│   │   ├── search/            # pgvector semantic search + embeddings
-│   │   └── user/              # User management
-│   └── src/test/              # 53+ unit tests
-├── frontend/                   # Next.js 16 PWA
-│   ├── src/
-│   │   ├── app/[locale]/      # i18n routing (EN + BM)
-│   │   │   ├── favorites/     # Saved places page
-│   │   │   ├── settings/      # Dark mode, contrast, language
-│   │   │   └── profile/       # Auth + user profile
-│   │   ├── components/
-│   │   │   ├── map/           # MapView, LocationPicker
-│   │   │   ├── places/        # PlaceCard, AccessBadge, Reviews, Comments, PlaceDetail
-│   │   │   ├── report/        # ReportWizard (6-step, optional steps 5–6)
-│   │   │   ├── ui/            # BottomSheet, LoadingSpinner, Button, Toast
-│   │   │   └── layout/        # BottomNav, Header (dark mode toggle)
-│   │   ├── hooks/             # usePlaces, useGeolocation, useDebounce, useFavorite
-│   │   ├── lib/               # API client, types, constants, utils
-│   │   └── messages/          # Translation files (EN + BM)
-│   └── tests/                 # 40 unit + 261+ E2E (Playwright TS)
-│                              # + 14 CDP map tests (Python)
-│                              # + 9 AI visual tests (browser-use)
-├── docker-compose.yml          # PostGIS + pgvector (ARM64-native)
-├── docs/                       # Architecture, PRD, development guide
-│   ├── AI_DATA_PIPELINE.md    # AI pipeline design notes
-│   └── AI_ENRICHMENT_SETUP.md # Gemini setup + enrichment guide
-└── .github/                    # Issue templates, CI workflows
+├── backend/src/main/kotlin/com/wheelcheck/
+│   ├── admin/          # Admin dashboard + approval workflow
+│   ├── aggregation/    # OSM, Wikidata, Geoapify, Prasarana, data.gov.my adapters
+│   ├── auth/           # JWT auth
+│   ├── comment/        # Threaded comments + voting
+│   ├── enrichment/     # Gemini AI pipeline + OSM fallback
+│   ├── favorite/       # Bookmarks
+│   ├── place/          # Place CRUD + spatial queries
+│   ├── review/         # Accessibility reviews + photos
+│   ├── search/         # pgvector semantic search
+│   └── user/           # User management
+├── frontend/src/
+│   ├── app/[locale]/   # i18n routing (EN + BM) — map, places, admin, profile, settings
+│   ├── components/     # map/, places/, report/, ui/, layout/
+│   ├── hooks/          # usePlaces, useGeolocation, useFavorite…
+│   └── messages/       # en.json, ms.json
+├── scripts/            # db-backup-demo.sh, db-pull-demo.sh, enrich-test.sh
+├── docker/db/          # Custom PostGIS + pgvector image
+├── docker-compose.yml
+└── docs/               # AI_ENRICHMENT_SETUP.md, AI_DATA_PIPELINE.md
 ```
-
-## 🔄 Data Freshness — How It Works
-
-WheelCheck uses a **three-layer data model**:
-
-| Layer | Source | Freshness | Notes |
-|-------|--------|-----------|-------|
-| **Seed import** | OSM + data.gov.my snapshot | Updated on demand (admin) | ~71,354 places loaded |
-| **Live shadow discovery** | OSM Overpass API | Real-time, triggered on map pan | New places auto-saved to DB, rate-limited per grid cell |
-| **User crowd-sourcing** | Community reports | Instant | Always takes priority over imported data |
-
-**Shadow discovery** means when you pan/zoom the map, the backend silently queries the OSM Overpass API for that viewport and saves any newly discovered places. These appear on your next refresh. No API key needed — OSM is free.
-
-| What this means | Detail |
-|-----------------|--------|
-| 🗺️ **Growing database** | Places accumulate as users browse new areas |
-| ⏱️ **Rate-limited** | 10-min cooldown per ~2km grid cell to avoid hammering OSM |
-| 🙋 **User reports** | Community accessibility reports always override imported data |
-| 🔄 **Manual refresh** | Re-run imports any time to pull the latest OSM snapshot |
-
-**To refresh all of Malaysia** (takes ~30 min):
-```bash
-curl -X POST http://localhost:8080/api/aggregation/import/malaysia \
-  -H "Authorization: Bearer <admin-token>"
-```
-
-A pre-built seed dump of ~71,000 places is available at [`data/places-seed.sql.gz`](data/places-seed.sql.gz) for immediate use. See [`data/README.md`](data/README.md).
 
 ---
 
@@ -477,164 +259,80 @@ A pre-built seed dump of ~71,000 places is available at [`data/places-seed.sql.g
 
 | Source | License | What we use |
 |--------|---------|-------------|
-| [OpenStreetMap](https://www.openstreetmap.org/) | ODbL | Wheelchair tags, ramps, kerbs, surfaces, elevators, tactile paving |
-| [Wikidata](https://www.wikidata.org/) | CC0 | P2846 accessibility property for landmarks |
-| [data.gov.my](https://data.gov.my/) | Open Data | MOH hospitals & government clinics nationwide |
-| [Prasarana GTFS](https://developer.data.gov.my/) | Open Data | KL Rapid Rail/Bus wheelchair boarding info |
-| [Geoapify](https://www.geoapify.com/) | Free tier | Points of interest with accessibility metadata |
-| [OpenRouteService](https://openrouteservice.org/) | Free tier | Wheelchair-friendly route planning |
-| [accessibility.cloud](https://www.accessibility.cloud/) | CC-BY | Global accessibility GeoJSON (optional) |
-| [Gemini 1.5 Flash](https://aistudio.google.com/) | Free tier | AI accessibility research with Google Search Grounding |
+| [OpenStreetMap](https://www.openstreetmap.org/) | ODbL | Wheelchair tags, ramps, surfaces, tactile paving |
+| [Wikidata](https://www.wikidata.org/) | CC0 | P2846 accessibility property |
+| [data.gov.my](https://data.gov.my/) | Open Data | MOH hospitals & clinics |
+| [Prasarana GTFS](https://developer.data.gov.my/) | Open Data | KL transit wheelchair boarding |
+| [Geoapify](https://www.geoapify.com/) | Free tier | POI + accessibility metadata |
+| [OpenRouteService](https://openrouteservice.org/) | Free tier | Wheelchair routing |
+| [accessibility.cloud](https://www.accessibility.cloud/) | CC-BY | Global accessibility GeoJSON |
+| [Gemini 2.5 Flash](https://aistudio.google.com/) | Free tier | AI accessibility research |
 
-- **Code License:** Apache 2.0
-- **Crowd-sourced Data:** ODbL (Open Database License)
-- All accessibility data contributed by users is open and exportable
-
-## 🇲🇾 Malaysia Focus
-
-- Bilingual: Bahasa Malaysia + English
-- Key venues: Malls, hospitals, mosques, MRT/LRT stations, government offices
-- Aligned with Persons with Disabilities Act 2008 (Act 685)
-- Smart abbreviation search: KL, KB, KK, JB, PG, PJ, SA, KT and more
-- Partnership-ready for OKU organizations
-- Seeded with real KL venues (Pavilion, KLCC, KL Sentral, Mid Valley, Nu Sentral)
+**Code:** Apache 2.0 · **Crowd-sourced data:** ODbL
 
 ---
 
 ## 🏛️ Demo Infrastructure & Architecture
 
-The public demo runs entirely on **free tiers** to prove the concept before any real hosting cost. Here's what runs where and why each choice was made.
-
-### Live Stack
-
 ```
 Users
-  │
-  ├─▶  Vercel (Frontend)
-  │       Next.js 16 + Tailwind + TypeScript
-  │       Deployed on every push to main
-  │
-  └─▶  HuggingFace Spaces (Backend API)
-          Spring Boot 3.3 + Kotlin (Docker container)
-          ↕
-       Supabase (Database)
-          PostgreSQL 16 + PostGIS + pgvector
-          80,000+ Malaysian accessibility places
+  ├─▶  Vercel (Frontend — Next.js 16)
+  └─▶  HuggingFace Spaces (Backend — Spring Boot / Docker)
+              ↕
+           Supabase (PostgreSQL 16 + PostGIS + pgvector)
 ```
 
 | Service | Role | Why |
 |---------|------|-----|
-| **[Vercel](https://vercel.com)** | Frontend hosting | Zero-config Next.js deployment, free hobby tier, global CDN, automatic preview deploys on PR |
-| **[HuggingFace Spaces](https://huggingface.co/spaces)** | Backend API (Spring Boot) | Free Docker container hosting, no credit card needed, supports persistent storage, ML-friendly for future model integration |
-| **[Supabase](https://supabase.com)** | PostgreSQL database | Managed Postgres with PostGIS + pgvector extensions pre-installed, 500MB free tier, built-in connection pooler, easy dashboard UI |
+| **Vercel** | Frontend | Zero-config Next.js, free hobby tier, global CDN |
+| **HuggingFace Spaces** | Backend API | Free Docker hosting, no credit card, persistent storage |
+| **Supabase** | Database | Managed Postgres with PostGIS + pgvector, 500MB free |
 
-### Architectural Decisions
+### Why these choices?
 
-#### Why Spring Boot + Kotlin (not Node/Python)?
-- Type-safe, robust backend with a well-established ecosystem
-- PostGIS spatial queries (`ST_DWithin`, `ST_Distance`) are first-class via Spring Data JPA
-- Kotlin's null-safety eliminates a whole class of runtime bugs
-- The target community includes Java/Kotlin developers familiar with Spring — lowers the contribution barrier for Malaysian devs
+**Spring Boot + Kotlin** — type-safe, PostGIS/JPA first-class, familiar to Malaysian Java/Kotlin devs, lower contribution barrier than exotic stacks.
 
-#### Why Next.js (not React SPA / Vue)?
-- SSR + SSG for SEO: accessibility venues should be indexable by Google for people searching "KLCC wheelchair accessible"
-- PWA support out-of-the-box (offline capability planned)
-- `next-intl` integrates naturally with the App Router for BM/EN switching
-- File-based routing matches the content structure (places, states, categories)
+**Next.js** — SSR for SEO (venues should be Google-indexable), PWA support built-in, `next-intl` + App Router for BM/EN switching.
 
-#### Why HuggingFace Spaces (not Railway / Render / Fly.io)?
-- Completely free Docker container with no sleep-on-idle penalty after warm-up
-- Persistent storage volume for uploaded photos
-- Native integration if we ever want to run local HuggingFace models (embedding, vision)
-- Public and open — fits the open-source ethos: anyone can inspect the running container
+**HuggingFace Spaces over Railway/Render** — free Docker with no sleep penalty after warm-up, persistent storage, ML-native if we add local embedding models later.
 
-#### Why Supabase (not Neon / PlanetScale)?
-- PostGIS extension is available — critical for `ST_DWithin` spatial search
-- pgvector extension available — needed for semantic search embeddings
-- Supabase's free tier includes 500MB (enough for 80k+ places + reviews)
-- Row-level security and REST API built-in if we ever move to a BFF pattern
-- Branching and SQL editor in dashboard is great for solo/small-team development
-
-#### Why no Kubernetes / ECS (yet)?
-- This is an open-source community project — over-engineering the infra adds maintenance burden without user benefit
-- The Docker Compose setup (`docker-compose.yml`) is intentionally simple so contributors can run the full stack locally in 2 commands
+**Supabase over Neon/PlanetScale** — PostGIS + pgvector both available (Neon has pgvector but PostGIS is limited), 500MB free handles 80k+ places comfortably, great dashboard for solo dev.
 
 ---
 
 ## 📈 Scaling Roadmap
 
-The current free-tier demo is intentionally minimal. Here's how the infrastructure scales if WheelCheck gets real adoption:
+### Tier 1 — Community (~100–1,000 DAU) · *Zero cost*
+- Backend: upgrade HF Spaces to persistent, or Fly.io (3 VMs free)
+- Database: Supabase Pro ($25/mo) for 8GB + daily backups
+- Media: Cloudflare R2 (free 10GB) for photo uploads
 
-### Tier 1 — Community Traction (~100–1,000 DAU)
-> Still zero/low cost. Just configuration changes.
+### Tier 2 — Real Adoption (~1,000–10,000 DAU) · *~$50–100/mo*
+- Backend: Railway/Render auto-scaling or DigitalOcean VPS
+- Rate limiting: Redis via Upstash (free tier)
+- CDN: Cloudflare in front of everything for SEA performance
+- Monitoring: Sentry + PostHog (both free tiers)
 
-| What | Change |
-|------|--------|
-| Backend cold starts | Upgrade HF Spaces to "persistent" or move to **Fly.io** (3 shared VMs free) |
-| Database | Upgrade Supabase to Pro ($25/mo) for 8GB storage + daily backups |
-| Frontend | No change needed — Vercel free tier handles millions of requests |
-| Media / photos | Move uploads to **Cloudflare R2** (free 10GB, cheap egress) |
-| Search | Enable pgvector semantic search (already in codebase, just needs HuggingFace API key) |
-
-### Tier 2 — Real Adoption (~1,000–10,000 DAU)
-> Requires modest budget (~$50–100/mo). Still very affordable.
-
-| What | Change |
-|------|--------|
-| Backend | Move to **Railway** or **Render** (auto-scaling, $5–20/mo) or VPS (DigitalOcean $12/mo) |
-| Database | Supabase Pro or **Neon** serverless Postgres (scales to zero between bursts) |
-| CDN / images | **Cloudflare** in front of everything — massive performance improvement for SEA |
-| API rate limiting | Move from in-memory to **Redis** (Upstash free tier) |
-| Background jobs | Separate enrichment worker (same Spring Boot, different Fly.io machine) |
-| Monitoring | **Sentry** (errors) + **PostHog** (product analytics) — both have free tiers |
-
-### Tier 3 — Serious Scale or NGO Deployment (~10,000+ DAU)
-> Requires proper infra investment. At this point there are probably partner organizations involved.
-
-| What | Change |
-|------|--------|
-| Backend | **Kubernetes** (GKE/EKS) or managed Spring Boot on **Google Cloud Run** (scales to zero) |
-| Database | Dedicated PostgreSQL cluster with read replicas (e.g. **Supabase Enterprise** or **AlloyDB**) |
-| Search | Elasticsearch or **Meilisearch** for full-text + faceted search at scale |
-| Maps | Consider self-hosted map tiles (**MapTiler** free tier, or **TileServer GL**) to avoid OSM tile abuse |
-| Auth | Move to **Keycloak** or **Auth0** for enterprise SSO / OKU organization accounts |
-| Admin | Dedicated ops runbook, automated DB backups to S3/GCS |
-| Compliance | Review PDPA (Malaysia Personal Data Protection Act) compliance for user data |
+### Tier 3 — Serious Scale (~10,000+ DAU) · *Partner/NGO investment*
+- Backend: Google Cloud Run or Kubernetes (GKE)
+- Database: Supabase Enterprise or AlloyDB with read replicas
+- Search: Meilisearch for full-text + faceted search at scale
+- Auth: Keycloak/Auth0 for enterprise SSO + OKU organisation accounts
+- PDPA compliance review (Malaysia Personal Data Protection Act)
 
 ---
 
 ## 📱 Mobile App — Future Plans
 
-A native mobile app is on the long-term roadmap. **It is not being built now** — the PWA (Progressive Web App) covers mobile use cases well enough for the community stage.
+**Not being built now** — the PWA covers mobile well enough for the community stage.
 
-### Why mobile matters for this app
-- Wheelchair users are on their phones, not laptops, when they're out navigating
-- Offline access to saved venues is essential — internet is unreliable at some venues
-- Camera access for photo evidence is easier from native camera API than browser
-- Push notifications for "new report near you" require native integration
+When the time comes, wheelchair users need native for: offline saved venues, native camera for photo evidence, and push notifications for nearby new reports.
 
-### Planned approach (when the time comes)
+- **React Native (preferred)** — reuse ~60% of existing TypeScript/component logic, Expo simplifies open-source distribution, single iOS + Android codebase
+- **Flutter** — better map performance, strong Malaysian dev community, but no code reuse
+- **Capacitor** — fastest path (wrap the PWA), limited native capability
 
-**Option A — React Native (preferred)**
-- Reuse ~60% of the existing Next.js component logic and Tailwind-equivalent styling
-- Single codebase for iOS + Android
-- Expo simplifies build/distribution for an open-source project
-- Existing TypeScript types and API client code reusable
-
-**Option B — Flutter**
-- Better performance for map interactions (Leaflet → flutter_map)
-- Strong Malaysia developer community familiar with Flutter
-- Trade-off: no code reuse from existing Next.js frontend
-
-**Option C — Capacitor (easiest path)**
-- Wrap the existing Next.js PWA in a native shell
-- Fast to ship but limited native capability
-- Good for an MVP native app if community contribution happens quickly
-
-### What won't change
-- The Spring Boot backend is app-agnostic — the same REST API serves web, iOS, and Android
-- All existing API endpoints, auth, and data structures are mobile-ready today
-- No backend changes needed to add a mobile client
+The Spring Boot backend is already mobile-ready — same REST API, same auth, no changes needed.
 
 ---
 
@@ -646,5 +344,3 @@ A native mobile app is on the long-term roadmap. **It is not being built now** �
 ---
 
 Built with ❤️ for the Malaysian OKU community.
-
-
