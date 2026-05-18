@@ -84,21 +84,22 @@ class AiEnrichmentService(
      * Runs async so the HTTP response returns immediately.
      */
     @Async
-    fun enrichStateAsync(state: String, forceRe: Boolean = false, limit: Int = -1) {
+    fun enrichStateAsync(state: String, forceRe: Boolean = false, limit: Int = -1, categories: List<String> = emptyList()) {
         if (!batchRunning.compareAndSet(false, true)) {
             logger.warn("Batch enrichment already running for ${batchState}, ignoring request for $state")
             return
         }
 
         batchState.clear()
-        batchState.append(state)
+        batchState.append(if (categories.isEmpty()) state else "$state [${categories.joinToString(",")}]")
         batchProgress.set(0)
 
         try {
-            val allIds: List<UUID> = if (forceRe) {
-                placeRepository.findByStateIgnoreCase(state).map { it.id }
-            } else {
-                enrichmentRepository.findUnenrichedPlaceIdsByState(state)
+            val allIds: List<UUID> = when {
+                forceRe && categories.isEmpty() -> placeRepository.findByStateIgnoreCase(state).map { it.id }
+                forceRe -> placeRepository.findByStateIgnoreCase(state).filter { it.category.name in categories }.map { it.id }
+                categories.isNotEmpty() -> enrichmentRepository.findUnenrichedPlaceIdsByStateAndCategories(state, categories)
+                else -> enrichmentRepository.findUnenrichedPlaceIdsByState(state)
             }
 
             val placeIds = if (limit > 0) allIds.take(limit) else allIds

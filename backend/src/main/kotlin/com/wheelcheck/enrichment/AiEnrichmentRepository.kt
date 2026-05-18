@@ -12,6 +12,17 @@ interface AiEnrichmentRepository : JpaRepository<AiEnrichment, UUID> {
 
     fun findByPlaceIdIn(placeIds: Collection<UUID>): List<AiEnrichment>
 
+    @Query(value = """
+        SELECT p.id FROM places p
+        LEFT JOIN ai_enrichment ae ON ae.place_id = p.id
+        WHERE LOWER(p.state) = LOWER(:state) AND ae.id IS NULL
+          AND p.category IN (:categories)
+    """, nativeQuery = true)
+    fun findUnenrichedPlaceIdsByStateAndCategories(
+        @Param("state") state: String,
+        @Param("categories") categories: Collection<String>
+    ): List<UUID>
+
     @Query("SELECT COUNT(a) FROM AiEnrichment a WHERE a.confidenceTier = :tier")
     fun countByTier(@Param("tier") tier: String): Long
 

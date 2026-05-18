@@ -41,13 +41,15 @@ class AiEnrichmentController(
     fun enrichState(
         @PathVariable state: String,
         @RequestParam(defaultValue = "false") forceRe: Boolean,
-        @RequestParam(defaultValue = "-1") limit: Int
+        @RequestParam(defaultValue = "-1") limit: Int,
+        @RequestParam(defaultValue = "") categories: List<String>
     ): ResponseEntity<Map<String, String>> {
-        enrichmentService.enrichStateAsync(state, forceRe, limit)
+        enrichmentService.enrichStateAsync(state, forceRe, limit, categories)
         val limitNote = if (limit > 0) " (test mode: capped at $limit places)" else ""
+        val catNote = if (categories.isNotEmpty()) " categories=[${categories.joinToString(",")}]" else ""
         return ResponseEntity.accepted().body(
             mapOf(
-                "message" to "Enrichment started for $state$limitNote",
+                "message" to "Enrichment started for $state$limitNote$catNote",
                 "note" to "Rate-limited to ~8 calls/min (Gemini free tier). Poll /api/admin/enrich/progress."
             )
         )
