@@ -175,7 +175,13 @@ export function LocationPicker({ onLocationChange, onAddressChange, initialCente
           <MapFlyTo target={flyToTarget} />
           <MapCenterReporter onCenterChange={handleCenterChange} />
           <ZoomControl position="topright" />
-          <TileLayer attribution={MAP_CONFIG.attribution} url={MAP_CONFIG.tileUrl} maxZoom={MAP_CONFIG.maxZoom} maxNativeZoom={18} />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            subdomains="abcd"
+            maxZoom={MAP_CONFIG.maxZoom}
+            maxNativeZoom={19}
+          />
         </MapContainer>
 
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-[500] -translate-x-1/2 -translate-y-full text-emerald-600 drop-shadow-md">
