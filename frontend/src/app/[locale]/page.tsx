@@ -653,6 +653,7 @@ export default function HomePage() {
         <BottomSheet
           key={selectedPlaceData.id}
           open
+          initialState="half"
           ariaLabel={`${selectedPlaceData.name} details`}
           onClose={() => {
             const closingPlaceId = selectedPlaceData.id;
