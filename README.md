@@ -217,6 +217,60 @@ Admin import endpoints:
 
 ---
 
+## 📸 Screenshots
+
+### Desktop
+
+<table>
+  <tr>
+    <td><strong>Map — Filter chips + places sidebar</strong></td>
+    <td><strong>Place detail bottom sheet</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/01-map-desktop.png" alt="Map desktop" /></td>
+    <td><img src="docs/screenshots/02-map-place-detail-desktop.png" alt="Place detail bottom sheet" /></td>
+  </tr>
+  <tr>
+    <td><strong>AI Accessibility Research panel</strong></td>
+    <td><strong>6-step accessibility report wizard</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/14-place-ai-enrichment.png" alt="AI enrichment panel" /></td>
+    <td><img src="docs/screenshots/15-report-wizard.png" alt="Report wizard" /></td>
+  </tr>
+  <tr>
+    <td><strong>Places listing page</strong></td>
+    <td><strong>Admin dashboard (88k+ places)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/06-places-page-desktop.png" alt="Places page" /></td>
+    <td><img src="docs/screenshots/07-admin-dashboard-desktop.png" alt="Admin dashboard" /></td>
+  </tr>
+  <tr>
+    <td colspan="2"><strong>Dark mode</strong></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/12-map-dark-mode.png" alt="Dark mode" /></td>
+  </tr>
+</table>
+
+### Mobile
+
+<table>
+  <tr>
+    <td><strong>Map view</strong></td>
+    <td><strong>Place detail sheet</strong></td>
+    <td><strong>Places drawer</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/08-map-mobile.png" alt="Mobile map" width="260" /></td>
+    <td><img src="docs/screenshots/10-map-place-detail-mobile.png" alt="Mobile bottom sheet" width="260" /></td>
+    <td><img src="docs/screenshots/09-places-list-panel-mobile.png" alt="Mobile places drawer" width="260" /></td>
+  </tr>
+</table>
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
