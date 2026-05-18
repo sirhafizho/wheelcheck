@@ -103,7 +103,7 @@ export function PlacesListPanel({ places, onPlaceClick, selectedPlaceId, loading
       {/* ── Desktop sidebar (lg+): fixed left panel overlaying the map ── */}
       <div
         data-testid="places-sidebar"
-        className="hidden lg:flex absolute left-3 top-[130px] bottom-3 z-[990] w-72 flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden"
+        className="hidden lg:flex absolute left-3 top-[130px] bottom-[100px] z-[990] w-72 flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden"
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
           <span className="text-sm font-semibold text-gray-700">
@@ -123,7 +123,7 @@ export function PlacesListPanel({ places, onPlaceClick, selectedPlaceId, loading
         type="button"
         data-testid="places-list-toggle"
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden absolute bottom-36 left-3 z-[990] flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 backdrop-blur-md"
+        className="lg:hidden absolute bottom-[100px] left-3 z-[990] flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 backdrop-blur-md"
       >
         <ListBulletIcon className="h-4 w-4 text-emerald-600" />
         <span>{places.length} {places.length === 1 ? 'place' : 'places'}</span>

@@ -666,8 +666,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Data freshness notice */}
-      <div className="absolute bottom-16 left-3 z-[1000]">
+      {/* Data freshness notice — right side on desktop to avoid sidebar overlap */}
+      <div className="absolute bottom-16 left-3 lg:left-auto lg:right-3 z-[1000]">
         <div className="flex items-center gap-1 rounded-full bg-amber-50/90 px-2.5 py-1 text-xs text-amber-700 shadow-sm backdrop-blur-sm ring-1 ring-amber-200/60">
           <span>⏱</span>
           <span>Data is imported, not live — <a href="https://github.com/sirhafizho/wheelcheck#%EF%B8%8F-data-freshness--important" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">learn more</a></span>
