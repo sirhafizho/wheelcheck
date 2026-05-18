@@ -664,16 +664,12 @@ export default function HomePage() {
             <PlaceDetail
               place={selectedPlaceData}
               locale={locale}
+              flat
+              detailsHref={`/${locale}/places/${selectedPlaceData.id}`}
               onDelete={() => setSelectedPlace(null)}
               onEdit={() => router.push(`/${locale}/edit-place/${selectedPlaceData.id}`)}
               onReportClick={() => router.push(`/${locale}/report/${selectedPlaceData.id}`)}
             />
-            <Link
-              href={`/${locale}/places/${selectedPlaceData.id}`}
-              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-            >
-              {t('places.details')}
-            </Link>
           </div>
         </BottomSheet>
       )}

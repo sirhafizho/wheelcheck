@@ -86,9 +86,11 @@ interface PlaceDetailProps {
   onShowOnMapClick?: () => void;
   onDelete?: () => void;
   onEdit?: () => void;
+  flat?: boolean;
+  detailsHref?: string;
 }
 
-export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, onDelete, onEdit }: PlaceDetailProps) {
+export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, onDelete, onEdit, flat, detailsHref }: PlaceDetailProps) {
   const tCommon = useTranslations('common');
   const tPlaces = useTranslations('places');
   const tCategories = useTranslations('addPlace.categories');
@@ -187,7 +189,7 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
   const formattedCategory = formatCategory(place.category);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className={flat ? undefined : 'bg-white rounded-lg shadow-lg overflow-hidden'}>
       {toast && (
         <Toast
           message={toast.message}
@@ -419,7 +421,15 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
               <ArrowTopRightOnSquareIcon className="h-5 w-5" aria-hidden="true" />
               {tPlaces('getDirections')}
             </a>
-            {onShowOnMapClick && (
+            {detailsHref && (
+              <a
+                href={detailsHref}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 min-h-[48px]"
+              >
+                {tPlaces('details')}
+              </a>
+            )}
+            {!detailsHref && onShowOnMapClick && (
               <Button
                 variant="outline"
                 fullWidth
