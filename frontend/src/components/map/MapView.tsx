@@ -13,9 +13,40 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
-import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
+// MarkerCluster.Default.css intentionally excluded — custom styles in globals.css
 import type { Place, AccessLevel } from '@/lib/types';
 import { MAP_CONFIG } from '@/lib/constants';
+
+// CartoDB tile layers — free, no API key, modern design
+const TILES = {
+  light: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>' +
+      ' &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
+  },
+  dark: {
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>' +
+      ' &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
+  },
+} as const;
+
+/** Watch the <html> element's class list for the app's custom dark mode toggle. */
+function useDarkMode() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains('dark'));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
 
 // Fix for default marker icon
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
@@ -175,6 +206,9 @@ export function MapView({
   onDragStart,
   className = '',
 }: MapViewProps) {
+  const isDark = useDarkMode();
+  const tiles = isDark ? TILES.dark : TILES.light;
+
   const [viewport, setViewport] = useState<MapViewport>({
     lat: Number(center.lat.toFixed(5)),
     lng: Number(center.lng.toFixed(5)),
@@ -200,11 +234,14 @@ export function MapView({
         <MapUpdater center={center} flyTo={flyTo} />
         <MapViewportReporter onChange={handleViewportChange} onDragStart={onDragStart} />
         <MapZoomExecutor zoomIn={zoomIn ?? 0} zoomOut={zoomOut ?? 0} />
+        {/* key forces tile layer to remount when theme changes */}
         <TileLayer
-          attribution={MAP_CONFIG.attribution}
-          url={MAP_CONFIG.tileUrl}
+          key={isDark ? 'dark' : 'light'}
+          attribution={tiles.attribution}
+          url={tiles.url}
           maxZoom={MAP_CONFIG.maxZoom}
-          maxNativeZoom={18}
+          maxNativeZoom={19}
+          subdomains="abcd"
         />
         <MarkerClusterGroup
           chunkedLoading
@@ -223,7 +260,7 @@ export function MapView({
                 click: () => onPlaceClick?.(place),
               }}
             >
-              <Tooltip direction="top" offset={[0, -4]} opacity={0.95}>
+              <Tooltip direction="top" offset={[0, -4]} opacity={1}>
                 <span className="text-xs font-medium">{place.name}</span>
               </Tooltip>
             </Marker>

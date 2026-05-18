@@ -312,9 +312,7 @@ html.dark .leaflet-control-attribution {
   color: #9ca3af !important;
 }
 
-html.dark .leaflet-tile-pane {
-  filter: brightness(0.7) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
-}
+/* Dark tiles are served by CartoDB — no CSS filter hack needed */
 
 /* Ring/focus offset in dark */
 html.dark .focus\:ring-offset-2:focus {
@@ -477,25 +475,6 @@ html.high-contrast .ring-black\/5 {
   --tw-ring-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-html.high-contrast .leaflet-control-zoom a {
-  background: rgba(0, 0, 0, 0.95) !important;
-  color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-html.high-contrast .leaflet-control-zoom a:hover {
-  background: rgba(30, 30, 30, 1) !important;
-}
-
-html.high-contrast .leaflet-popup-content-wrapper {
-  background: #000 !important;
-  color: #fff !important;
-}
-
-html.high-contrast .leaflet-popup-tip {
-  background: #000 !important;
-}
-
 html.high-contrast .placeholder-gray-400::placeholder {
   color: #9ca3af !important;
 }
@@ -531,24 +510,86 @@ html.high-contrast .divide-black\/5 > :not(:last-child) {
   z-index: 0;
 }
 
-/* Leaflet popup styling */
+/* ── Popup ─────────────────────────────────────────────── */
 .leaflet-popup-content-wrapper {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(12px);
 }
 
 .leaflet-popup-content {
-  margin: 8px 12px !important;
+  margin: 8px 14px !important;
 }
 
-/* Leaflet attribution - subtle */
+html.dark .leaflet-popup-content-wrapper {
+  background: rgba(30, 41, 55, 0.92) !important;
+  border-color: rgba(75, 85, 99, 0.4) !important;
+  color: #f9fafb !important;
+}
+
+html.dark .leaflet-popup-tip {
+  background: rgba(30, 41, 55, 0.92) !important;
+}
+
+/* ── Tooltip ────────────────────────────────────────────── */
+.leaflet-tooltip {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: 8px !important;
+  color: #111827 !important;
+  padding: 5px 10px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.13) !important;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Hide the arrow triangle */
+.leaflet-tooltip::before {
+  display: none !important;
+}
+
+html.dark .leaflet-tooltip {
+  background: rgba(30, 41, 55, 0.90) !important;
+  border-color: rgba(75, 85, 99, 0.45) !important;
+  color: #f9fafb !important;
+}
+
+/* ── Attribution ────────────────────────────────────────── */
 .leaflet-control-attribution {
-  font-size: 10px !important;
-  background: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(4px);
+  font-size: 9.5px !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(6px);
+  border-radius: 8px 0 0 0 !important;
+  padding: 2px 6px !important;
+  color: #6b7280 !important;
+  border-top: none !important;
 }
 
-/* Leaflet zoom controls */
+.leaflet-control-attribution a {
+  color: #6b7280 !important;
+  text-decoration: none;
+}
+
+/* Hide "Leaflet" branding — attribution still shows OSM + CARTO */
+.leaflet-control-attribution .leaflet-attribution-flag,
+.leaflet-control-attribution span[aria-hidden="true"] {
+  display: none !important;
+}
+
+html.dark .leaflet-control-attribution {
+  background: rgba(17, 24, 39, 0.60) !important;
+  color: #6b7280 !important;
+}
+
+html.dark .leaflet-control-attribution a {
+  color: #9ca3af !important;
+}
+
+/* ── Zoom controls ──────────────────────────────────────── */
 .leaflet-top .leaflet-control {
   margin-top: 8.5rem !important;
 }
@@ -559,9 +600,9 @@ html.high-contrast .divide-black\/5 > :not(:last-child) {
 
 .leaflet-control-zoom {
   border: 0 !important;
-  border-radius: 0.75rem !important;
+  border-radius: 14px !important;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.14) !important;
   backdrop-filter: blur(12px);
 }
 
@@ -569,20 +610,139 @@ html.high-contrast .divide-black\/5 > :not(:last-child) {
   width: 44px !important;
   height: 44px !important;
   line-height: 44px !important;
-  font-size: 24px !important;
+  font-size: 22px !important;
   border: 0 !important;
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.90) !important;
   color: #374151 !important;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
 .leaflet-control-zoom a:hover {
   background: rgba(255, 255, 255, 1) !important;
+  color: #059669 !important;
 }
 
 .leaflet-control-zoom a.leaflet-disabled {
-  background: rgba(255, 255, 255, 0.75) !important;
-  color: #9ca3af !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+  color: #d1d5db !important;
+  cursor: not-allowed;
+}
+
+html.dark .leaflet-control-zoom a {
+  background: rgba(30, 41, 55, 0.92) !important;
+  color: #e5e7eb !important;
+}
+
+html.dark .leaflet-control-zoom a:hover {
+  background: rgba(55, 65, 81, 1) !important;
+  color: #34d399 !important;
+}
+
+html.dark .leaflet-control-zoom a.leaflet-disabled {
+  background: rgba(30, 41, 55, 0.65) !important;
+  color: #4b5563 !important;
+}
+
+/* ── Marker clusters (custom emerald glass-morphism) ────── */
+.marker-cluster-small {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border: 2px solid rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25) !important;
+}
+
+.marker-cluster-small div {
+  background: rgba(16, 185, 129, 0.72) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+}
+
+.marker-cluster-medium {
+  background: rgba(245, 158, 11, 0.18) !important;
+  border: 2px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25) !important;
+}
+
+.marker-cluster-medium div {
+  background: rgba(245, 158, 11, 0.75) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+}
+
+.marker-cluster-large {
+  background: rgba(239, 68, 68, 0.18) !important;
+  border: 2px solid rgba(239, 68, 68, 0.45) !important;
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.25) !important;
+}
+
+.marker-cluster-large div {
+  background: rgba(239, 68, 68, 0.72) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+}
+
+.marker-cluster {
+  backdrop-filter: blur(4px);
+  border-radius: 50% !important;
+}
+
+.marker-cluster div {
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 5px !important;
+}
+
+html.dark .marker-cluster-small {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border-color: rgba(52, 211, 153, 0.50) !important;
+}
+
+html.dark .marker-cluster-small div {
+  background: rgba(16, 185, 129, 0.80) !important;
+}
+
+html.dark .marker-cluster-medium {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: rgba(251, 191, 36, 0.50) !important;
+}
+
+html.dark .marker-cluster-medium div {
+  background: rgba(245, 158, 11, 0.80) !important;
+}
+
+html.dark .marker-cluster-large {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: rgba(248, 113, 113, 0.50) !important;
+}
+
+html.dark .marker-cluster-large div {
+  background: rgba(239, 68, 68, 0.80) !important;
+}
+
+/* ── High contrast overrides ────────────────────────────── */
+html.high-contrast .leaflet-control-zoom a {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+html.high-contrast .leaflet-control-zoom a:hover {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+html.high-contrast .leaflet-popup-content-wrapper {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+html.high-contrast .leaflet-popup-tip {
+  background: #000 !important;
 }
 
 /* Ensure high contrast for accessibility */
