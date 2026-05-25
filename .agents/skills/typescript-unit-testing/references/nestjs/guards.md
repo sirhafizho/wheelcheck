@@ -92,7 +92,7 @@ describe('JwtAuthGuard', () => {
   it('should allow access with valid JWT token', async () => {
     // Arrange
     const mockContext = createMock<ExecutionContext>();
-    const validToken = 'REDACTED_TEST_JWT';
+    const validToken = 'test-jwt-token';
     mockContext.switchToHttp().getRequest.mockReturnValue({
       headers: { authorization: `Bearer ${validToken}` },
     });

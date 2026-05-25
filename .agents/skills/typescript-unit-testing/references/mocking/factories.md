@@ -266,7 +266,7 @@ For external service responses:
 // test/factories/external.factory.ts
 export function createAuthResponseFixture(overrides?: Partial<AuthResponse>): AuthResponse {
   return {
-    accessToken: 'REDACTED_TEST_JWT',
+    accessToken: 'test-access-token',
     refreshToken: 'refresh-token-123',
     expiresIn: 3600,
     tokenType: 'Bearer',
