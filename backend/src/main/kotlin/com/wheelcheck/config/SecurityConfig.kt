@@ -35,7 +35,7 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.DELETE, "/api/places/{id}").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/places").authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/reviews", "/api/reviews/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/reviews").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/reviews").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/reviews/*/photos").authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/photos", "/api/photos/**").permitAll()
