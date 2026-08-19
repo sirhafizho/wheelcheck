@@ -54,7 +54,7 @@ export default function ReportPage({ params }: ReportPageProps) {
   if (!place) {
     return (
       <div className="h-full overflow-y-auto pb-16">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4">
             Place not found
           </div>
@@ -69,7 +69,7 @@ export default function ReportPage({ params }: ReportPageProps) {
   if (submitted) {
     return (
       <div className="h-full overflow-y-auto pb-16">
-      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">

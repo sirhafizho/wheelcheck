@@ -316,7 +316,7 @@ export default function ProfilePage({ params }: { params: Params }) {
   if (!isLoggedIn) {
     return (
       <div className="h-full overflow-y-auto pb-16">
-      <div className="max-w-md mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">👤</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h1>
@@ -502,7 +502,7 @@ export default function ProfilePage({ params }: { params: Params }) {
 
   return (
     <div className="h-full overflow-y-auto pb-16">
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-4xl mx-auto px-4 py-6">
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">

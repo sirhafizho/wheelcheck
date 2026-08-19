@@ -112,7 +112,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
   return (
     <div className="h-full overflow-y-auto pb-16">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             {isInitialLoad ? (
