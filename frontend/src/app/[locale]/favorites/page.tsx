@@ -55,7 +55,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="h-full overflow-y-auto pb-16">
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
           <HeartIcon className="h-7 w-7 text-red-500" />
           <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
