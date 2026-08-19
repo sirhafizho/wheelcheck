@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
  * Per-IP rate limiting for the public demo deployment.
@@ -21,16 +22,28 @@ import java.util.concurrent.ConcurrentHashMap
  *  - Auth endpoints (login, register): 5 req/min per IP
  *  - Admin endpoints: 10 req/min per IP
  *  - General read (GET): 120 req/min per IP
+ *
+ * Security:
+ *  - X-Forwarded-For is NOT trusted from clients; only remoteAddr is used
+ *    (HF Spaces / Vercel proxy sets remoteAddr to the real client IP)
+ *  - Bounded cache with TTL eviction prevents memory exhaustion
  */
 @Component
 class RateLimitConfig : OncePerRequestFilter() {
 
-    // Separate buckets per IP+tier
-    private val heavyBuckets  = ConcurrentHashMap<String, Bucket>()  // nearby, search
-    private val writeBuckets  = ConcurrentHashMap<String, Bucket>()  // POST reviews/comments
-    private val authBuckets   = ConcurrentHashMap<String, Bucket>()  // login/register
-    private val adminBuckets  = ConcurrentHashMap<String, Bucket>()  // admin endpoints
-    private val generalBuckets = ConcurrentHashMap<String, Bucket>() // everything else
+    companion object {
+        // Max unique IPs tracked per tier before oldest entries are evicted
+        private const val MAX_BUCKETS_PER_TIER = 50_000
+        // Evict buckets older than this (no requests in this window)
+        private const val EVICTION_INTERVAL_MS = 300_000L // 5 minutes
+    }
+
+    // Bounded bucket stores: IP -> (Bucket, lastAccessTimestamp)
+    private val heavyBuckets  = BoundedBucketStore()
+    private val writeBuckets  = BoundedBucketStore()
+    private val authBuckets   = BoundedBucketStore()
+    private val adminBuckets  = BoundedBucketStore()
+    private val generalBuckets = BoundedBucketStore()
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -76,18 +89,19 @@ class RateLimitConfig : OncePerRequestFilter() {
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.requestURI
-        // Only skip rate limiting for aggregation and docs endpoints
-        return path.startsWith("/api/aggregation") ||
-               path.startsWith("/swagger-ui") ||
+        // Only exempt documentation and health endpoints — NOT aggregation
+        return path.startsWith("/swagger-ui") ||
                path.startsWith("/v3/api-docs") ||
                path.startsWith("/actuator/health")
     }
 
+    /**
+     * Use remoteAddr only — do NOT trust X-Forwarded-For from clients.
+     * Behind HF Spaces / Vercel reverse proxy, remoteAddr is set to the real
+     * client IP by the proxy infrastructure itself.
+     */
     private fun getClientIp(request: HttpServletRequest): String {
-        // Respect X-Forwarded-For from reverse proxies (HF Spaces, Vercel)
-        val forwarded = request.getHeader("X-Forwarded-For")
-        return if (!forwarded.isNullOrBlank()) forwarded.split(",").first().trim()
-        else request.remoteAddr
+        return request.remoteAddr
     }
 
     private fun newBucket(tokens: Long, period: Duration): Bucket =
@@ -95,6 +109,52 @@ class RateLimitConfig : OncePerRequestFilter() {
             .addLimit(Bandwidth.classic(tokens, Refill.intervally(tokens, period)))
             .build()
 
-    private fun <K, V> ConcurrentHashMap<K, V>.getOrCreate(key: K, factory: () -> V): V =
-        getOrPut(key, factory)
+    /**
+     * Bounded bucket store with LRU eviction to prevent memory exhaustion.
+     * Evicts entries older than EVICTION_INTERVAL_MS and caps at MAX_BUCKETS_PER_TIER.
+     */
+    private class BoundedBucketStore {
+        private val buckets = ConcurrentHashMap<String, BucketEntry>()
+        private val accessOrder = ConcurrentLinkedDeque<String>()
+
+        data class BucketEntry(val bucket: Bucket, @Volatile var lastAccess: Long)
+
+        fun getOrCreate(ip: String, factory: () -> Bucket): Bucket {
+            val now = System.currentTimeMillis()
+
+            val entry = buckets.compute(ip) { _, existing ->
+                if (existing != null) {
+                    existing.lastAccess = now
+                    existing
+                } else {
+                    accessOrder.addLast(ip)
+                    BucketEntry(factory(), now)
+                }
+            }!!
+
+            // Periodic eviction: remove stale entries
+            if (buckets.size > MAX_BUCKETS_PER_TIER / 2) {
+                evictStale(now)
+            }
+
+            return entry.bucket
+        }
+
+        private fun evictStale(now: Long) {
+            val cutoff = now - EVICTION_INTERVAL_MS
+            var evicted = 0
+            val maxEvict = (buckets.size - MAX_BUCKETS_PER_TIER / 2).coerceAtLeast(0)
+
+            val iter = accessOrder.iterator()
+            while (iter.hasNext() && (evicted < maxEvict || buckets.size > MAX_BUCKETS_PER_TIER)) {
+                val ip = iter.next()
+                val entry = buckets[ip]
+                if (entry == null || entry.lastAccess < cutoff) {
+                    iter.remove()
+                    buckets.remove(ip)
+                    evicted++
+                }
+            }
+        }
+    }
 }

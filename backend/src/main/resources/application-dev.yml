@@ -5,6 +5,17 @@ spring:
       hibernate:
         format_sql: true
 
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 logging:
   level:
     com.wheelcheck: DEBUG

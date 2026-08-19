@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: wheelcheck
       POSTGRES_PASSWORD: wheelcheck_dev
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -52,10 +52,10 @@ services:
       - backend
 
   adminer:
-    image: adminer
+    image: adminer:4.8.1
     container_name: wheelcheck-adminer
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
     depends_on:
       - db
 

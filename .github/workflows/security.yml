@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci --ignore-scripts
-      - run: npm audit --audit-level=high || true
+      - run: npm audit --audit-level=critical
 
   gradle-audit:
     name: Backend Dependency Check

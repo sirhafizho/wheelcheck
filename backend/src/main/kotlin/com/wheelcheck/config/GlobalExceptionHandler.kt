@@ -18,7 +18,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleDeserializationError(ex: HttpMessageNotReadableException): ResponseEntity<Map<String, String>> {
-        return ResponseEntity.badRequest().body(mapOf("error" to "Invalid request body: ${ex.mostSpecificCause.message}"))
+        return ResponseEntity.badRequest().body(mapOf("error" to "Invalid request body"))
     }
 
     @ExceptionHandler(IllegalArgumentException::class)

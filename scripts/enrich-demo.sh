@@ -29,8 +29,9 @@ if [[ -f "$(dirname "$0")/../.env.supabase" ]]; then
 fi
 
 if [[ -z "$ADMIN_PASSWORD" ]]; then
-  echo "ℹ️  ADMIN_PASSWORD not set, trying default..."
-  ADMIN_PASSWORD="Admin1234!"
+  echo "❌  ADMIN_PASSWORD is not set."
+  echo "    Set it in .env.supabase or export it before running this script."
+  exit 1
 fi
 
 LIMIT_NOTE=""

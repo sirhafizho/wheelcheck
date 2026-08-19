@@ -24,7 +24,7 @@ class UserService(
     @Transactional
     fun createUser(email: String, password: String, name: String): User {
         if (userRepository.existsByEmail(email)) {
-            throw IllegalArgumentException("Email already exists: $email")
+            throw IllegalArgumentException("Registration failed")
         }
         
         val user = User(

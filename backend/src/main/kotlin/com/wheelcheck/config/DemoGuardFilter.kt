@@ -71,6 +71,11 @@ class DemoGuardFilter(
                     denyWithReason(response, "Demo accounts cannot change user roles")
                     return
                 }
+                // Block: admin place modification (prevent data corruption)
+                path.matches(Regex("/api/admin/places/[^/]+")) && method == "PUT" -> {
+                    denyWithReason(response, "Demo accounts cannot modify places via admin")
+                    return
+                }
                 // Rate-limit: admin place deletion
                 path.matches(Regex("/api/admin/places/[^/]+")) && method == "DELETE" -> {
                     if (!checkAndTrack(deleteTracker, email, MAX_DEMO_DELETES_PER_HOUR)) {
@@ -78,15 +83,37 @@ class DemoGuardFilter(
                         return
                     }
                 }
+                // Rate-limit: admin review deletion
+                path.matches(Regex("/api/admin/reviews/[^/]+")) && method == "DELETE" -> {
+                    if (!checkAndTrack(deleteTracker, email, MAX_DEMO_DELETES_PER_HOUR)) {
+                        denyWithReason(response, "Demo account delete limit reached ($MAX_DEMO_DELETES_PER_HOUR/hour)")
+                        return
+                    }
+                }
+                // Block: aggregation/import (prevents external API abuse and DB flooding)
+                path.startsWith("/api/admin/osm") || path.startsWith("/api/aggregation") -> {
+                    denyWithReason(response, "Demo accounts cannot trigger imports")
+                    return
+                }
+                // Block: AI enrichment triggering (consumes Gemini quota)
+                path.matches(Regex("/api/admin/enrich/(place|state)/.*")) && method == "POST" -> {
+                    denyWithReason(response, "Demo accounts cannot trigger AI enrichment")
+                    return
+                }
                 // Admin reads are fine
             }
         }
 
         // Rate-limit place/comment creation for demo accounts
-        if (method == "POST" && (path.startsWith("/api/places") || path.startsWith("/api/comments"))) {
-            if (!checkAndTrack(createTracker, email, MAX_DEMO_CREATES_PER_HOUR)) {
-                denyWithReason(response, "Demo account creation limit reached ($MAX_DEMO_CREATES_PER_HOUR/hour)")
-                return
+        // Exclude /api/places/nearby (a read operation that uses POST)
+        if (method == "POST") {
+            val isPlaceCreate = path == "/api/places"
+            val isCommentCreate = path == "/api/comments"
+            if (isPlaceCreate || isCommentCreate) {
+                if (!checkAndTrack(createTracker, email, MAX_DEMO_CREATES_PER_HOUR)) {
+                    denyWithReason(response, "Demo account creation limit reached ($MAX_DEMO_CREATES_PER_HOUR/hour)")
+                    return
+                }
             }
         }
 

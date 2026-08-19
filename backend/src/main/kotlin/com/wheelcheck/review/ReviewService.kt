@@ -59,7 +59,7 @@ class ReviewService(
     fun update(reviewId: UUID, request: UpdateReviewRequest, userId: UUID?): ReviewDto {
         val review = reviewRepository.findByIdOrNull(reviewId)
             ?: throw NoSuchElementException("Review not found: $reviewId")
-        if (userId != null && review.userId != userId) {
+        if (userId == null || review.userId != userId) {
             throw IllegalArgumentException("Not authorized to modify this review")
         }
         val updated = review.copy(
@@ -78,7 +78,7 @@ class ReviewService(
     fun addPhotos(reviewId: UUID, photoUrls: List<String>, userId: UUID?): ReviewDto {
         val review = reviewRepository.findByIdOrNull(reviewId)
             ?: throw NoSuchElementException("Review not found: $reviewId")
-        if (userId != null && review.userId != userId) {
+        if (userId == null || review.userId != userId) {
             throw IllegalArgumentException("Not authorized to modify this review")
         }
         val updated = review.copy(photoUrls = review.photoUrls + photoUrls)
