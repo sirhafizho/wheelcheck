@@ -37,7 +37,7 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | **Frontend** | Next.js 16 (PWA) + TypeScript |
 | **Database** | PostgreSQL 16 + PostGIS 3.4 + pgvector |
 | **Maps** | Leaflet.js + OpenStreetMap |
-| **Auth** | JWT (HS512) — optional, anonymous reports allowed |
+| **Auth** | JWT (HS512) — login required for reviews and uploads |
 | **i18n** | next-intl (English + Bahasa Malaysia) |
 | **AI Enrichment** | Gemini 2.5 Flash (knowledge-based, free tier) |
 | **Semantic Search** | HuggingFace Embeddings + pgvector cosine similarity |
@@ -57,7 +57,7 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | Accessibility scoring algorithm | ✅ Done |
 | Photo evidence upload (with validation) | ✅ Done |
 | JWT authentication (register/login) | ✅ Done |
-| Anonymous contributions (no sign-up required) | ✅ Done |
+| Authenticated reviews (login required for reports) | ✅ Done |
 | Rate limiting (per IP + per user) | ✅ Done |
 | Interactive map with Leaflet + OSM tiles | ✅ Done |
 | Bilingual UI (EN + BM) | ✅ Done |
@@ -86,7 +86,7 @@ WheelCheck helps people with mobility impairments find accessible venues in Mala
 | Role-based access control (USER / ADMIN) | ✅ Done |
 | JWT role claims with Spring Security @PreAuthorize | ✅ Done |
 | Admin-only import endpoints | ✅ Done |
-| Demo account protection (admin demo limited to read-only deletes, backup guard) | ✅ Done |
+| Demo account protection (blocked from imports, enrichment, admin writes, rate-limited deletes) | ✅ Done |
 | Rate limiting + CORS hardening on all sensitive endpoints | ✅ Done |
 
 ### ✅ Phase 4 — Reviews, Comments & Social
@@ -204,9 +204,10 @@ Admin import endpoints:
 |---------|-----|
 | **Frontend** | [wheelcheck-swart.vercel.app](https://wheelcheck-swart.vercel.app) |
 | **Backend API** | [sirhafizho-wheelcheck-api.hf.space/api](https://sirhafizho-wheelcheck-api.hf.space/api/places?page=0&size=5) |
-| **API Docs** | [Swagger UI](https://sirhafizho-wheelcheck-api.hf.space/swagger-ui.html) |
+| **API Docs** | Swagger UI (dev only — `http://localhost:8080/swagger-ui.html`) |
 
 > First request may take ~10s if the HuggingFace container is cold-starting.
+> Swagger UI is disabled in production for security. Run the backend locally for interactive API docs.
 
 ### Demo Accounts
 
@@ -362,13 +363,13 @@ See [`tools/README.md`](tools/README.md) for Python venv setup.
 | POST | `/api/places/nearby` | Find within radius (triggers OSM shadow discovery) | No |
 | GET | `/api/places/search?name=` | Fuzzy search (abbrev. aware: KL, KB…) | No |
 | GET | `/api/places/semantic-search` | Vector search (pgvector) | No |
-| POST | `/api/places` | Create place | No |
+| POST | `/api/places` | Create place | Yes |
 | GET | `/api/places/{id}/reports` | Get reviews for a place | No |
 | GET | `/api/places/{id}/enrichment` | AI enrichment for a place | No |
-| POST | `/api/reviews` | Submit accessibility review | No |
-| POST | `/api/reviews/{id}` | Update own review | Yes |
+| POST | `/api/reviews` | Submit accessibility review | Yes |
+| PUT | `/api/reviews/{id}` | Update own review | Yes |
 | POST | `/api/reviews/{id}/photos` | Upload review photos | Yes |
-| POST | `/api/photos/upload` | Upload photo evidence | No |
+| POST | `/api/photos/upload` | Upload photo evidence | Yes |
 | GET | `/api/comments/place/{id}` | Get comments | No |
 | POST | `/api/comments` | Post comment | Yes |
 | POST | `/api/comments/{id}/vote?type=` | Upvote/downvote | Yes |
@@ -391,7 +392,7 @@ See [`tools/README.md`](tools/README.md) for Python venv setup.
 | GET | `/api/admin/enrich/stats/{state}` | Enrichment stats | Admin |
 | GET/POST | `/api/admin/places/pending` | Pending place approvals | Admin |
 
-Full Swagger docs: `/swagger-ui.html`
+Swagger docs available in local dev: `http://localhost:8080/swagger-ui.html` (disabled in production)
 
 ---
 
