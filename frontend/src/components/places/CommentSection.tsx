@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { Comment } from '@/lib/types';
 import { api } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 
 type VoteState = 'up' | 'down' | null;
 
@@ -197,21 +198,28 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [cachedToken, setCachedToken] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('wheelcheck_token'));
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+      setCachedToken(session?.access_token ?? null);
+    });
   }, []);
 
-  const getToken = () => {
+  const getToken = async () => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('wheelcheck_token');
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
   };
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
 
     try {
-      const token = getToken() ?? undefined;
+      const token = (await getToken()) ?? undefined;
       const data = await api.getComments(placeId, token);
       setComments(data);
       setUserVotes(extractUserVotes(data));
@@ -231,7 +239,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
     const content = parentId ? replyText : newComment;
     if (!content.trim()) return;
 
-    const token = getToken();
+    const token = await getToken();
     if (!token) {
       alert(t('loginToComment'));
       return;
@@ -258,7 +266,7 @@ export function CommentSection({ placeId, locale }: CommentSectionProps) {
   };
 
   const handleVote = async (commentId: string, type: 'up' | 'down') => {
-    const token = getToken();
+    const token = await getToken();
     if (!token) {
       alert(t('loginToVote'));
       return;

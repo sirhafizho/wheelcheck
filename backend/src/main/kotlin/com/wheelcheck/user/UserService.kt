@@ -47,7 +47,22 @@ class UserService(
         userRepository.save(updated)
     }
     
+    @Transactional
+    fun findOrCreateFromSupabase(id: UUID, email: String, name: String): User {
+        return userRepository.findById(id).orElse(null)
+            ?: userRepository.findByEmail(email)
+            ?: userRepository.save(
+                User(
+                    id = id,
+                    email = email,
+                    passwordHash = null,
+                    name = name,
+                    isVerified = true
+                )
+            )
+    }
+
     fun validatePassword(user: User, password: String): Boolean {
-        return passwordEncoder.matches(password, user.passwordHash)
+        return passwordEncoder.matches(password, user.passwordHash ?: "")
     }
 }

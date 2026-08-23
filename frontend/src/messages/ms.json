@@ -214,6 +214,12 @@
   "profile": {
     "title": "Profil",
     "loginPrompt": "Log masuk untuk menjejaki sumbangan dan mengurus laporan anda",
+    "continueWithGoogle": "Teruskan dengan Google",
+    "continueWithGitHub": "Teruskan dengan GitHub",
+    "orUseEmail": "atau gunakan e-mel",
+    "emailLogin": "Log masuk dengan e-mel",
+    "createAccountPrompt": "Belum ada akaun?",
+    "createAccountLink": "Buat satu",
     "login": "Log Masuk",
     "register": "Buat Akaun",
     "email": "E-mel",
@@ -231,9 +237,11 @@
     "savedPlaces": "Tempat Tersimpan",
     "savedPlacesSubtext": "Lihat semua tempat yang anda simpan",
     "errors": {
-      "invalidCredentials": "Maklumat log masuk tidak sah",
-      "loginFailed": "Log masuk gagal",
-      "registrationFailed": "Pendaftaran gagal"
+      "invalidCredentials": "E-mel atau kata laluan tidak sah",
+      "loginFailed": "Log masuk gagal. Sila cuba lagi.",
+      "registrationFailed": "Pendaftaran gagal. Sila cuba lagi.",
+      "socialLoginFailed": "Log masuk sosial gagal. Sila cuba lagi.",
+      "emailConfirmation": "Semak e-mel anda untuk mengesahkan akaun"
     }
   },
   "settings": {

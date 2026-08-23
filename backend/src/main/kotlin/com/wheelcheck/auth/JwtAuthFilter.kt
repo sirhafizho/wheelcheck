@@ -28,14 +28,29 @@ class JwtAuthFilter(
                 val userId = jwtTokenProvider.getUserIdFromToken(token)
 
                 if (userId != null) {
-                    val user = userService.findById(userId)
+                    val user = if (jwtTokenProvider.isSupabaseToken(token)) {
+                        // Supabase token: auto-create user if needed
+                        val email = jwtTokenProvider.getEmailFromToken(token) ?: ""
+                        val metadata = jwtTokenProvider.getUserMetadata(token)
+                        val name = (metadata?.get("full_name") as? String)
+                            ?: (metadata?.get("name") as? String)
+                            ?: email.substringBefore("@")
+                        if (email.isNotBlank()) {
+                            userService.findOrCreateFromSupabase(userId, email, name)
+                        } else {
+                            userService.findById(userId)
+                        }
+                    } else {
+                        userService.findById(userId)
+                    }
 
                     if (user != null) {
                         val role = (jwtTokenProvider.extractRole(token) ?: user.role).uppercase()
+                        val normalizedRole = if (role == "AUTHENTICATED") "USER" else role
                         val authentication = UsernamePasswordAuthenticationToken(
                             user.id,
                             null,
-                            listOf(SimpleGrantedAuthority("ROLE_$role"))
+                            listOf(SimpleGrantedAuthority("ROLE_$normalizedRole"))
                         )
                         SecurityContextHolder.getContext().authentication = authentication
                     }

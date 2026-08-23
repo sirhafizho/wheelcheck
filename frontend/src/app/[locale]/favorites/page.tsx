@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { HeartIcon, MapPinIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { createClient } from '@/lib/supabase/client';
 import { api } from '@/lib/api';
 import type { Favorite } from '@/lib/types';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -32,17 +33,22 @@ export default function FavoritesPage() {
   }, []);
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('wheelcheck_token') : null;
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    setLoggedIn(true);
-    loadFavorites(token);
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const token = session?.access_token ?? null;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      setLoggedIn(true);
+      loadFavorites(token);
+    });
   }, [loadFavorites]);
 
   const handleRemove = async (placeId: string) => {
-    const token = localStorage.getItem('wheelcheck_token');
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? null;
     if (!token) return;
     setRemoving(placeId);
     try {

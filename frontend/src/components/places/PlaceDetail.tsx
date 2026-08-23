@@ -10,6 +10,7 @@ import { Button } from '../ui/Button';
 import { Toast } from '../ui/Toast';
 import { useFavorite } from '@/hooks/useFavorite';
 import { API_URL } from '@/lib/constants';
+import { createClient } from '@/lib/supabase/client';
 
 interface AiSource {
   url: string;
@@ -104,7 +105,9 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
-    setCurrentUserId(localStorage.getItem('wheelcheck_user_id'));
+    createClient().auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
   }, []);
 
   useEffect(() => {
@@ -117,7 +120,9 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
   }, [place.id]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('wheelcheck_token') : null;
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? null;
     if (!token) {
       setToast({ message: tFav('loginToSave'), type: 'info' });
       return;
@@ -131,7 +136,9 @@ export function PlaceDetail({ place, locale, onReportClick, onShowOnMapClick, on
   }, [favorited, toggle, tFav]);
 
   const handleDelete = useCallback(async () => {
-    const token = localStorage.getItem('wheelcheck_token');
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? null;
     if (!token) return;
     setDeleteLoading(true);
     try {

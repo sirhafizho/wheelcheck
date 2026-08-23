@@ -13,8 +13,8 @@ data class User(
     @Column(unique = true, nullable = false)
     val email: String,
 
-    @Column(name = "password_hash", nullable = false)
-    val passwordHash: String,
+    @Column(name = "password_hash")
+    val passwordHash: String? = null,
 
     @Column(nullable = false)
     val name: String,

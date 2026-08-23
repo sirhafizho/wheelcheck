@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { PhotoUpload } from '@/components/report/PhotoUpload';
+import { createClient } from '@/lib/supabase/client';
 import { API_URL } from '@/lib/constants';
 
 type Params = Promise<{ locale: string }>;
@@ -73,8 +74,13 @@ export default function AddPlacePage({ params }: { params: Params }) {
 
   // Auth check
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('wheelcheck_token'));
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+      setAuthToken(session?.access_token ?? null);
+    });
   }, []);
 
   // Autocomplete state
@@ -152,7 +158,9 @@ export default function AddPlacePage({ params }: { params: Params }) {
     setError(null);
 
     try {
-      const token = localStorage.getItem('wheelcheck_token');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       if (!token) {
         throw new Error(t('errors.loginRequired'));
       }

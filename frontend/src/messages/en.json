@@ -214,6 +214,12 @@
   "profile": {
     "title": "Profile",
     "loginPrompt": "Sign in to track your contributions and manage your reports",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithGitHub": "Continue with GitHub",
+    "orUseEmail": "or use email",
+    "emailLogin": "Log in with email",
+    "createAccountPrompt": "Don't have an account?",
+    "createAccountLink": "Create one",
     "login": "Log In",
     "register": "Create Account",
     "email": "Email",
@@ -231,9 +237,11 @@
     "savedPlaces": "Saved Places",
     "savedPlacesSubtext": "View all your bookmarked venues",
     "errors": {
-      "invalidCredentials": "Invalid credentials",
-      "loginFailed": "Login failed",
-      "registrationFailed": "Registration failed"
+      "invalidCredentials": "Invalid email or password",
+      "loginFailed": "Login failed. Please try again.",
+      "registrationFailed": "Registration failed. Please try again.",
+      "socialLoginFailed": "Social login failed. Please try again.",
+      "emailConfirmation": "Check your email to confirm your account"
     }
   },
   "settings": {

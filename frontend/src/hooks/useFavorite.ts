@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 
-function getToken(): string | null {
+async function getToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('wheelcheck_token');
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token ?? null;
 }
 
 export function useFavorite(placeId: string) {
@@ -16,23 +19,24 @@ export function useFavorite(placeId: string) {
 
   useEffect(() => {
     let cancelled = false;
-    const token = getToken();
-    api.getFavoriteStatus(placeId, token ?? undefined)
-      .then((status) => {
-        if (!cancelled) {
-          setFavorited(status.favorited);
-          setTotalFavorites(status.totalFavorites);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setInitialLoading(false);
-      });
+    getToken().then((token) => {
+      api.getFavoriteStatus(placeId, token ?? undefined)
+        .then((status) => {
+          if (!cancelled) {
+            setFavorited(status.favorited);
+            setTotalFavorites(status.totalFavorites);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) setInitialLoading(false);
+        });
+    });
     return () => { cancelled = true; };
   }, [placeId]);
 
   const toggle = useCallback(async () => {
-    const token = getToken();
+    const token = await getToken();
     if (!token) return false; // caller should show login prompt
     setLoading(true);
     try {

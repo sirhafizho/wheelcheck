@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
+import { createClient } from '@/lib/supabase/client';
 
 type Params = Promise<{ locale: string }>;
 
@@ -38,16 +39,18 @@ export default function SettingsPage({ params }: { params: Params }) {
     const storedHighContrast = localStorage.getItem('wheelcheck_high_contrast') === 'true';
     const storedLargeText = localStorage.getItem('wheelcheck_large_text') === 'true';
     const storedDarkMode = localStorage.getItem('wheelcheck_dark_mode') === 'true';
-    const token = localStorage.getItem('wheelcheck_token');
-    const tokenPayload = token ? parseToken(token) : null;
-
     setHighContrast(storedHighContrast);
     setLargeText(storedLargeText);
     setDarkMode(storedDarkMode);
-    setIsAdmin(tokenPayload?.role?.toUpperCase() === 'ADMIN');
     document.documentElement.classList.toggle('high-contrast', storedHighContrast);
     document.documentElement.classList.toggle('large-text', storedLargeText);
     document.documentElement.classList.toggle('dark', storedDarkMode);
+
+    createClient().auth.getSession().then(({ data: { session } }) => {
+      const token = session?.access_token ?? null;
+      const tokenPayload = token ? parseToken(token) : null;
+      setIsAdmin(tokenPayload?.role?.toUpperCase() === 'ADMIN');
+    });
   }, []);
 
   const toggleHighContrast = () => {

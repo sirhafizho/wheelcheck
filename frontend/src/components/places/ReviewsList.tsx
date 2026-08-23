@@ -7,6 +7,7 @@ import type { AccessReport, AccessLevel } from '@/lib/types';
 import { api } from '@/lib/api';
 import { API_URL } from '@/lib/constants';
 import { Toast } from '../ui/Toast';
+import { createClient } from '@/lib/supabase/client';
 
 interface ReviewsListProps {
   placeId: string;
@@ -106,7 +107,9 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
   };
 
   useEffect(() => {
-    setCurrentUserId(localStorage.getItem('wheelcheck_user_id'));
+    createClient().auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
   }, []);
 
   useEffect(() => {
@@ -150,7 +153,9 @@ export function ReviewsList({ placeId, locale }: ReviewsListProps) {
       return;
     }
 
-    const token = localStorage.getItem('wheelcheck_token');
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? null;
     if (!token) {
       setToast({ message: tCommon('error'), type: 'error' });
       return;

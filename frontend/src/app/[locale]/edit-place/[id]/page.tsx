@@ -9,6 +9,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Toast } from '@/components/ui/Toast';
 import { API_URL } from '@/lib/constants';
 import type { AccessLevel, Place } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
 
 type Params = Promise<{ locale: string; id: string }>;
 
@@ -89,54 +90,57 @@ export default function EditPlacePage({ params }: { params: Params }) {
 
   useEffect(() => {
     let cancelled = false;
-    const storedToken = localStorage.getItem('wheelcheck_token');
-    const storedUserId = localStorage.getItem('wheelcheck_user_id');
 
-    if (!storedToken) {
-      router.replace(`/${locale}/profile`);
-      return;
-    }
+    createClient().auth.getSession().then(({ data: { session } }) => {
+      const storedToken = session?.access_token ?? null;
+      const storedUserId = session?.user?.id ?? null;
 
-    const loadPlace = async () => {
-      try {
-        const response = await fetch(`${API_URL}/places/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to load place');
-        }
+      if (!storedToken) {
+        router.replace(`/${locale}/profile`);
+        return;
+      }
 
-        const place = await response.json() as EditablePlace;
+      const loadPlace = async () => {
+        try {
+          const response = await fetch(`${API_URL}/places/${id}`);
+          if (!response.ok) {
+            throw new Error('Failed to load place');
+          }
 
-        if (!storedUserId || !place.createdBy || storedUserId !== place.createdBy) {
+          const place = await response.json() as EditablePlace;
+
+          if (!storedUserId || !place.createdBy || storedUserId !== place.createdBy) {
+            if (!cancelled) {
+              setError(t('notOwner'));
+              setLoading(false);
+            }
+            return;
+          }
+
           if (!cancelled) {
-            setError(t('notOwner'));
+            setForm({
+              name: place.name,
+              address: place.address ?? '',
+              city: place.city ?? '',
+              state: place.state ?? '',
+              category: place.category ?? '',
+              accessibilityLevel: place.accessibilityLevel ?? 'UNKNOWN',
+              latitude: place.latitude.toFixed(6),
+              longitude: place.longitude.toFixed(6),
+              notes: place.notes ?? place.description ?? '',
+            });
             setLoading(false);
           }
-          return;
+        } catch {
+          if (!cancelled) {
+            setError(t('loadFailed'));
+            setLoading(false);
+          }
         }
+      };
 
-        if (!cancelled) {
-          setForm({
-            name: place.name,
-            address: place.address ?? '',
-            city: place.city ?? '',
-            state: place.state ?? '',
-            category: place.category ?? '',
-            accessibilityLevel: place.accessibilityLevel ?? 'UNKNOWN',
-            latitude: place.latitude.toFixed(6),
-            longitude: place.longitude.toFixed(6),
-            notes: place.notes ?? place.description ?? '',
-          });
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setError(t('loadFailed'));
-          setLoading(false);
-        }
-      }
-    };
-
-    void loadPlace();
+      void loadPlace();
+    });
 
     return () => {
       cancelled = true;
@@ -167,7 +171,9 @@ export default function EditPlacePage({ params }: { params: Params }) {
       return;
     }
 
-    const token = localStorage.getItem('wheelcheck_token');
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? null;
     if (!token) {
       router.replace(`/${locale}/profile`);
       return;

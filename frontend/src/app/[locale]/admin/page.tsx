@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { API_URL } from '@/lib/constants';
+import { createClient } from '@/lib/supabase/client';
 
 type Params = Promise<{ locale: string }>;
 type TabKey = 'places' | 'pending' | 'reviews' | 'users' | 'enrichment';
@@ -104,7 +105,6 @@ interface EnrichmentStateStats {
 
 interface EnrichmentBatchProgress { running: boolean; processed: number; total: number; currentState: string; quotaUsedToday: number; quotaCap: number; quotaRemaining: number; }
 
-const TOKEN_KEY = 'wheelcheck_token';
 const PAGE_SIZE = 20;
 const CATEGORIES: Category[] = [
   'RESTAURANT',
@@ -331,7 +331,9 @@ export default function AdminPage({ params }: { params: Params }) {
     let isMounted = true;
 
     const initialize = async () => {
-      const storedToken = localStorage.getItem(TOKEN_KEY);
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const storedToken = session?.access_token ?? null;
 
       if (!storedToken) {
         if (isMounted) {

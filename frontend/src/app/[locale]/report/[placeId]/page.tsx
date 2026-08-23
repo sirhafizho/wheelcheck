@@ -8,6 +8,7 @@ import { usePlace } from '@/hooks/usePlaces';
 import { api } from '@/lib/api';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
+import { createClient } from '@/lib/supabase/client';
 import type { CreateReportRequest } from '@/lib/types';
 
 type Params = Promise<{ locale: string; placeId: string }>;
@@ -25,7 +26,9 @@ export default function ReportPage({ params }: ReportPageProps) {
 
   const handleSubmit = async (report: CreateReportRequest) => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('wheelcheck_token') ?? undefined : undefined;
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? undefined;
       await api.createReport(report, token);
       setSubmitted(true);
       
