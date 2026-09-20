@@ -34,7 +34,7 @@ app:
     secret: ${JWT_SECRET}
     expiration: 86400
   supabase:
-    jwt-secret: ${SUPABASE_JWT_SECRET:}
+    url: ${SUPABASE_URL:}
   upload:
     directory: ${UPLOAD_DIRECTORY:uploads}
 
