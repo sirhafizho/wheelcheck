@@ -1,9 +1,10 @@
 'use client';
 
-import { use } from 'react';
+import { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { usePlace } from '@/hooks/usePlaces';
+import { useRecentPlaces } from '@/hooks/useRecentPlaces';
 import { PlaceDetail } from '@/components/places/PlaceDetail';
 import { ReviewsList } from '@/components/places/ReviewsList';
 import { CommentSection } from '@/components/places/CommentSection';
@@ -21,6 +22,18 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
   const router = useRouter();
   const t = useTranslations();
   const { place, loading, error } = usePlace(id);
+  const { addRecent } = useRecentPlaces();
+
+  useEffect(() => {
+    if (place) {
+      addRecent({
+        id: place.id,
+        name: place.name,
+        category: place.category,
+        accessibilityLevel: place.accessibilityLevel,
+      });
+    }
+  }, [place, addRecent]);
 
   if (loading) {
     return (
