@@ -322,9 +322,14 @@ html.dark .leaflet-control-attribution {
   color: #9ca3af !important;
 }
 
-/* Dark mode: invert + hue-rotate OSM tiles for a dark appearance */
-.dark-tiles {
-  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+/* Clean up busy OSM tiles — near-grayscale, washed out for a minimal CARTO-like look */
+.leaflet-tile-pane .leaflet-layer img {
+  filter: saturate(0) brightness(1.15) contrast(0.75) opacity(0.9);
+}
+
+/* Dark mode: invert + desaturate for clean dark appearance */
+.dark-tiles img {
+  filter: invert(1) hue-rotate(180deg) saturate(0) brightness(0.85) contrast(0.8) opacity(0.9) !important;
 }
 
 /* Ring/focus offset in dark */
