@@ -343,6 +343,7 @@ export default function HomePage() {
   const handlePlaceClick = (place: Place) => {
     setSelectedPlace(place);
     setActivePlaceId(place.id);
+    flyToPlace(place);
   };
 
   const handleSuggestionSelect = (place: Place) => {
