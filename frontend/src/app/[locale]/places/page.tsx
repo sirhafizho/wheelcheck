@@ -23,9 +23,9 @@ interface FilterOption {
 }
 
 interface Filters {
-  cities: FilterOption[];
+  regions: FilterOption[];
   categories: FilterOption[];
-  states: FilterOption[];
+  cities: FilterOption[];
 }
 
 type Params = Promise<{ locale: string }>;
@@ -49,16 +49,16 @@ export default function PlacesPage({ params }: PlacesPageProps) {
   const [error, setError] = useState<string | null>(null);
   const requestIdRef = useRef(0);
   const debouncedSearch = useDebounce(searchQuery.trim(), 300);
-  const { recent } = useRecentPlaces();
+  const { recent, clearRecent } = useRecentPlaces();
 
   // Filter state
   const [filters, setFilters] = useState<Filters | null>(null);
-  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedAccess, setSelectedAccess] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const activeFilterCount = [selectedCity, selectedCategory, selectedAccess].filter(Boolean).length;
+  const activeFilterCount = [selectedRegion, selectedCategory, selectedAccess].filter(Boolean).length;
 
   // Load available filters on mount
   useEffect(() => {
@@ -135,11 +135,11 @@ export default function PlacesPage({ params }: PlacesPageProps) {
       nextPage: 0,
       append: false,
       query: debouncedSearch,
-      city: selectedCity || undefined,
+      city: selectedRegion || undefined,
       category: selectedCategory || undefined,
       accessLevel: selectedAccess || undefined,
     });
-  }, [debouncedSearch, selectedCity, selectedCategory, selectedAccess, loadPlaces]);
+  }, [debouncedSearch, selectedRegion, selectedCategory, selectedAccess, loadPlaces]);
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
@@ -147,7 +147,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
       nextPage,
       append: true,
       query: debouncedSearch,
-      city: selectedCity || undefined,
+      city: selectedRegion || undefined,
       category: selectedCategory || undefined,
       accessLevel: selectedAccess || undefined,
     });
@@ -236,21 +236,21 @@ export default function PlacesPage({ params }: PlacesPageProps) {
             {showFilters && (
               <div className="mb-5 rounded-xl bg-white ring-1 ring-black/5 p-4 space-y-3">
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {/* City filter */}
+                  {/* Region/State filter */}
                   <div>
-                    <label htmlFor="filter-city" className="block text-xs font-medium text-gray-500 mb-1">
-                      City
+                    <label htmlFor="filter-region" className="block text-xs font-medium text-gray-500 mb-1">
+                      Region
                     </label>
                     <select
-                      id="filter-city"
-                      value={selectedCity}
-                      onChange={(e) => setSelectedCity(e.target.value)}
+                      id="filter-region"
+                      value={selectedRegion}
+                      onChange={(e) => setSelectedRegion(e.target.value)}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
                     >
-                      <option value="">All cities</option>
-                      {filters?.cities.map((c) => (
-                        <option key={c.name} value={c.name}>
-                          {c.name} ({c.count.toLocaleString()})
+                      <option value="">All regions</option>
+                      {filters?.regions.map((r) => (
+                        <option key={r.name} value={r.name}>
+                          {r.name} ({r.count.toLocaleString()})
                         </option>
                       ))}
                     </select>
@@ -280,7 +280,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                   {/* Accessibility filter */}
                   <div>
                     <label htmlFor="filter-access" className="block text-xs font-medium text-gray-500 mb-1">
-                      {t('accessibility')}
+                      Accessibility
                     </label>
                     <select
                       id="filter-access"
@@ -301,7 +301,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedCity('');
+                      setSelectedRegion('');
                       setSelectedCategory('');
                       setSelectedAccess('');
                     }}
@@ -317,10 +317,10 @@ export default function PlacesPage({ params }: PlacesPageProps) {
             {/* Active filter pills (shown when filters panel is closed) */}
             {!showFilters && activeFilterCount > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
-                {selectedCity && (
+                {selectedRegion && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-                    {selectedCity}
-                    <button type="button" onClick={() => setSelectedCity('')} className="hover:text-red-500">
+                    {selectedRegion}
+                    <button type="button" onClick={() => setSelectedRegion('')} className="hover:text-red-500">
                       <XMarkIcon className="h-3.5 w-3.5" />
                     </button>
                   </span>
@@ -346,7 +346,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
             {/* Recent strip — visible below xl (when sidebar is hidden) */}
             <div className="xl:hidden">
-              <RecentStrip recent={recent} locale={locale} />
+              <RecentStrip recent={recent} locale={locale} onClear={clearRecent} />
             </div>
 
             {error && (

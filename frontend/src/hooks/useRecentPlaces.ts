@@ -48,5 +48,10 @@ export function useRecentPlaces() {
     []
   );
 
-  return { recent, addRecent };
+  const clearRecent = useCallback(() => {
+    setRecent([]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+  }, []);
+
+  return { recent, addRecent, clearRecent };
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ClockIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { RecentPlace } from '@/hooks/useRecentPlaces';
 
 const ACCESS_DOT: Record<string, string> = {
@@ -13,16 +13,29 @@ const ACCESS_DOT: Record<string, string> = {
 interface RecentStripProps {
   recent: RecentPlace[];
   locale: string;
+  onClear?: () => void;
 }
 
-export function RecentStrip({ recent, locale }: RecentStripProps) {
+export function RecentStrip({ recent, locale, onClear }: RecentStripProps) {
   if (recent.length === 0) return null;
 
   return (
     <div className="mb-4">
-      <div className="flex items-center gap-1.5 text-xs font-medium text-gray-400 uppercase tracking-wider mb-2 px-1">
-        <ClockIcon className="h-3.5 w-3.5" />
-        <span>Recent</span>
+      <div className="flex items-center justify-between mb-2 px-1">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-400 uppercase tracking-wider">
+          <ClockIcon className="h-3.5 w-3.5" />
+          <span>Recent</span>
+        </div>
+        {onClear && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors"
+          >
+            <XMarkIcon className="h-3.5 w-3.5" />
+            Clear
+          </button>
+        )}
       </div>
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
         {recent.map((place) => (

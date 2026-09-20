@@ -116,17 +116,17 @@ class PlaceService(
         val access = accessLevel?.takeIf { it.isNotBlank() }?.let {
             try { AccessLevel.valueOf(it.uppercase()) } catch (_: Exception) { null }
         }
+        val c = city?.takeIf { it.isNotBlank() }
 
-        // Native queries have their own ORDER BY, so strip sort from pageable
         val unsorted = PageRequest.of(pageable.pageNumber, pageable.pageSize)
 
-        val result: Page<Place> = when {
-            q != null && cat != null -> placeRepository.searchByTextAndCategory(q, cat.name, unsorted)
-            q != null -> placeRepository.searchByText(q, unsorted)
-            cat != null -> placeRepository.findByCategoryPaged(cat, pageable)
-            access != null -> placeRepository.findByAccessLevelPaged(access, pageable)
-            else -> placeRepository.findAll(pageable)
-        }
+        val result: Page<Place> = placeRepository.searchWithAllFilters(
+            search = q,
+            category = cat?.name,
+            city = c,
+            accessLevel = access?.name,
+            pageable = unsorted
+        )
 
         return result.withEnrichment()
     }
@@ -172,13 +172,13 @@ class PlaceService(
 
     @Transactional(readOnly = true)
     fun getAvailableFilters(): Map<String, Any> {
-        val cities = placeRepository.findDistinctCitiesWithCount()
-        val categories = placeRepository.findDistinctCategoriesWithCount()
         val states = placeRepository.findDistinctStatesWithCount()
+        val categories = placeRepository.findDistinctCategoriesWithCount()
+        val cities = placeRepository.findDistinctCitiesWithCount()
         return mapOf(
-            "cities" to cities,
+            "regions" to states,
             "categories" to categories,
-            "states" to states
+            "cities" to cities
         )
     }
 

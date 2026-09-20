@@ -168,4 +168,36 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         ORDER BY count DESC
     """, nativeQuery = true)
     fun findDistinctStatesWithCount(): List<Map<String, Any>>
+
+    @Query(value = """
+        SELECT * FROM places p
+        WHERE (:search IS NULL OR (
+            LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:search, ' ', ''), '%%'))
+            OR p.name ILIKE CONCAT('%%', :search, '%%')
+            OR p.address ILIKE CONCAT('%%', :search, '%%')
+        ))
+        AND (:category IS NULL OR p.category = :category)
+        AND (:city IS NULL OR p.city = :city OR p.state = :city)
+        AND (:accessLevel IS NULL OR p.accessibility_level = :accessLevel)
+        ORDER BY p.created_at DESC
+    """,
+    countQuery = """
+        SELECT COUNT(*) FROM places p
+        WHERE (:search IS NULL OR (
+            LOWER(REPLACE(p.name, ' ', '')) LIKE LOWER(CONCAT('%%', REPLACE(:search, ' ', ''), '%%'))
+            OR p.name ILIKE CONCAT('%%', :search, '%%')
+            OR p.address ILIKE CONCAT('%%', :search, '%%')
+        ))
+        AND (:category IS NULL OR p.category = :category)
+        AND (:city IS NULL OR p.city = :city OR p.state = :city)
+        AND (:accessLevel IS NULL OR p.accessibility_level = :accessLevel)
+    """,
+    nativeQuery = true)
+    fun searchWithAllFilters(
+        @Param("search") search: String?,
+        @Param("category") category: String?,
+        @Param("city") city: String?,
+        @Param("accessLevel") accessLevel: String?,
+        pageable: Pageable
+    ): Page<Place>
 }

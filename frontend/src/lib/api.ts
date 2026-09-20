@@ -112,9 +112,9 @@ class ApiClient {
   }
 
   async getFilters(): Promise<{
-    cities: { name: string; count: number }[];
+    regions: { name: string; count: number }[];
     categories: { name: string; count: number }[];
-    states: { name: string; count: number }[];
+    cities: { name: string; count: number }[];
   }> {
     return this.fetch('/places/filters');
   }
