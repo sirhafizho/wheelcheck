@@ -322,7 +322,10 @@ html.dark .leaflet-control-attribution {
   color: #9ca3af !important;
 }
 
-/* Dark tiles are served by CartoDB — no CSS filter hack needed */
+/* Dark mode: invert + hue-rotate OSM tiles for a dark appearance */
+.dark-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
 
 /* Ring/focus offset in dark */
 html.dark .focus\:ring-offset-2:focus {

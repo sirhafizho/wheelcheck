@@ -17,20 +17,11 @@ import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import type { Place, AccessLevel } from '@/lib/types';
 import { MAP_CONFIG } from '@/lib/constants';
 
-// CartoDB tile layers — free, no API key, modern design
-const TILES = {
-  light: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>' +
-      ' &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
-  },
-  dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>' +
-      ' &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
-  },
+// OpenStreetMap tiles — free, no API key required
+const OSM_TILE = {
+  url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  attribution:
+    '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
 } as const;
 
 /** Watch the <html> element's class list for the app's custom dark mode toggle. */
@@ -241,7 +232,6 @@ export function MapView({
   className = '',
 }: MapViewProps) {
   const isDark = useDarkMode();
-  const tiles = isDark ? TILES.dark : TILES.light;
 
   const [viewport, setViewport] = useState<MapViewport>({
     lat: Number(center.lat.toFixed(5)),
@@ -268,14 +258,12 @@ export function MapView({
         <MapUpdater center={center} flyTo={flyTo} />
         <MapViewportReporter onChange={handleViewportChange} onDragStart={onDragStart} />
         <MapZoomExecutor zoomIn={zoomIn ?? 0} zoomOut={zoomOut ?? 0} />
-        {/* key forces tile layer to remount when theme changes */}
         <TileLayer
-          key={isDark ? 'dark' : 'light'}
-          attribution={tiles.attribution}
-          url={tiles.url}
+          attribution={OSM_TILE.attribution}
+          url={OSM_TILE.url}
           maxZoom={MAP_CONFIG.maxZoom}
           maxNativeZoom={19}
-          subdomains="abcd"
+          className={isDark ? 'dark-tiles' : ''}
         />
         <MarkerClusterGroup
           chunkedLoading
