@@ -24,20 +24,6 @@ const OSM_TILE = {
     '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
 } as const;
 
-/** Watch the <html> element's class list for the app's custom dark mode toggle. */
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsDark(document.documentElement.classList.contains('dark'));
-    check();
-    const observer = new MutationObserver(check);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  return isDark;
-}
 
 // Fix for default marker icon
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
@@ -231,8 +217,6 @@ export function MapView({
   onDragStart,
   className = '',
 }: MapViewProps) {
-  const isDark = useDarkMode();
-
   const [viewport, setViewport] = useState<MapViewport>({
     lat: Number(center.lat.toFixed(5)),
     lng: Number(center.lng.toFixed(5)),
@@ -263,7 +247,6 @@ export function MapView({
           url={OSM_TILE.url}
           maxZoom={MAP_CONFIG.maxZoom}
           maxNativeZoom={19}
-          className={isDark ? 'dark-tiles' : ''}
         />
         <MarkerClusterGroup
           chunkedLoading

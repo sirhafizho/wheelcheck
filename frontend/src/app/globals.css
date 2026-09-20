@@ -322,14 +322,15 @@ html.dark .leaflet-control-attribution {
   color: #9ca3af !important;
 }
 
-/* Clean up busy OSM tiles — near-grayscale, washed out for a minimal CARTO-like look */
+/* Light mode: desaturate + soften OSM tiles for a clean, minimal look */
 .leaflet-tile-pane .leaflet-layer img {
-  filter: saturate(0) brightness(1.15) contrast(0.75) opacity(0.9);
+  filter: saturate(0) brightness(1.12) contrast(0.78);
+  transition: filter 0.3s ease;
 }
 
-/* Dark mode: invert + desaturate for clean dark appearance */
-.dark-tiles img {
-  filter: invert(1) hue-rotate(180deg) saturate(0) brightness(0.85) contrast(0.8) opacity(0.9) !important;
+/* Dark mode: invert + soften for a clean dark map */
+html.dark .leaflet-tile-pane .leaflet-layer img {
+  filter: invert(1) hue-rotate(180deg) saturate(0) brightness(0.82) contrast(0.85);
 }
 
 /* Ring/focus offset in dark */
