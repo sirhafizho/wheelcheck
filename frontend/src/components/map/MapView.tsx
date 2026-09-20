@@ -264,7 +264,7 @@ function MapStyleToggle({ minimal, onToggle }: { minimal: boolean; onToggle: () 
     <button
       type="button"
       onClick={onToggle}
-      className="absolute bottom-28 right-3 z-[1000] rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-gray-600 shadow-md ring-1 ring-black/5 backdrop-blur-sm hover:bg-white transition-colors"
+      className="absolute bottom-28 left-3 z-[1000] rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-gray-600 shadow-md ring-1 ring-black/5 backdrop-blur-sm hover:bg-white transition-colors lg:left-auto lg:right-14 lg:bottom-3"
       aria-label={minimal ? 'Switch to standard map' : 'Switch to minimal map'}
       title={minimal ? 'Standard view' : 'Minimal view'}
     >
