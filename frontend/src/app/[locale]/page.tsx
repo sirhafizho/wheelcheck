@@ -19,7 +19,7 @@ import type { AccessibilityFeature, Place, AccessLevel } from '@/lib/types';
 import { formatDistance, formatWheelchairDistance } from '@/lib/utils';
 
 const MAX_SUGGESTIONS = 8;
-const SEARCH_FLY_TO_ZOOM = 16;
+const SEARCH_FLY_TO_ZOOM = 18;
 const MAP_VIEWPORT_KEY = 'wheelcheck_map_viewport';
 const DATA_SOURCE_SHORT_LABELS: Record<string, string> = {
   OSM: 'OpenStreetMap',
