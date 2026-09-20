@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { XMarkIcon, ListBulletIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import type { Place, AccessLevel } from '@/lib/types';
 
@@ -48,6 +49,7 @@ interface PlacesListPanelProps {
 }
 
 export function PlacesListPanel({ places, onPlaceClick, selectedPlaceId, loading }: PlacesListPanelProps) {
+  const tMap = useTranslations('map');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Sort by distance (nearest first) when distance data is available
@@ -63,8 +65,8 @@ export function PlacesListPanel({ places, onPlaceClick, selectedPlaceId, loading
       {places.length === 0 && !loading && (
         <li className="px-4 py-10 text-center">
           <div className="text-2xl mb-2">{'\uD83D\uDD0D'}</div>
-          <p className="text-sm font-medium text-gray-500">No places in view</p>
-          <p className="text-xs text-gray-400 mt-1">Zoom in or pan the map to see places</p>
+          <p className="text-sm font-medium text-gray-500">{tMap('noPlacesInView')}</p>
+          <p className="text-xs text-gray-400 mt-1">{tMap('zoomInHint')}</p>
         </li>
       )}
       {loading && places.length === 0 && (
@@ -131,7 +133,7 @@ export function PlacesListPanel({ places, onPlaceClick, selectedPlaceId, loading
             {places.length} {places.length === 1 ? 'place' : 'places'}
           </span>
           {loading && (
-            <span className="text-xs text-gray-400 animate-pulse">updating…</span>
+            <span className="text-xs text-gray-400 animate-pulse">{tMap('updating')}</span>
           )}
         </div>
         <div className="flex-1 overflow-y-auto [scrollbar-width:thin]">

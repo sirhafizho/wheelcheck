@@ -40,6 +40,8 @@ export default function PlacesPage({ params }: PlacesPageProps) {
   const tAddPlace = useTranslations('addPlace');
   const tCat = useTranslations('addPlace.categories');
   const tCommon = useTranslations('common');
+  const tFilters = useTranslations('filters');
+  const tRecent = useTranslations('recent');
   const [searchQuery, setSearchQuery] = useState('');
   const [places, setPlaces] = useState<Place[]>([]);
   const [page, setPage] = useState(0);
@@ -223,7 +225,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                 aria-label="Toggle filters"
               >
                 <FunnelIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Filters</span>
+                <span className="hidden sm:inline">{tFilters('title')}</span>
                 {activeFilterCount > 0 && (
                   <span className="flex items-center justify-center h-5 w-5 rounded-full bg-emerald-600 text-white text-xs">
                     {activeFilterCount}
@@ -239,7 +241,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                   {/* Region/State filter */}
                   <div>
                     <label htmlFor="filter-region" className="block text-xs font-medium text-gray-500 mb-1">
-                      Region
+                      {tFilters('region')}
                     </label>
                     <select
                       id="filter-region"
@@ -247,7 +249,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                       onChange={(e) => setSelectedRegion(e.target.value)}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
                     >
-                      <option value="">All regions</option>
+                      <option value="">{tFilters('allRegions')}</option>
                       {filters?.regions.map((r) => (
                         <option key={r.name} value={r.name}>
                           {r.name} ({r.count.toLocaleString()})
@@ -259,7 +261,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                   {/* Category filter */}
                   <div>
                     <label htmlFor="filter-category" className="block text-xs font-medium text-gray-500 mb-1">
-                      {t('category')}
+                      {tFilters('category')}
                     </label>
                     <select
                       id="filter-category"
@@ -267,7 +269,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                       onChange={(e) => setSelectedCategory(e.target.value)}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
                     >
-                      <option value="">All categories</option>
+                      <option value="">{tFilters('allCategories')}</option>
                       {filters?.categories.map((c) => (
                         <option key={c.name} value={c.name}>
                           {(() => { try { return (tCat as (key: string) => string)(c.name); } catch { return c.name; } })()}
@@ -280,7 +282,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                   {/* Accessibility filter */}
                   <div>
                     <label htmlFor="filter-access" className="block text-xs font-medium text-gray-500 mb-1">
-                      Accessibility
+                      {tFilters('accessibility')}
                     </label>
                     <select
                       id="filter-access"
@@ -288,7 +290,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                       onChange={(e) => setSelectedAccess(e.target.value)}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
                     >
-                      <option value="">All levels</option>
+                      <option value="">{tFilters('allLevels')}</option>
                       <option value="FULL">{'\u2705'} Accessible</option>
                       <option value="PARTIAL">{'\u26A0\uFE0F'} Partially</option>
                       <option value="NOT_ACCESSIBLE">{'\u274C'} Not Accessible</option>
@@ -308,7 +310,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
                     className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors"
                   >
                     <XMarkIcon className="h-3.5 w-3.5" />
-                    Clear all filters
+                    {tFilters('clearAll')}
                   </button>
                 )}
               </div>

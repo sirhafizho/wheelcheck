@@ -33,7 +33,48 @@
       "wideEntrance": "Wide Entrance"
     },
     "updatingPlaces": "Updating places…",
-    "newPlacesFound": "{count} places found — tap to dismiss"
+    "newPlacesFound": "{count} places found — tap to dismiss",
+    "searchPlaceholderShort": "Search for a place... (press /)"
+  },
+  "map": {
+    "standard": "Standard",
+    "minimal": "Minimal",
+    "switchToStandard": "Switch to standard map",
+    "switchToMinimal": "Switch to minimal map",
+    "noPlacesInView": "No places in view",
+    "zoomInHint": "Zoom in or pan the map to see places",
+    "placesCount": "{count} {count, plural, one {place} other {places}}",
+    "placesNearby": "{count} {count, plural, one {place} other {places}} nearby",
+    "updating": "updating..."
+  },
+  "filters": {
+    "title": "Filters",
+    "region": "Region",
+    "category": "Category",
+    "accessibility": "Accessibility",
+    "allRegions": "All regions",
+    "allCategories": "All categories",
+    "allLevels": "All levels",
+    "clearAll": "Clear all filters",
+    "accessible": "Accessible",
+    "partial": "Partially",
+    "notAccessible": "Not Accessible",
+    "unknown": "Unknown"
+  },
+  "recent": {
+    "title": "Recent",
+    "clear": "Clear"
+  },
+  "profileEdit": {
+    "title": "Edit Profile",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Your display name",
+    "stayAnonymous": "Stay anonymous",
+    "anonymousHint": "Your reviews and comments will show as \"Anonymous\"",
+    "save": "Save",
+    "cancel": "Cancel",
+    "updated": "Profile updated",
+    "failed": "Failed to update profile"
   },
   "places": {
     "title": "Places",

@@ -33,7 +33,48 @@
       "wideEntrance": "Pintu Masuk Lebar"
     },
     "updatingPlaces": "Mengemas kini tempat…",
-    "newPlacesFound": "{count} tempat ditemui — ketik untuk tutup"
+    "newPlacesFound": "{count} tempat ditemui — ketik untuk tutup",
+    "searchPlaceholderShort": "Cari tempat... (tekan /)"
+  },
+  "map": {
+    "standard": "Standard",
+    "minimal": "Minimal",
+    "switchToStandard": "Tukar ke peta standard",
+    "switchToMinimal": "Tukar ke peta minimal",
+    "noPlacesInView": "Tiada tempat dalam paparan",
+    "zoomInHint": "Zum masuk atau geser peta untuk lihat tempat",
+    "placesCount": "{count} tempat",
+    "placesNearby": "{count} tempat berdekatan",
+    "updating": "mengemas kini..."
+  },
+  "filters": {
+    "title": "Penapis",
+    "region": "Wilayah",
+    "category": "Kategori",
+    "accessibility": "Kebolehcapaian",
+    "allRegions": "Semua wilayah",
+    "allCategories": "Semua kategori",
+    "allLevels": "Semua tahap",
+    "clearAll": "Kosongkan semua penapis",
+    "accessible": "Boleh Diakses",
+    "partial": "Separa",
+    "notAccessible": "Tidak Boleh Diakses",
+    "unknown": "Tidak Diketahui"
+  },
+  "recent": {
+    "title": "Terkini",
+    "clear": "Kosongkan"
+  },
+  "profileEdit": {
+    "title": "Sunting Profil",
+    "displayName": "Nama Paparan",
+    "displayNamePlaceholder": "Nama paparan anda",
+    "stayAnonymous": "Kekal tanpa nama",
+    "anonymousHint": "Ulasan dan komen anda akan dipaparkan sebagai \"Tanpa Nama\"",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "updated": "Profil dikemas kini",
+    "failed": "Gagal mengemas kini profil"
   },
   "places": {
     "title": "Tempat",

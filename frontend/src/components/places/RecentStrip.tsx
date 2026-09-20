@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { RecentPlace } from '@/hooks/useRecentPlaces';
 
@@ -17,6 +18,7 @@ interface RecentStripProps {
 }
 
 export function RecentStrip({ recent, locale, onClear }: RecentStripProps) {
+  const t = useTranslations('recent');
   if (recent.length === 0) return null;
 
   return (
@@ -24,7 +26,7 @@ export function RecentStrip({ recent, locale, onClear }: RecentStripProps) {
       <div className="flex items-center justify-between mb-2 px-1">
         <div className="flex items-center gap-1.5 text-xs font-medium text-gray-400 uppercase tracking-wider">
           <ClockIcon className="h-3.5 w-3.5" />
-          <span>Recent</span>
+          <span>{t('title')}</span>
         </div>
         {onClear && (
           <button
@@ -33,7 +35,7 @@ export function RecentStrip({ recent, locale, onClear }: RecentStripProps) {
             className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors"
           >
             <XMarkIcon className="h-3.5 w-3.5" />
-            Clear
+            {t('clear')}
           </button>
         )}
       </div>

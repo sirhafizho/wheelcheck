@@ -28,6 +28,7 @@ interface Review {
 export default function ProfilePage({ params }: { params: Params }) {
   const { locale } = use(params);
   const t = useTranslations('profile');
+  const tEdit = useTranslations('profileEdit');
   const {
     user,
     isLoggedIn,
@@ -213,10 +214,10 @@ export default function ProfilePage({ params }: { params: Params }) {
       }
 
       setEditingProfile(false);
-      setProfileMessage('Profile updated');
+      setProfileMessage(tEdit('updated'));
       setTimeout(() => setProfileMessage(null), 3000);
     } catch {
-      setProfileMessage('Failed to update profile');
+      setProfileMessage(tEdit('failed'));
     } finally {
       setSavingProfile(false);
     }
@@ -516,11 +517,11 @@ export default function ProfilePage({ params }: { params: Params }) {
           {editingProfile ? (
             /* ── Edit mode ── */
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-gray-900">Edit Profile</h2>
+              <h2 className="text-lg font-bold text-gray-900">{tEdit('title')}</h2>
 
               <div>
                 <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Display Name
+                  {tEdit('displayName')}
                 </label>
                 <input
                   id="edit-name"
@@ -529,14 +530,14 @@ export default function ProfilePage({ params }: { params: Params }) {
                   onChange={(e) => setEditName(e.target.value)}
                   disabled={editAnonymous}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px] disabled:bg-gray-100 disabled:text-gray-400"
-                  placeholder="Your display name"
+                  placeholder={tEdit('displayNamePlaceholder')}
                 />
               </div>
 
               <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Stay anonymous</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Your reviews and comments will show as "Anonymous"</p>
+                  <p className="text-sm font-medium text-gray-700">{tEdit('stayAnonymous')}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{tEdit('anonymousHint')}</p>
                 </div>
                 <button
                   type="button"
@@ -556,7 +557,7 @@ export default function ProfilePage({ params }: { params: Params }) {
               <div className="flex gap-3">
                 <Button variant="outline" fullWidth onClick={cancelEditing} className="min-h-[48px] rounded-xl">
                   <XMarkIcon className="h-4 w-4 mr-1.5" />
-                  Cancel
+                  {tEdit('cancel')}
                 </Button>
                 <Button
                   variant="primary"
@@ -568,7 +569,7 @@ export default function ProfilePage({ params }: { params: Params }) {
                   {savingProfile ? <LoadingSpinner size="sm" /> : (
                     <>
                       <CheckIcon className="h-4 w-4 mr-1.5" />
-                      Save
+                      {tEdit('save')}
                     </>
                   )}
                 </Button>
