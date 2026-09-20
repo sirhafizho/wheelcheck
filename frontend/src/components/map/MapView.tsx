@@ -142,7 +142,18 @@ function MapUpdater({
 
     // Never zoom out: use whichever is greater — requested zoom or current zoom
     const targetZoom = Math.max(flyTo.zoom ?? map.getZoom(), map.getZoom());
-    map.flyTo([flyTo.lat, flyTo.lng], targetZoom, {
+
+    // Offset the target upward so the marker lands in the upper third of the viewport,
+    // above the bottom sheet which covers the lower ~40% of the screen.
+    const mapHeight = map.getSize().y;
+    const offsetPx = mapHeight * 0.25; // shift marker 25% up from center
+    const targetPoint = map.project([flyTo.lat, flyTo.lng], targetZoom);
+    const offsetTarget = map.unproject(
+      [targetPoint.x, targetPoint.y + offsetPx],
+      targetZoom
+    );
+
+    map.flyTo([offsetTarget.lat, offsetTarget.lng], targetZoom, {
       animate: true,
       duration: 1.2,
     });
