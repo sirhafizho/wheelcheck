@@ -53,21 +53,42 @@ export default function ProfilePage({ params }: { params: Params }) {
 
   useEffect(() => {
     if (!isLoggedIn || !user) return;
-    void fetchReviews(user.id);
-  }, [isLoggedIn, user]);
+    void loadProfileData();
+  }, [isLoggedIn, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const fetchReviews = async (userId: string) => {
+  const loadProfileData = async () => {
     setLoadingReviews(true);
     try {
-      const res = await fetch(`${API_URL}/reviews/user/${userId}`);
-      if (!res.ok) {
+      const token = await getAccessToken();
+      if (!token) {
         setReviews([]);
+        setLoadingReviews(false);
         return;
       }
-      const data = await res.json();
-      const reviewsArr = Array.isArray(data) ? data : [];
-      setReviews(reviewsArr);
-      setReviewCount(reviewsArr.length);
+
+      // Try to get the backend user profile (which may have a different ID than Supabase)
+      let backendUserId = user?.id;
+      try {
+        const meRes = await fetch(`${API_URL}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          backendUserId = meData.id ?? user?.id;
+          if (meData.reviewCount) setReviewCount(meData.reviewCount);
+        }
+      } catch { /* fall back to Supabase ID */ }
+
+      // Fetch reviews using the backend user ID
+      if (backendUserId) {
+        const reviewsRes = await fetch(`${API_URL}/reviews/user/${backendUserId}`);
+        if (reviewsRes.ok) {
+          const data = await reviewsRes.json();
+          const reviewsArr = Array.isArray(data) ? data : [];
+          setReviews(reviewsArr);
+          if (reviewsArr.length > reviewCount) setReviewCount(reviewsArr.length);
+        }
+      }
     } catch {
       setReviews([]);
     } finally {
