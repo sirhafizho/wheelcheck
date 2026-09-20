@@ -203,7 +203,22 @@ export default function HomePage() {
   const [zoomInCount, setZoomInCount] = useState(0);
   const [zoomOutCount, setZoomOutCount] = useState(0);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { latitude, longitude, getCurrentPosition, loading: geoLoading } = useGeolocation();
+
+  // Keyboard shortcut: / to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const mapCenter = useMemo(
     () => (latitude !== null && longitude !== null
@@ -474,8 +489,9 @@ export default function HomePage() {
           <div className="flex items-center gap-2 px-3 py-2">
             <MagnifyingGlassIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
             <input
+              ref={searchInputRef}
               type="search"
-              placeholder={t('home.searchPlaceholder')}
+              placeholder={`${t('home.searchPlaceholder')} (press /)`}
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={handleSearchFocus}

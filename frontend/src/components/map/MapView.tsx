@@ -13,8 +13,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
-// MarkerCluster.Default.css intentionally excluded — custom styles in globals.css
-import type { Place, AccessLevel } from '@/lib/types';
+import type { Place } from '@/lib/types';
 import { MAP_CONFIG } from '@/lib/constants';
 
 // OpenStreetMap tiles — free, no API key required
@@ -23,7 +22,6 @@ const OSM_TILE = {
   attribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
 } as const;
-
 
 // Fix for default marker icon
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
@@ -41,8 +39,19 @@ const MARKER_COLORS: Record<string, string> = {
   UNKNOWN: '#6b7280',       // gray    — unknown
 };
 
-function createAccessibilityIcon(level: AccessLevel | null): L.DivIcon {
-  const color = (level && MARKER_COLORS[level]) ?? MARKER_COLORS.UNKNOWN;
+/** Resolve effective color: use community level, fall back to AI prediction */
+function resolveMarkerColor(place: Place): string {
+  if (place.accessibilityLevel && place.accessibilityLevel !== 'UNKNOWN') {
+    return MARKER_COLORS[place.accessibilityLevel] ?? MARKER_COLORS.UNKNOWN;
+  }
+  if (place.aiAccessible === true) return MARKER_COLORS.FULL;
+  if (place.aiAccessible === false) return MARKER_COLORS.NOT_ACCESSIBLE;
+  return MARKER_COLORS.UNKNOWN;
+}
+
+function createAccessibilityIcon(place: Place, highlighted = false): L.DivIcon {
+  const color = resolveMarkerColor(place);
+  const glow = highlighted ? `; filter: drop-shadow(0 0 6px ${color}) drop-shadow(0 0 12px ${color})` : '';
   return L.divIcon({
     className: '',
     html: `<div data-testid="map-marker" style="
@@ -51,7 +60,7 @@ function createAccessibilityIcon(level: AccessLevel | null): L.DivIcon {
       border:2.5px solid white;
       border-radius:50% 50% 50% 0;
       transform:rotate(-45deg);
-      box-shadow:0 2px 6px rgba(0,0,0,0.35);
+      box-shadow:0 2px 6px rgba(0,0,0,0.35)${glow};
     "></div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 24],
@@ -60,8 +69,8 @@ function createAccessibilityIcon(level: AccessLevel | null): L.DivIcon {
   });
 }
 
-function createSelectedIcon(level: AccessLevel | null): L.DivIcon {
-  const color = (level && MARKER_COLORS[level]) ?? MARKER_COLORS.UNKNOWN;
+function createSelectedIcon(place: Place): L.DivIcon {
+  const color = resolveMarkerColor(place);
   return L.divIcon({
     className: '',
     html: `
@@ -90,6 +99,38 @@ function createSelectedIcon(level: AccessLevel | null): L.DivIcon {
   });
 }
 
+/** Custom cluster icon colored by count size */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createClusterIcon(cluster: any): L.DivIcon {
+  const total: number = cluster.getChildCount();
+
+  // Color based on cluster size
+  let bgColor: string;
+  if (total < 20) {
+    bgColor = '#10b981'; // emerald — small cluster
+  } else if (total < 100) {
+    bgColor = '#f59e0b'; // amber — medium
+  } else {
+    bgColor = '#6b7280'; // gray — large
+  }
+
+  const size = total < 10 ? 36 : total < 100 ? 42 : 48;
+  return L.divIcon({
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      background:${bgColor};
+      color:white;
+      border:3px solid white;
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:${size < 42 ? 12 : 13}px;font-weight:700;
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    ">${total}</div>`,
+    className: '',
+    iconSize: [size, size],
+  });
+}
+
 interface FlyToCoordinates {
   lat: number;
   lng: number;
@@ -110,10 +151,12 @@ interface MapViewProps {
   zoomIn?: number;
   zoomOut?: number;
   selectedPlaceId?: string | null;
+  highlightedPlaceIds?: Set<string>;
   onPlaceClick?: (place: Place) => void;
   onViewportChange?: (viewport: MapViewport) => void;
   onDragStart?: () => void;
   className?: string;
+  minimal?: boolean;
 }
 
 function MapUpdater({
@@ -215,6 +258,21 @@ function MapZoomExecutor({ zoomIn, zoomOut }: { zoomIn: number; zoomOut: number 
   return null;
 }
 
+/** Map style toggle button */
+function MapStyleToggle({ minimal, onToggle }: { minimal: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="absolute top-3 right-3 z-[1000] rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-gray-600 shadow-md ring-1 ring-black/5 backdrop-blur-sm hover:bg-white transition-colors"
+      aria-label={minimal ? 'Switch to standard map' : 'Switch to minimal map'}
+      title={minimal ? 'Standard view' : 'Minimal view'}
+    >
+      {minimal ? '\uD83C\uDF0D Standard' : '\uD83E\uDDFC Minimal'}
+    </button>
+  );
+}
+
 export function MapView({
   places,
   center = MAP_CONFIG.defaultCenter,
@@ -223,6 +281,7 @@ export function MapView({
   zoomIn,
   zoomOut,
   selectedPlaceId,
+  highlightedPlaceIds,
   onPlaceClick,
   onViewportChange,
   onDragStart,
@@ -233,6 +292,7 @@ export function MapView({
     lng: Number(center.lng.toFixed(5)),
     zoom,
   });
+  const [minimalStyle, setMinimalStyle] = useState(true);
 
   const handleViewportChange = useCallback((newViewport: MapViewport) => {
     setViewport(newViewport);
@@ -241,13 +301,14 @@ export function MapView({
 
   return (
     <div className={`relative ${className}`} data-testid="map-view">
+      <MapStyleToggle minimal={minimalStyle} onToggle={() => setMinimalStyle(!minimalStyle)} />
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={zoom}
         minZoom={MAP_CONFIG.minZoom}
         maxZoom={MAP_CONFIG.maxZoom}
         zoomControl={false}
-        className="h-full w-full"
+        className={`h-full w-full ${minimalStyle ? 'map-minimal' : 'map-standard'}`}
         style={{ height: '100%', width: '100%' }}
       >
         <MapUpdater center={center} flyTo={flyTo} />
@@ -266,17 +327,19 @@ export function MapView({
           zoomToBoundsOnClick
           maxClusterRadius={50}
           disableClusteringAtZoom={18}
+          iconCreateFunction={createClusterIcon}
         >
           {places.map((place) => {
             const isSelected = place.id === selectedPlaceId;
+            const isHighlighted = highlightedPlaceIds?.has(place.id) ?? false;
             return (
               <Marker
                 key={place.id}
                 position={[place.latitude, place.longitude]}
                 icon={isSelected
-                  ? createSelectedIcon(place.accessibilityLevel)
-                  : createAccessibilityIcon(place.accessibilityLevel)}
-                zIndexOffset={isSelected ? 1000 : 0}
+                  ? createSelectedIcon(place)
+                  : createAccessibilityIcon(place, isHighlighted)}
+                zIndexOffset={isSelected ? 1000 : isHighlighted ? 500 : 0}
                 eventHandlers={{
                   click: () => onPlaceClick?.(place),
                 }}
@@ -286,7 +349,7 @@ export function MapView({
                     <span className="text-xs font-medium">{place.name}</span>
                     {place.aiAccessible !== null && place.aiAccessible !== undefined && (
                       <span className={`text-[10px] font-semibold ${place.aiAccessible ? 'text-sky-600' : 'text-red-500'}`}>
-                        {place.aiAccessible ? '✦ AI Accessible' : '✦ AI Inaccessible'}
+                        {place.aiAccessible ? '\u2726 AI Accessible' : '\u2726 AI Inaccessible'}
                       </span>
                     )}
                   </div>

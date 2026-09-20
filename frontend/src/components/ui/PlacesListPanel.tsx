@@ -50,15 +50,36 @@ interface PlacesListPanelProps {
 export function PlacesListPanel({ places, onPlaceClick, selectedPlaceId, loading }: PlacesListPanelProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Sort by distance (nearest first) when distance data is available
+  const sortedPlaces = [...places].sort((a, b) => {
+    if (a.distance != null && b.distance != null) return a.distance - b.distance;
+    if (a.distance != null) return -1;
+    if (b.distance != null) return 1;
+    return 0;
+  });
+
   const list = (
     <ul className="divide-y divide-gray-100">
       {places.length === 0 && !loading && (
-        <li className="px-4 py-8 text-center text-sm text-gray-400">No places in view</li>
+        <li className="px-4 py-10 text-center">
+          <div className="text-2xl mb-2">{'\uD83D\uDD0D'}</div>
+          <p className="text-sm font-medium text-gray-500">No places in view</p>
+          <p className="text-xs text-gray-400 mt-1">Zoom in or pan the map to see places</p>
+        </li>
       )}
       {loading && places.length === 0 && (
-        <li className="px-4 py-8 text-center text-sm text-gray-400">Loading…</li>
+        Array.from({ length: 6 }).map((_, i) => (
+          <li key={i} className="px-3 py-3">
+            <div className="h-4 w-3/4 rounded bg-gray-200 animate-pulse mb-2" />
+            <div className="h-3 w-1/2 rounded bg-gray-100 animate-pulse mb-2" />
+            <div className="flex gap-1">
+              <div className="h-5 w-16 rounded-full bg-gray-100 animate-pulse" />
+              <div className="h-5 w-12 rounded-full bg-gray-100 animate-pulse" />
+            </div>
+          </li>
+        ))
       )}
-      {places.map(place => {
+      {sortedPlaces.map(place => {
         const cat = formatCategory(place.category);
         const isSelected = place.id === selectedPlaceId;
         return (
