@@ -3,7 +3,7 @@
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useRecentPlaces } from '@/hooks/useRecentPlaces';
 import { api } from '@/lib/api';
@@ -17,6 +17,17 @@ import { Button } from '@/components/ui/Button';
 
 const PAGE_SIZE = 20;
 
+interface FilterOption {
+  name: string;
+  count: number;
+}
+
+interface Filters {
+  cities: FilterOption[];
+  categories: FilterOption[];
+  states: FilterOption[];
+}
+
 type Params = Promise<{ locale: string }>;
 
 interface PlacesPageProps {
@@ -27,6 +38,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
   const { locale } = use(params);
   const t = useTranslations('places');
   const tAddPlace = useTranslations('addPlace');
+  const tCat = useTranslations('addPlace.categories');
   const tCommon = useTranslations('common');
   const [searchQuery, setSearchQuery] = useState('');
   const [places, setPlaces] = useState<Place[]>([]);
@@ -39,14 +51,34 @@ export default function PlacesPage({ params }: PlacesPageProps) {
   const debouncedSearch = useDebounce(searchQuery.trim(), 300);
   const { recent } = useRecentPlaces();
 
+  // Filter state
+  const [filters, setFilters] = useState<Filters | null>(null);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedAccess, setSelectedAccess] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
+  const activeFilterCount = [selectedCity, selectedCategory, selectedAccess].filter(Boolean).length;
+
+  // Load available filters on mount
+  useEffect(() => {
+    api.getFilters().then(setFilters).catch(() => {});
+  }, []);
+
   const loadPlaces = useCallback(async ({
     nextPage,
     append,
     query,
+    city,
+    category,
+    accessLevel,
   }: {
     nextPage: number;
     append: boolean;
     query: string;
+    city?: string;
+    category?: string;
+    accessLevel?: string;
   }) => {
     const requestId = ++requestIdRef.current;
 
@@ -59,10 +91,11 @@ export default function PlacesPage({ params }: PlacesPageProps) {
     setError(null);
 
     try {
+      const hasFilters = !!(city || category || accessLevel);
       const response = await api.searchPlaces(
-        query
+        query && !hasFilters
           ? { query }
-          : { page: nextPage, size: PAGE_SIZE }
+          : { page: nextPage, size: PAGE_SIZE, query: query || undefined, city, category, accessLevel }
       );
 
       if (requestId !== requestIdRef.current) {
@@ -98,12 +131,26 @@ export default function PlacesPage({ params }: PlacesPageProps) {
     setPage(0);
     setPlaces([]);
     setTotal(0);
-    void loadPlaces({ nextPage: 0, append: false, query: debouncedSearch });
-  }, [debouncedSearch, loadPlaces]);
+    void loadPlaces({
+      nextPage: 0,
+      append: false,
+      query: debouncedSearch,
+      city: selectedCity || undefined,
+      category: selectedCategory || undefined,
+      accessLevel: selectedAccess || undefined,
+    });
+  }, [debouncedSearch, selectedCity, selectedCategory, selectedAccess, loadPlaces]);
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const didLoad = await loadPlaces({ nextPage, append: true, query: debouncedSearch });
+    const didLoad = await loadPlaces({
+      nextPage,
+      append: true,
+      query: debouncedSearch,
+      city: selectedCity || undefined,
+      category: selectedCategory || undefined,
+      accessLevel: selectedAccess || undefined,
+    });
 
     if (didLoad) {
       setPage(nextPage);
@@ -154,14 +201,148 @@ export default function PlacesPage({ params }: PlacesPageProps) {
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {/* Search */}
-            <div className="mb-5">
-              <SearchInput
-                placeholder={t('searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            {/* Search + filter toggle */}
+            <div className="mb-4 flex gap-2">
+              <div className="flex-1">
+                <SearchInput
+                  placeholder={t('searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`
+                  flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-medium
+                  transition-colors min-h-[48px] flex-shrink-0
+                  ${activeFilterCount > 0
+                    ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'}
+                `}
+                aria-label="Toggle filters"
+              >
+                <FunnelIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="flex items-center justify-center h-5 w-5 rounded-full bg-emerald-600 text-white text-xs">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
             </div>
+
+            {/* Filter dropdowns */}
+            {showFilters && (
+              <div className="mb-5 rounded-xl bg-white ring-1 ring-black/5 p-4 space-y-3">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {/* City filter */}
+                  <div>
+                    <label htmlFor="filter-city" className="block text-xs font-medium text-gray-500 mb-1">
+                      City
+                    </label>
+                    <select
+                      id="filter-city"
+                      value={selectedCity}
+                      onChange={(e) => setSelectedCity(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
+                    >
+                      <option value="">All cities</option>
+                      {filters?.cities.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name} ({c.count.toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Category filter */}
+                  <div>
+                    <label htmlFor="filter-category" className="block text-xs font-medium text-gray-500 mb-1">
+                      {t('category')}
+                    </label>
+                    <select
+                      id="filter-category"
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
+                    >
+                      <option value="">All categories</option>
+                      {filters?.categories.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {(() => { try { return (tCat as (key: string) => string)(c.name); } catch { return c.name; } })()}
+                          {' '}({c.count.toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Accessibility filter */}
+                  <div>
+                    <label htmlFor="filter-access" className="block text-xs font-medium text-gray-500 mb-1">
+                      {t('accessibility')}
+                    </label>
+                    <select
+                      id="filter-access"
+                      value={selectedAccess}
+                      onChange={(e) => setSelectedAccess(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
+                    >
+                      <option value="">All levels</option>
+                      <option value="FULL">{'\u2705'} Accessible</option>
+                      <option value="PARTIAL">{'\u26A0\uFE0F'} Partially</option>
+                      <option value="NOT_ACCESSIBLE">{'\u274C'} Not Accessible</option>
+                      <option value="UNKNOWN">{'\u2753'} Unknown</option>
+                    </select>
+                  </div>
+                </div>
+
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCity('');
+                      setSelectedCategory('');
+                      setSelectedAccess('');
+                    }}
+                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors"
+                  >
+                    <XMarkIcon className="h-3.5 w-3.5" />
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Active filter pills (shown when filters panel is closed) */}
+            {!showFilters && activeFilterCount > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedCity && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                    {selectedCity}
+                    <button type="button" onClick={() => setSelectedCity('')} className="hover:text-red-500">
+                      <XMarkIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                )}
+                {selectedCategory && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                    {(() => { try { return (tCat as (key: string) => string)(selectedCategory); } catch { return selectedCategory; } })()}
+                    <button type="button" onClick={() => setSelectedCategory('')} className="hover:text-red-500">
+                      <XMarkIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                )}
+                {selectedAccess && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                    {selectedAccess}
+                    <button type="button" onClick={() => setSelectedAccess('')} className="hover:text-red-500">
+                      <XMarkIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Recent strip — visible below xl (when sidebar is hidden) */}
             <div className="xl:hidden">

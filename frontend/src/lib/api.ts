@@ -102,8 +102,21 @@ class ApiClient {
 
     const page = params.page ?? 0;
     const size = params.size ?? 20;
-    const response = await this.fetch<{ content: Place[]; totalElements: number }>(`/places?page=${page}&size=${size}`);
+    const urlParams = new URLSearchParams({ page: String(page), size: String(size) });
+    if (params.category) urlParams.set('category', params.category);
+    if (params.city) urlParams.set('city', params.city);
+    if (params.accessLevel) urlParams.set('accessLevel', params.accessLevel);
+    if (params.query) urlParams.set('q', params.query);
+    const response = await this.fetch<{ content: Place[]; totalElements: number }>(`/places?${urlParams}`);
     return { data: response.content, total: response.totalElements };
+  }
+
+  async getFilters(): Promise<{
+    cities: { name: string; count: number }[];
+    categories: { name: string; count: number }[];
+    states: { name: string; count: number }[];
+  }> {
+    return this.fetch('/places/filters');
   }
 
   async getPlace(id: string): Promise<ApiResponse<Place>> {

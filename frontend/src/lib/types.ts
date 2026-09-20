@@ -83,8 +83,10 @@ export interface PlaceSearchParams {
   lat?: number;
   lng?: number;
   radius?: number;
-  accessLevel?: AccessLevel;
+  accessLevel?: AccessLevel | string;
   accessibilityFeatures?: AccessibilityFeature[];
+  category?: string;
+  city?: string;
   limit?: number;
   offset?: number;
   page?: number;

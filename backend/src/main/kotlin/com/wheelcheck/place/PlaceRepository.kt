@@ -141,4 +141,31 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         @Param("category") category: String,
         pageable: Pageable
     ): Page<Place>
+
+    @Query(value = """
+        SELECT city as name, COUNT(*) as count
+        FROM places
+        WHERE city IS NOT NULL AND city != ''
+        GROUP BY city
+        ORDER BY count DESC
+        LIMIT 50
+    """, nativeQuery = true)
+    fun findDistinctCitiesWithCount(): List<Map<String, Any>>
+
+    @Query(value = """
+        SELECT category as name, COUNT(*) as count
+        FROM places
+        GROUP BY category
+        ORDER BY count DESC
+    """, nativeQuery = true)
+    fun findDistinctCategoriesWithCount(): List<Map<String, Any>>
+
+    @Query(value = """
+        SELECT state as name, COUNT(*) as count
+        FROM places
+        WHERE state IS NOT NULL AND state != ''
+        GROUP BY state
+        ORDER BY count DESC
+    """, nativeQuery = true)
+    fun findDistinctStatesWithCount(): List<Map<String, Any>>
 }

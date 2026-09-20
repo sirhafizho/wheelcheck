@@ -171,6 +171,18 @@ class PlaceService(
     }
 
     @Transactional(readOnly = true)
+    fun getAvailableFilters(): Map<String, Any> {
+        val cities = placeRepository.findDistinctCitiesWithCount()
+        val categories = placeRepository.findDistinctCategoriesWithCount()
+        val states = placeRepository.findDistinctStatesWithCount()
+        return mapOf(
+            "cities" to cities,
+            "categories" to categories,
+            "states" to states
+        )
+    }
+
+    @Transactional(readOnly = true)
     fun findByOwner(userId: UUID): List<PlaceDto> {
         return placeRepository.findByCreatedBy(userId).map { it.toDto() }
     }

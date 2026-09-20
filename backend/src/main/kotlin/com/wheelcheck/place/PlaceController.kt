@@ -27,10 +27,25 @@ class PlaceController(
     @GetMapping
     fun getAllPlaces(
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") size: Int
+        @RequestParam(defaultValue = "20") size: Int,
+        @RequestParam(required = false) q: String?,
+        @RequestParam(required = false) category: String?,
+        @RequestParam(required = false) city: String?,
+        @RequestParam(required = false) accessLevel: String?
     ): ResponseEntity<Page<PlaceDto>> {
         val pageable = PageRequest.of(page, size.coerceAtMost(100))
-        return ResponseEntity.ok(placeService.findAll(pageable))
+        val hasFilters = listOf(q, category, city, accessLevel).any { !it.isNullOrBlank() }
+        return if (hasFilters) {
+            ResponseEntity.ok(placeService.searchWithFilters(q, category, city, accessLevel, pageable))
+        } else {
+            ResponseEntity.ok(placeService.findAll(pageable))
+        }
+    }
+
+    @GetMapping("/filters")
+    fun getAvailableFilters(): ResponseEntity<Map<String, Any>> {
+        val filters = placeService.getAvailableFilters()
+        return ResponseEntity.ok(filters)
     }
     
     @GetMapping("/{id}")

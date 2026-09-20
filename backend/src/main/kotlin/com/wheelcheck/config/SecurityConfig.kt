@@ -27,7 +27,7 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     // Public endpoints
-                    .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/search").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/search", "/api/places/filters").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/places/{id}", "/api/places/{id}/reports", "/api/places/{id}/enrichment").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/places/nearby").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/places/my").authenticated()
