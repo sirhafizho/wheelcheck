@@ -4,10 +4,11 @@ import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { HeartIcon } from '@heroicons/react/24/solid';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 import { API_URL } from '@/lib/constants';
 
 type Params = Promise<{ locale: string }>;
@@ -50,6 +51,13 @@ export default function ProfilePage({ params }: { params: Params }) {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Profile edit state
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editAnonymous, setEditAnonymous] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoggedIn || !user) return;
@@ -158,6 +166,60 @@ export default function ProfilePage({ params }: { params: Params }) {
     setPassword('');
     setName('');
     setShowPassword(false);
+  };
+
+  const startEditing = () => {
+    setEditName(
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      user?.email?.split('@')[0] ||
+      ''
+    );
+    setEditAnonymous(user?.user_metadata?.anonymous === true);
+    setEditingProfile(true);
+    setProfileMessage(null);
+  };
+
+  const cancelEditing = () => {
+    setEditingProfile(false);
+    setProfileMessage(null);
+  };
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    setProfileMessage(null);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          full_name: editName.trim(),
+          name: editName.trim(),
+          anonymous: editAnonymous,
+        },
+      });
+      if (error) throw error;
+
+      // Also update backend user record
+      const token = await getAccessToken();
+      if (token) {
+        await fetch(`${API_URL}/users/me`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name: editAnonymous ? 'Anonymous' : editName.trim() }),
+        }).catch(() => {});
+      }
+
+      setEditingProfile(false);
+      setProfileMessage('Profile updated');
+      setTimeout(() => setProfileMessage(null), 3000);
+    } catch {
+      setProfileMessage('Failed to update profile');
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const formatAccessLevel = (level: string) => {
@@ -442,42 +504,132 @@ export default function ProfilePage({ params }: { params: Params }) {
   return (
     <div className="h-full overflow-y-auto pb-16">
     <div className="max-w-4xl mx-auto px-4 py-6">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-            {user?.user_metadata?.avatar_url ? (
-              <img
-                src={user.user_metadata.avatar_url}
-                alt=""
-                className="w-full h-full object-cover rounded-full"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span className="text-2xl font-bold text-emerald-600">
-                {displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
-              </span>
-            )}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+        {profileMessage && (
+          <div className={`px-6 py-2.5 text-sm font-medium text-center ${
+            profileMessage.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
+          }`}>
+            {profileMessage}
           </div>
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold text-gray-900 break-words">{displayName}</h1>
-            <p className="text-gray-600 break-all">{user?.email}</p>
-          </div>
-        </div>
+        )}
+        <div className="p-6">
+          {editingProfile ? (
+            /* ── Edit mode ── */
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-gray-900">Edit Profile</h2>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-emerald-50 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-emerald-600">{reviewCount || reviews.length}</p>
-            <p className="text-sm text-gray-600">{t('reviewsSubmitted')}</p>
-          </div>
-          <div className="bg-blue-50 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-blue-600">{reviews.length}</p>
-            <p className="text-sm text-gray-600">{t('contributions')}</p>
-          </div>
-        </div>
+              <div>
+                <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Display Name
+                </label>
+                <input
+                  id="edit-name"
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  disabled={editAnonymous}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px] disabled:bg-gray-100 disabled:text-gray-400"
+                  placeholder="Your display name"
+                />
+              </div>
 
-        <Button variant="outline" fullWidth onClick={handleLogout} className="min-h-[48px]">
-          {t('logout')}
-        </Button>
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Stay anonymous</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Your reviews and comments will show as "Anonymous"</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={editAnonymous}
+                  onClick={() => setEditAnonymous(!editAnonymous)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    editAnonymous ? 'bg-emerald-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${
+                    editAnonymous ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" fullWidth onClick={cancelEditing} className="min-h-[48px] rounded-xl">
+                  <XMarkIcon className="h-4 w-4 mr-1.5" />
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onClick={() => void saveProfile()}
+                  disabled={savingProfile || (!editAnonymous && !editName.trim())}
+                  className="min-h-[48px] rounded-xl"
+                >
+                  {savingProfile ? <LoadingSpinner size="sm" /> : (
+                    <>
+                      <CheckIcon className="h-4 w-4 mr-1.5" />
+                      Save
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            /* ── View mode ── */
+            <>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                  {user?.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt=""
+                      className="w-full h-full object-cover rounded-full"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className="text-2xl font-bold text-emerald-600">
+                      {displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-bold text-gray-900 break-words">
+                      {user?.user_metadata?.anonymous ? 'Anonymous' : displayName}
+                    </h1>
+                    {user?.user_metadata?.anonymous && (
+                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">hidden</span>
+                    )}
+                  </div>
+                  <p className="text-gray-600 break-all text-sm">{user?.email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={startEditing}
+                  className="rounded-full p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors flex-shrink-0"
+                  aria-label="Edit profile"
+                >
+                  <PencilIcon className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-emerald-50 rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-emerald-600">{reviewCount || reviews.length}</p>
+                  <p className="text-sm text-gray-600">{t('reviewsSubmitted')}</p>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-blue-600">{reviews.length}</p>
+                  <p className="text-sm text-gray-600">{t('contributions')}</p>
+                </div>
+              </div>
+
+              <Button variant="outline" fullWidth onClick={handleLogout} className="min-h-[48px] rounded-xl">
+                {t('logout')}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Saved Places quick-link */}
