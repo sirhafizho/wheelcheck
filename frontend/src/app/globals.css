@@ -331,22 +331,14 @@ html.dark .leaflet-control-attribution {
   color: #9ca3af !important;
 }
 
-/* Minimal map style: desaturate + soften OSM tiles for a clean look */
-.map-minimal .leaflet-tile-pane .leaflet-layer img {
+/* Desaturate + soften OSM tiles for a clean, minimal look */
+.leaflet-tile-pane .leaflet-layer img {
   filter: saturate(0) brightness(1.12) contrast(0.78);
-  transition: filter 0.3s ease;
-}
-
-/* Standard map style: no filter, full color */
-.map-standard .leaflet-tile-pane .leaflet-layer img {
-  filter: none;
-  transition: filter 0.3s ease;
 }
 
 /* Dark mode: invert + soften for a clean dark map */
 html.dark .leaflet-tile-pane .leaflet-layer img {
   filter: invert(1) hue-rotate(180deg) saturate(0) brightness(0.82) contrast(0.85);
-  transition: filter 0.3s ease;
 }
 
 /* Ring/focus offset in dark */

@@ -156,7 +156,6 @@ interface MapViewProps {
   onViewportChange?: (viewport: MapViewport) => void;
   onDragStart?: () => void;
   className?: string;
-  minimal?: boolean;
 }
 
 function MapUpdater({
@@ -258,21 +257,6 @@ function MapZoomExecutor({ zoomIn, zoomOut }: { zoomIn: number; zoomOut: number 
   return null;
 }
 
-/** Map style toggle button */
-function MapStyleToggle({ minimal, onToggle }: { minimal: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className="absolute bottom-28 left-3 z-[1000] rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-gray-600 shadow-md ring-1 ring-black/5 backdrop-blur-sm hover:bg-white transition-colors lg:left-auto lg:right-14 lg:bottom-3"
-      aria-label={minimal ? 'Switch to standard map' : 'Switch to minimal map'}
-      title={minimal ? 'Standard view' : 'Minimal view'}
-    >
-      {minimal ? '\uD83C\uDF0D Standard' : '\uD83E\uDDFC Minimal'}
-    </button>
-  );
-}
-
 export function MapView({
   places,
   center = MAP_CONFIG.defaultCenter,
@@ -292,7 +276,6 @@ export function MapView({
     lng: Number(center.lng.toFixed(5)),
     zoom,
   });
-  const [minimalStyle, setMinimalStyle] = useState(true);
 
   const handleViewportChange = useCallback((newViewport: MapViewport) => {
     setViewport(newViewport);
@@ -301,14 +284,13 @@ export function MapView({
 
   return (
     <div className={`relative ${className}`} data-testid="map-view">
-      <MapStyleToggle minimal={minimalStyle} onToggle={() => setMinimalStyle(!minimalStyle)} />
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={zoom}
         minZoom={MAP_CONFIG.minZoom}
         maxZoom={MAP_CONFIG.maxZoom}
         zoomControl={false}
-        className={`h-full w-full ${minimalStyle ? 'map-minimal' : 'map-standard'}`}
+        className="h-full w-full"
         style={{ height: '100%', width: '100%' }}
       >
         <MapUpdater center={center} flyTo={flyTo} />
