@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { invalidateCache } from '@/lib/cache';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthState {
@@ -97,6 +98,11 @@ export function useAuth() {
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
+    // Clear all user-specific cached data
+    invalidateCache('favorites');
+    invalidateCache('favstatus:');
+    invalidateCache('comments:');
+    invalidateCache('reports:');
     return { error };
   }, [supabase]);
 
