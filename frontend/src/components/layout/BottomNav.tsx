@@ -71,7 +71,7 @@ export function BottomNav({ locale }: BottomNavProps) {
       className="
         fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom
         bg-white/95 backdrop-blur-lg shadow-[0_-1px_3px_rgba(0,0,0,0.05)]
-        lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2 lg:right-auto
+        lg:bottom-8 lg:left-1/2 lg:-translate-x-1/2 lg:right-auto
         lg:rounded-2xl lg:shadow-xl lg:ring-1 lg:ring-black/5
         lg:px-2 lg:w-auto
       "
