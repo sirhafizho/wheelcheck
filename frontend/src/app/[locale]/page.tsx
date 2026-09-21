@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { PlusIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { AccessBadge as AccessBadgeComponent } from '@/components/places/AccessBadge';
 import { PlaceDetail } from '@/components/places/PlaceDetail';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -719,32 +720,88 @@ export default function HomePage() {
         loading={placesLoading}
       />
 
-      {/* Desktop: side panel (lg+) */}
+      {/* Desktop: compact side panel (lg+) */}
       {selectedPlaceData && (
-        <div className="hidden lg:flex absolute right-3 top-[72px] bottom-[80px] z-[1000] w-[380px] flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
-            <span className="text-sm font-semibold text-gray-700 truncate">{selectedPlaceData.name}</span>
+        <div className="hidden lg:flex absolute right-3 top-[72px] bottom-[80px] z-[1000] w-[340px] flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3 shrink-0">
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-gray-900 leading-tight line-clamp-2">{selectedPlaceData.name}</h2>
+              {selectedPlaceData.address && selectedPlaceData.address !== 'Address not available' && (
+                <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{selectedPlaceData.address}</p>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => setSelectedPlace(null)}
-              className="rounded-full p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              className="rounded-full p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0 -mt-0.5"
               aria-label="Close"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin]">
-            <PlaceDetail
-              place={selectedPlaceData}
-              locale={locale}
-              flat
-              detailsHref={`/${locale}/places/${selectedPlaceData.id}`}
-              onDelete={() => setSelectedPlace(null)}
-              onEdit={() => router.push(`/${locale}/edit-place/${selectedPlaceData.id}`)}
-              onReportClick={() => router.push(`/${locale}/report/${selectedPlaceData.id}`)}
-            />
+
+          {/* Compact content */}
+          <div className="flex-1 overflow-y-auto px-4 pb-4 [scrollbar-width:thin] space-y-3">
+            {/* Badge + category row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <AccessBadgeComponent level={selectedPlaceData.accessibilityLevel} size="sm" />
+              {selectedPlaceData.category && (
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                  {selectedPlaceData.category.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
+                </span>
+              )}
+              {selectedPlaceData.reviewCount > 0 && (
+                <span className="text-xs text-gray-400">{selectedPlaceData.reviewCount} {selectedPlaceData.reviewCount === 1 ? 'report' : 'reports'}</span>
+              )}
+            </div>
+
+            {/* AI enrichment hint */}
+            {selectedPlaceData.aiAccessible !== null && selectedPlaceData.aiAccessible !== undefined && (
+              <div className={`flex items-center gap-1.5 text-xs font-medium rounded-lg px-2.5 py-1.5 ${
+                selectedPlaceData.aiAccessible ? 'bg-sky-50 text-sky-700' : 'bg-red-50 text-red-600'
+              }`}>
+                <span>{selectedPlaceData.aiAccessible ? '\u2726 AI: Likely Accessible' : '\u2726 AI: Likely Not Accessible'}</span>
+              </div>
+            )}
+
+            {/* Distance */}
+            {selectedPlaceDistanceSummary && (
+              <p className="text-xs text-emerald-600 font-medium">{selectedPlaceDistanceSummary}</p>
+            )}
+
+            {/* Actions — compact row */}
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={`https://maps.google.com/maps?q=${selectedPlaceData.latitude},${selectedPlaceData.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Directions
+              </a>
+              <Link
+                href={`/${locale}/places/${selectedPlaceData.id}`}
+                className="flex items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Full Details
+              </Link>
+            </div>
+            <Link
+              href={`/${locale}/report/${selectedPlaceData.id}`}
+              className="block w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white text-center hover:bg-emerald-700 transition-colors"
+            >
+              Report Accessibility
+            </Link>
+
+            {/* Metadata — minimal */}
+            {selectedPlaceData.dataSource && (
+              <p className="text-[10px] text-gray-400 pt-1 border-t border-gray-100">
+                Source: {selectedPlaceData.dataSource === 'OSM' ? 'OpenStreetMap' : selectedPlaceData.dataSource}
+              </p>
+            )}
           </div>
         </div>
       )}
