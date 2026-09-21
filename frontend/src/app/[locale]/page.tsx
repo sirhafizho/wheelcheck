@@ -722,7 +722,7 @@ export default function HomePage() {
 
       {/* Desktop: compact side panel (lg+) */}
       {selectedPlaceData && (
-        <div className="hidden lg:flex absolute right-3 top-[72px] bottom-[80px] z-[1000] w-[340px] flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden">
+        <div className="hidden lg:flex absolute right-3 top-[72px] z-[1000] w-[340px] max-h-[calc(100vh-160px)] flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden">
           {/* Header */}
           <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3 shrink-0">
             <div className="min-w-0">
