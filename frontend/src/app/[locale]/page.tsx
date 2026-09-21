@@ -719,18 +719,23 @@ export default function HomePage() {
         loading={placesLoading}
       />
 
+      {/* Desktop: side panel (lg+) */}
       {selectedPlaceData && (
-        <BottomSheet
-          key={selectedPlaceData.id}
-          open
-          initialState="half"
-          ariaLabel={`${selectedPlaceData.name} details`}
-          onClose={() => {
-            const closingPlaceId = selectedPlaceData.id;
-            setSelectedPlace((currentPlace) => (currentPlace?.id === closingPlaceId ? null : currentPlace));
-          }}
-        >
-          <div className="space-y-4 pb-2">
+        <div className="hidden lg:flex absolute right-3 top-[72px] bottom-[80px] z-[1000] w-[380px] flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
+            <span className="text-sm font-semibold text-gray-700 truncate">{selectedPlaceData.name}</span>
+            <button
+              type="button"
+              onClick={() => setSelectedPlace(null)}
+              className="rounded-full p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin]">
             <PlaceDetail
               place={selectedPlaceData}
               locale={locale}
@@ -741,7 +746,35 @@ export default function HomePage() {
               onReportClick={() => router.push(`/${locale}/report/${selectedPlaceData.id}`)}
             />
           </div>
-        </BottomSheet>
+        </div>
+      )}
+
+      {/* Mobile: bottom sheet (< lg) */}
+      {selectedPlaceData && (
+        <div className="lg:hidden">
+          <BottomSheet
+            key={selectedPlaceData.id}
+            open
+            initialState="half"
+            ariaLabel={`${selectedPlaceData.name} details`}
+            onClose={() => {
+              const closingPlaceId = selectedPlaceData.id;
+              setSelectedPlace((currentPlace) => (currentPlace?.id === closingPlaceId ? null : currentPlace));
+            }}
+          >
+            <div className="space-y-4 pb-2">
+              <PlaceDetail
+                place={selectedPlaceData}
+                locale={locale}
+                flat
+                detailsHref={`/${locale}/places/${selectedPlaceData.id}`}
+                onDelete={() => setSelectedPlace(null)}
+                onEdit={() => router.push(`/${locale}/edit-place/${selectedPlaceData.id}`)}
+                onReportClick={() => router.push(`/${locale}/report/${selectedPlaceData.id}`)}
+              />
+            </div>
+          </BottomSheet>
+        </div>
       )}
     </div>
   );
