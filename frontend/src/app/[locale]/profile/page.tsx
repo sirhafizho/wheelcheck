@@ -75,29 +75,38 @@ export default function ProfilePage({ params }: { params: Params }) {
         return;
       }
 
-      // Try to get the backend user profile (which may have a different ID than Supabase)
-      let backendUserId = user?.id;
-      try {
-        const meRes = await fetch(`${API_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (meRes.ok) {
-          const meData = await meRes.json();
-          backendUserId = meData.id ?? user?.id;
-          if (meData.reviewCount) setReviewCount(meData.reviewCount);
-        }
-      } catch { /* fall back to Supabase ID */ }
+      // Fire both requests in parallel — don't wait for /users/me before fetching reviews
+      const supabaseUserId = user?.id ?? '';
+      const [meResult, reviewsResult] = await Promise.allSettled([
+        fetch(`${API_URL}/users/me`, { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null),
+        fetch(`${API_URL}/reviews/user/${supabaseUserId}`)
+          .then(r => r.ok ? r.json() : [])
+          .catch(() => []),
+      ]);
 
-      // Fetch reviews using the backend user ID
-      if (backendUserId) {
-        const reviewsRes = await fetch(`${API_URL}/reviews/user/${backendUserId}`);
-        if (reviewsRes.ok) {
-          const data = await reviewsRes.json();
-          const reviewsArr = Array.isArray(data) ? data : [];
-          setReviews(reviewsArr);
-          if (reviewsArr.length > reviewCount) setReviewCount(reviewsArr.length);
-        }
+      const meData = meResult.status === 'fulfilled' ? meResult.value : null;
+      const reviewsData = reviewsResult.status === 'fulfilled' ? reviewsResult.value : [];
+
+      if (meData?.reviewCount) setReviewCount(meData.reviewCount);
+
+      // If backend user ID differs from Supabase, fetch reviews again with backend ID
+      const backendUserId = meData?.id;
+      let reviewsArr = Array.isArray(reviewsData) ? reviewsData : [];
+
+      if (backendUserId && backendUserId !== supabaseUserId && reviewsArr.length === 0) {
+        try {
+          const res = await fetch(`${API_URL}/reviews/user/${backendUserId}`);
+          if (res.ok) {
+            const data = await res.json();
+            reviewsArr = Array.isArray(data) ? data : [];
+          }
+        } catch { /* ignore */ }
       }
+
+      setReviews(reviewsArr);
+      if (reviewsArr.length > (meData?.reviewCount ?? 0)) setReviewCount(reviewsArr.length);
     } catch {
       setReviews([]);
     } finally {
@@ -244,8 +253,23 @@ export default function ProfilePage({ params }: { params: Params }) {
 
   if (authLoading) {
     return (
-      <div className="flex h-full items-center justify-center pb-16">
-        <LoadingSpinner size="lg" />
+      <div className="h-full overflow-y-auto pb-16">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 rounded-full bg-gray-200 animate-pulse shrink-0" />
+              <div className="flex-1">
+                <div className="h-5 w-32 rounded bg-gray-200 animate-pulse mb-2" />
+                <div className="h-4 w-48 rounded bg-gray-100 animate-pulse" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="h-20 rounded-xl bg-gray-100 animate-pulse" />
+              <div className="h-20 rounded-xl bg-gray-100 animate-pulse" />
+            </div>
+            <div className="h-12 rounded-xl bg-gray-100 animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }

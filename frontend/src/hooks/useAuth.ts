@@ -101,11 +101,13 @@ export function useAuth() {
   }, [supabase]);
 
   const getAccessToken = useCallback(async (): Promise<string | null> => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Use cached session first, only fetch if missing
+    if (state.session?.access_token) {
+      return state.session.access_token;
+    }
+    const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token ?? null;
-  }, [supabase]);
+  }, [supabase, state.session]);
 
   return {
     ...state,
