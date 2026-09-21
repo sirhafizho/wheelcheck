@@ -1,14 +1,16 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { ShareIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { usePlace } from '@/hooks/usePlaces';
 import { useRecentPlaces } from '@/hooks/useRecentPlaces';
 import { PlaceDetail } from '@/components/places/PlaceDetail';
 import { ReviewsList } from '@/components/places/ReviewsList';
 import { CommentSection } from '@/components/places/CommentSection';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ScrollToTop } from '@/components/ui/ScrollToTop';
 import { Button } from '@/components/ui/Button';
 
 type Params = Promise<{ locale: string; id: string }>;
@@ -34,6 +36,19 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
       });
     }
   }, [place, addRecent]);
+
+  const handleShare = useCallback(async () => {
+    const url = window.location.href;
+    const title = place?.name ?? 'WheelCheck Place';
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard');
+    }
+  }, [place]);
 
   if (loading) {
     return (
@@ -112,15 +127,28 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
   }
 
   return (
-    <div className="h-full overflow-y-auto pb-16">
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      <Button 
-        variant="ghost" 
-        onClick={() => router.back()}
-        className="mb-2"
-      >
-        ← {t('common.back')}
-      </Button>
+    <div className="h-full overflow-y-auto pb-16" data-scroll-container>
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
+      {/* Top bar: back + share */}
+      <div className="flex items-center justify-between">
+        <Button 
+          variant="ghost" 
+          onClick={() => router.back()}
+          className="gap-1.5"
+        >
+          <ArrowLeftIcon className="h-4 w-4" />
+          {t('common.back')}
+        </Button>
+        <button
+          type="button"
+          onClick={() => void handleShare()}
+          className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+          aria-label="Share this place"
+        >
+          <ShareIcon className="h-4 w-4" />
+          <span className="hidden sm:inline">Share</span>
+        </button>
+      </div>
 
       <PlaceDetail
         place={place}
@@ -131,14 +159,15 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
         onShowOnMapClick={() => router.push(`/${locale}?placeId=${place.id}&lat=${place.latitude}&lng=${place.longitude}`)}
       />
 
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-6">
         <ReviewsList placeId={place.id} locale={locale} />
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-6">
         <CommentSection placeId={place.id} locale={locale} />
       </div>
     </div>
+    <ScrollToTop />
     </div>
   );
 }

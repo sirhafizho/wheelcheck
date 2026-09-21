@@ -12,6 +12,7 @@ import { PlaceCard } from '@/components/places/PlaceCard';
 import { PlacesSidebar } from '@/components/places/PlacesSidebar';
 import { RecentStrip } from '@/components/places/RecentStrip';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ScrollToTop } from '@/components/ui/ScrollToTop';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Button } from '@/components/ui/Button';
 
@@ -163,7 +164,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
   const isInitialLoad = loading && places.length === 0 && !debouncedSearch;
 
   return (
-    <div className="h-full overflow-y-auto pb-16">
+    <div className="h-full overflow-y-auto pb-16" data-scroll-container>
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -414,6 +415,8 @@ export default function PlacesPage({ params }: PlacesPageProps) {
           </div>
         </div>
       </div>
+
+      <ScrollToTop />
 
       {/* Mobile FAB */}
       <Link
