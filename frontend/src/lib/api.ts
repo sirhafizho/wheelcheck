@@ -1,5 +1,6 @@
 import { API_URL } from './constants';
 import { setBackendStatus } from './backendStatus';
+import { cachedFetch, invalidateCache, CACHE_TTL } from './cache';
 import type {
   Place,
   AccessReport,
@@ -116,12 +117,14 @@ class ApiClient {
     categories: { name: string; count: number }[];
     cities: { name: string; count: number }[];
   }> {
-    return this.fetch('/places/filters');
+    return cachedFetch('filters', () => this.fetch('/places/filters'), CACHE_TTL.FILTERS);
   }
 
   async getPlace(id: string): Promise<ApiResponse<Place>> {
-    const place = await this.fetch<Place>(`/places/${id}`);
-    return { data: place };
+    return cachedFetch(`place:${id}`, async () => {
+      const place = await this.fetch<Place>(`/places/${id}`);
+      return { data: place };
+    }, CACHE_TTL.PLACE_DETAIL);
   }
 
   async getNearbyPlaces(lat: number, lng: number, radius = 5000): Promise<PaginatedResponse<Place>> {
@@ -133,13 +136,13 @@ class ApiClient {
   }
 
   async getPlaceReports(placeId: string): Promise<AccessReport[]> {
-    return this.fetch<AccessReport[]>(`/places/${placeId}/reports`);
+    return cachedFetch(`reports:${placeId}`, () => this.fetch<AccessReport[]>(`/places/${placeId}/reports`), CACHE_TTL.REVIEWS);
   }
 
   async createReport(report: CreateReportRequest, token?: string): Promise<AccessReport> {
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.fetch<AccessReport>('/reviews', {
+    const result = await this.fetch<AccessReport>('/reviews', {
       method: 'POST',
       body: JSON.stringify({
         placeId: report.placeId,
@@ -151,24 +154,28 @@ class ApiClient {
       }),
       headers,
     });
+    // Invalidate related caches
+    invalidateCache(`reports:${report.placeId}`);
+    invalidateCache(`place:${report.placeId}`);
+    return result;
   }
 
   async getComments(placeId: string, token?: string): Promise<Comment[]> {
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.fetch<Comment[]>(`/comments/place/${placeId}`, {
-      headers,
-    });
+    return cachedFetch(`comments:${placeId}`, () => this.fetch<Comment[]>(`/comments/place/${placeId}`, { headers }), CACHE_TTL.COMMENTS);
   }
 
   async createComment(request: CreateCommentRequest, token?: string): Promise<Comment> {
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.fetch<Comment>('/comments', {
+    const result = await this.fetch<Comment>('/comments', {
       method: 'POST',
       body: JSON.stringify(request),
       headers,
     });
+    invalidateCache(`comments:${request.placeId}`);
+    return result;
   }
 
   async voteComment(commentId: string, type: 'up' | 'down', token?: string): Promise<Comment> {
@@ -183,20 +190,24 @@ class ApiClient {
   async getFavoriteStatus(placeId: string, token?: string): Promise<FavoriteStatus> {
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.fetch<FavoriteStatus>(`/favorites/${placeId}/status`, { headers });
+    return cachedFetch(`favstatus:${placeId}`, () => this.fetch<FavoriteStatus>(`/favorites/${placeId}/status`, { headers }), CACHE_TTL.FAVORITES);
   }
 
   async toggleFavorite(placeId: string, token: string): Promise<FavoriteStatus> {
-    return this.fetch<FavoriteStatus>(`/favorites/${placeId}`, {
+    const result = await this.fetch<FavoriteStatus>(`/favorites/${placeId}`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
     });
+    // Invalidate favorite caches so UI updates
+    invalidateCache('favstatus:');
+    invalidateCache('favorites');
+    return result;
   }
 
   async getUserFavorites(token: string): Promise<Favorite[]> {
-    return this.fetch<Favorite[]>('/favorites', {
+    return cachedFetch('favorites', () => this.fetch<Favorite[]>('/favorites', {
       headers: { 'Authorization': `Bearer ${token}` },
-    });
+    }), CACHE_TTL.FAVORITES);
   }
 }
 
