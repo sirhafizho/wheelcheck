@@ -81,11 +81,11 @@ export default function SettingsPage({ params }: { params: Params }) {
 
   return (
     <div className="h-full overflow-y-auto pb-16">
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('title')}</h1>
       <p className="text-sm text-gray-500 mt-1 mb-6">Customize your WheelCheck experience</p>
 
-      <div className="space-y-5">
+      <div className="lg:grid lg:grid-cols-2 lg:gap-6 space-y-5 lg:space-y-0">
         <div className="bg-white rounded-2xl shadow p-4">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">🌐 {t('language')}</h2>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

@@ -128,9 +128,9 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
 
   return (
     <div className="h-full overflow-y-auto pb-16" data-scroll-container>
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    <div className="max-w-6xl mx-auto px-4 py-6">
       {/* Top bar: back + share */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-5">
         <Button 
           variant="ghost" 
           onClick={() => router.back()}
@@ -150,21 +150,50 @@ export default function PlaceDetailPage({ params }: PlaceDetailPageProps) {
         </button>
       </div>
 
-      <PlaceDetail
-        place={place}
-        locale={locale}
-        onDelete={() => router.push(`/${locale}`)}
-        onEdit={() => router.push(`/${locale}/edit-place/${place.id}`)}
-        onReportClick={() => router.push(`/${locale}/report/${place.id}`)}
-        onShowOnMapClick={() => router.push(`/${locale}?placeId=${place.id}&lat=${place.latitude}&lng=${place.longitude}`)}
-      />
+      {/* Desktop: 2-column | Mobile: stacked */}
+      <div className="lg:grid lg:grid-cols-[1fr_420px] lg:gap-6">
+        {/* Left column — place info */}
+        <div className="space-y-5 mb-5 lg:mb-0">
+          <PlaceDetail
+            place={place}
+            locale={locale}
+            onDelete={() => router.push(`/${locale}`)}
+            onEdit={() => router.push(`/${locale}/edit-place/${place.id}`)}
+            onReportClick={() => router.push(`/${locale}/report/${place.id}`)}
+            onShowOnMapClick={() => router.push(`/${locale}?placeId=${place.id}&lat=${place.latitude}&lng=${place.longitude}`)}
+          />
 
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <ReviewsList placeId={place.id} locale={locale} />
-      </div>
+          {/* Mini map — desktop only */}
+          <div className="hidden lg:block bg-white rounded-2xl shadow-lg overflow-hidden ring-1 ring-black/5">
+            <div className="h-48 relative">
+              <iframe
+                title="Place location"
+                className="w-full h-full border-0 grayscale opacity-90"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${place.longitude - 0.005},${place.latitude - 0.003},${place.longitude + 0.005},${place.latitude + 0.003}&layer=mapnik&marker=${place.latitude},${place.longitude}`}
+                loading="lazy"
+              />
+            </div>
+            <a
+              href={`https://maps.google.com/maps?q=${place.latitude},${place.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block px-4 py-2.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 text-center transition-colors"
+            >
+              Open in Google Maps
+            </a>
+          </div>
+        </div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <CommentSection placeId={place.id} locale={locale} />
+        {/* Right column — reviews + comments */}
+        <div className="space-y-5 lg:sticky lg:top-6 lg:self-start">
+          <div className="bg-white rounded-2xl shadow-lg p-5">
+            <ReviewsList placeId={place.id} locale={locale} />
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg p-5">
+            <CommentSection placeId={place.id} locale={locale} />
+          </div>
+        </div>
       </div>
     </div>
     <ScrollToTop />

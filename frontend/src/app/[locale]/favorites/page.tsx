@@ -61,7 +61,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="h-full overflow-y-auto pb-16">
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
           <HeartIcon className="h-7 w-7 text-red-500" />
           <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
@@ -96,58 +96,64 @@ export default function FavoritesPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3" data-testid="favorites-list">
-            <p className="text-sm text-gray-500 mb-4">{t('count', { count: favorites.length })}</p>
+          <div className="grid gap-4 sm:grid-cols-2" data-testid="favorites-list">
+            <p className="text-sm text-gray-500 mb-4 sm:col-span-2">{t('count', { count: favorites.length })}</p>
             {favorites.map((fav) => {
               const badge = fav.accessibilityLevel ? ACCESS_BADGE[fav.accessibilityLevel] : null;
               return (
                 <div
                   key={fav.id}
                   data-testid="favorite-item"
-                  className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 hover:shadow-md transition-shadow"
+                  className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 hover:shadow-md transition-shadow"
                 >
-                  {/* Heart icon */}
-                  <div className="flex-shrink-0 rounded-full bg-red-50 p-2">
-                    <HeartIcon className="h-4 w-4 text-red-500" />
+                  {/* Top: badge + remove */}
+                  <div className="flex items-center justify-between mb-3">
+                    {badge ? (
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${badge.className}`}>
+                        {badge.label}
+                      </span>
+                    ) : <span />}
+                    <button
+                      onClick={() => handleRemove(fav.placeId)}
+                      disabled={removing === fav.placeId}
+                      aria-label={t('remove')}
+                      data-testid="remove-favorite"
+                      className="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    >
+                      {removing === fav.placeId
+                        ? <LoadingSpinner size="sm" />
+                        : <XMarkIcon className="h-4 w-4" />
+                      }
+                    </button>
                   </div>
 
-                  {/* Place info — clickable */}
+                  {/* Place name + category */}
                   <Link
                     href={`/${locale}/places/${fav.placeId}`}
-                    className="flex-1 min-w-0"
                     data-testid="favorite-place-link"
                   >
-                    <p className="font-semibold text-gray-900 truncate">
+                    <p className="font-semibold text-gray-900 mb-1 line-clamp-2 hover:text-emerald-700 transition-colors">
                       {fav.placeName ?? 'Unknown Place'}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      {fav.placeCategory && (
-                        <span className="text-xs text-gray-400">{fav.placeCategory}</span>
-                      )}
-                      {badge && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge.className}`}>
-                          {badge.label}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {t('savedOn')} {new Date(fav.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </p>
+                    {fav.placeCategory && (
+                      <p className="text-xs text-gray-400 mb-2">{fav.placeCategory}</p>
+                    )}
                   </Link>
 
-                  {/* Remove button */}
-                  <button
-                    onClick={() => handleRemove(fav.placeId)}
-                    disabled={removing === fav.placeId}
-                    aria-label={t('remove')}
-                    data-testid="remove-favorite"
-                    className="flex-shrink-0 p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-                  >
-                    {removing === fav.placeId
-                      ? <LoadingSpinner size="sm" />
-                      : <XMarkIcon className="h-5 w-5" />
-                    }
-                  </button>
+                  {/* Footer: saved date + directions */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-2">
+                    <p className="text-xs text-gray-400">
+                      {t('savedOn')} {new Date(fav.createdAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
+                    </p>
+                    <a
+                      href={`https://maps.google.com/maps?q=${encodeURIComponent(fav.placeName ?? '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+                    >
+                      Directions
+                    </a>
+                  </div>
                 </div>
               );
             })}

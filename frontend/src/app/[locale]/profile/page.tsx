@@ -254,7 +254,7 @@ export default function ProfilePage({ params }: { params: Params }) {
   if (authLoading) {
     return (
       <div className="h-full overflow-y-auto pb-16">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 rounded-full bg-gray-200 animate-pulse shrink-0" />
@@ -277,7 +277,7 @@ export default function ProfilePage({ params }: { params: Params }) {
   if (!isLoggedIn) {
     return (
       <div className="h-full overflow-y-auto pb-16">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">{'\uD83D\uDC64'}</div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h1>
@@ -528,194 +528,202 @@ export default function ProfilePage({ params }: { params: Params }) {
 
   return (
     <div className="h-full overflow-y-auto pb-16">
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
-        {profileMessage && (
-          <div className={`px-6 py-2.5 text-sm font-medium text-center ${
-            profileMessage.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
-          }`}>
-            {profileMessage}
-          </div>
-        )}
-        <div className="p-6">
-          {editingProfile ? (
-            /* ── Edit mode ── */
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-gray-900">{tEdit('title')}</h2>
-
-              <div>
-                <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-1">
-                  {tEdit('displayName')}
-                </label>
-                <input
-                  id="edit-name"
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  disabled={editAnonymous}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px] disabled:bg-gray-100 disabled:text-gray-400"
-                  placeholder={tEdit('displayNamePlaceholder')}
-                />
+    <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-8">
+        {/* Left column — sticky on desktop */}
+        <div className="lg:sticky lg:top-6 lg:self-start space-y-6 mb-6 lg:mb-0">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            {profileMessage && (
+              <div className={`px-6 py-2.5 text-sm font-medium text-center ${
+                profileMessage.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
+              }`}>
+                {profileMessage}
               </div>
+            )}
+            <div className="p-6">
+              {editingProfile ? (
+                /* ── Edit mode ── */
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold text-gray-900">{tEdit('title')}</h2>
 
-              <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">{tEdit('stayAnonymous')}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{tEdit('anonymousHint')}</p>
+                  <div>
+                    <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-1">
+                      {tEdit('displayName')}
+                    </label>
+                    <input
+                      id="edit-name"
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      disabled={editAnonymous}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px] disabled:bg-gray-100 disabled:text-gray-400"
+                      placeholder={tEdit('displayNamePlaceholder')}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">{tEdit('stayAnonymous')}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{tEdit('anonymousHint')}</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={editAnonymous}
+                      onClick={() => setEditAnonymous(!editAnonymous)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        editAnonymous ? 'bg-emerald-600' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${
+                        editAnonymous ? 'translate-x-6' : 'translate-x-1'
+                      }`} />
+                    </button>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button variant="outline" fullWidth onClick={cancelEditing} className="min-h-[48px] rounded-xl">
+                      <XMarkIcon className="h-4 w-4 mr-1.5" />
+                      {tEdit('cancel')}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      fullWidth
+                      onClick={() => void saveProfile()}
+                      disabled={savingProfile || (!editAnonymous && !editName.trim())}
+                      className="min-h-[48px] rounded-xl"
+                    >
+                      {savingProfile ? <LoadingSpinner size="sm" /> : (
+                        <>
+                          <CheckIcon className="h-4 w-4 mr-1.5" />
+                          {tEdit('save')}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={editAnonymous}
-                  onClick={() => setEditAnonymous(!editAnonymous)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    editAnonymous ? 'bg-emerald-600' : 'bg-gray-300'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${
-                    editAnonymous ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              </div>
+              ) : (
+                /* ── View mode ── */
+                <>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                      {user?.user_metadata?.avatar_url ? (
+                        <img
+                          src={user.user_metadata.avatar_url}
+                          alt=""
+                          className="w-full h-full object-cover rounded-full"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <span className="text-2xl font-bold text-emerald-600">
+                          {displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-xl font-bold text-gray-900 break-words">
+                          {user?.user_metadata?.anonymous ? 'Anonymous' : displayName}
+                        </h1>
+                        {user?.user_metadata?.anonymous && (
+                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">hidden</span>
+                        )}
+                      </div>
+                      <p className="text-gray-600 break-all text-sm">{user?.email}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={startEditing}
+                      className="rounded-full p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors flex-shrink-0"
+                      aria-label="Edit profile"
+                    >
+                      <PencilIcon className="h-5 w-5" />
+                    </button>
+                  </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" fullWidth onClick={cancelEditing} className="min-h-[48px] rounded-xl">
-                  <XMarkIcon className="h-4 w-4 mr-1.5" />
-                  {tEdit('cancel')}
-                </Button>
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={() => void saveProfile()}
-                  disabled={savingProfile || (!editAnonymous && !editName.trim())}
-                  className="min-h-[48px] rounded-xl"
-                >
-                  {savingProfile ? <LoadingSpinner size="sm" /> : (
-                    <>
-                      <CheckIcon className="h-4 w-4 mr-1.5" />
-                      {tEdit('save')}
-                    </>
-                  )}
-                </Button>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-emerald-50 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-bold text-emerald-600">{reviewCount || reviews.length}</p>
+                      <p className="text-sm text-gray-600">{t('reviewsSubmitted')}</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-bold text-blue-600">{reviews.length}</p>
+                      <p className="text-sm text-gray-600">{t('contributions')}</p>
+                    </div>
+                  </div>
+
+                  <Button variant="outline" fullWidth onClick={handleLogout} className="min-h-[48px] rounded-xl">
+                    {t('logout')}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Saved Places quick-link */}
+          <Link
+            href={`/${locale}/favorites`}
+            data-testid="saved-places-link"
+            className="flex items-center justify-between bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-red-50 p-2 group-hover:bg-red-100 transition-colors">
+                <HeartIcon className="h-5 w-5 text-red-500" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">{t('savedPlaces')}</p>
+                <p className="text-xs text-gray-500">{t('savedPlacesSubtext')}</p>
               </div>
             </div>
+            <span className="text-emerald-600 text-sm font-medium">View &rarr;</span>
+          </Link>
+        </div>
+
+        {/* Right column — review history */}
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">{t('reviewHistory')}</h2>
+          {loadingReviews ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner size="md" />
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="text-center py-8 bg-white rounded-lg shadow">
+              <p className="text-gray-500">{t('noReviews')}</p>
+              <Link href={`/${locale}/places`} className="text-emerald-600 font-medium hover:underline mt-2 inline-block min-h-[48px] leading-[48px]">
+                {t('startReporting')}
+              </Link>
+            </div>
           ) : (
-            /* ── View mode ── */
-            <>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-                  {user?.user_metadata?.avatar_url ? (
-                    <img
-                      src={user.user_metadata.avatar_url}
-                      alt=""
-                      className="w-full h-full object-cover rounded-full"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span className="text-2xl font-bold text-emerald-600">
-                      {displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold text-gray-900 break-words">
-                      {user?.user_metadata?.anonymous ? 'Anonymous' : displayName}
-                    </h1>
-                    {user?.user_metadata?.anonymous && (
-                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">hidden</span>
-                    )}
-                  </div>
-                  <p className="text-gray-600 break-all text-sm">{user?.email}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={startEditing}
-                  className="rounded-full p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors flex-shrink-0"
-                  aria-label="Edit profile"
+            <div className="space-y-3">
+              {reviews.map((review) => (
+                <Link
+                  key={review.id}
+                  href={`/${locale}/places/${review.placeId}`}
+                  className="block bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                 >
-                  <PencilIcon className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-emerald-600">{reviewCount || reviews.length}</p>
-                  <p className="text-sm text-gray-600">{t('reviewsSubmitted')}</p>
-                </div>
-                <div className="bg-blue-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-blue-600">{reviews.length}</p>
-                  <p className="text-sm text-gray-600">{t('contributions')}</p>
-                </div>
-              </div>
-
-              <Button variant="outline" fullWidth onClick={handleLogout} className="min-h-[48px] rounded-xl">
-                {t('logout')}
-              </Button>
-            </>
+                  {review.placeName && (
+                    <p className="font-semibold text-gray-900 mb-1 truncate">{review.placeName}</p>
+                  )}
+                  <div className="flex items-center gap-2 mb-2 text-lg">
+                    <span>{formatAccessLevel(review.entrance)}</span>
+                    <span>{formatAccessLevel(review.toilet)}</span>
+                    <span>{formatAccessLevel(review.parking)}</span>
+                    <span>{formatAccessLevel(review.internalNav)}</span>
+                  </div>
+                  {review.notes && <p className="text-sm text-gray-600 mb-1">{review.notes}</p>}
+                  <p className="text-xs text-gray-400">
+                    {new Intl.DateTimeFormat(locale, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    }).format(new Date(review.createdAt))}
+                  </p>
+                </Link>
+              ))}
+            </div>
           )}
         </div>
       </div>
-
-      {/* Saved Places quick-link */}
-      <Link
-        href={`/${locale}/favorites`}
-        data-testid="saved-places-link"
-        className="flex items-center justify-between bg-white rounded-lg shadow p-4 mb-6 hover:shadow-md transition-shadow group"
-      >
-        <div className="flex items-center gap-3">
-          <div className="rounded-full bg-red-50 p-2 group-hover:bg-red-100 transition-colors">
-            <HeartIcon className="h-5 w-5 text-red-500" />
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900">{t('savedPlaces')}</p>
-            <p className="text-xs text-gray-500">{t('savedPlacesSubtext')}</p>
-          </div>
-        </div>
-        <span className="text-emerald-600 text-sm font-medium">View &rarr;</span>
-      </Link>
-
-      <h2 className="text-lg font-bold text-gray-900 mb-4">{t('reviewHistory')}</h2>
-      {loadingReviews ? (
-        <div className="flex justify-center py-8">
-          <LoadingSpinner size="md" />
-        </div>
-      ) : reviews.length === 0 ? (
-        <div className="text-center py-8 bg-white rounded-lg shadow">
-          <p className="text-gray-500">{t('noReviews')}</p>
-          <Link href={`/${locale}/places`} className="text-emerald-600 font-medium hover:underline mt-2 inline-block min-h-[48px] leading-[48px]">
-            {t('startReporting')}
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {reviews.map((review) => (
-            <Link
-              key={review.id}
-              href={`/${locale}/places/${review.placeId}`}
-              className="block bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-            >
-              {review.placeName && (
-                <p className="font-semibold text-gray-900 mb-1 truncate">{review.placeName}</p>
-              )}
-              <div className="flex items-center gap-2 mb-2 text-lg">
-                <span>{formatAccessLevel(review.entrance)}</span>
-                <span>{formatAccessLevel(review.toilet)}</span>
-                <span>{formatAccessLevel(review.parking)}</span>
-                <span>{formatAccessLevel(review.internalNav)}</span>
-              </div>
-              {review.notes && <p className="text-sm text-gray-600 mb-1">{review.notes}</p>}
-              <p className="text-xs text-gray-400">
-                {new Intl.DateTimeFormat(locale, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                }).format(new Date(review.createdAt))}
-              </p>
-            </Link>
-          ))}
-        </div>
-      )}
       </div>
     </div>
   );
