@@ -197,7 +197,7 @@ export default function PlacesPage({ params }: PlacesPageProps) {
           {/* Sidebar — hidden below xl (1280px) */}
           <div className="hidden xl:block w-56 flex-shrink-0">
             <div className="sticky top-6">
-              <PlacesSidebar locale={locale} recent={recent} />
+              <PlacesSidebar locale={locale} recent={recent} onClearRecent={clearRecent} />
             </div>
           </div>
 

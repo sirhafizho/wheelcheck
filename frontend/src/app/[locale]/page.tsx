@@ -13,6 +13,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { PlacesListPanel } from '@/components/ui/PlacesListPanel';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { useRecentPlaces } from '@/hooks/useRecentPlaces';
 import { usePlaces } from '@/hooks/usePlaces';
 import { MAP_CONFIG } from '@/lib/constants';
 import type { AccessibilityFeature, Place, AccessLevel } from '@/lib/types';
@@ -205,6 +206,7 @@ export default function HomePage() {
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { latitude, longitude, getCurrentPosition, loading: geoLoading } = useGeolocation();
+  const { addRecent } = useRecentPlaces();
 
   // Keyboard shortcut: / to focus search
   useEffect(() => {
@@ -359,6 +361,12 @@ export default function HomePage() {
     setSelectedPlace(place);
     setActivePlaceId(place.id);
     flyToPlace(place);
+    addRecent({
+      id: place.id,
+      name: place.name,
+      category: place.category,
+      accessibilityLevel: place.accessibilityLevel,
+    });
   };
 
   const handleSuggestionSelect = (place: Place) => {
