@@ -66,18 +66,21 @@ export function BottomNav({ locale }: BottomNavProps) {
     },
   ];
 
+  const isHomePage = pathname === `/${locale}`;
+
   return (
     <nav 
-      className="
+      className={`
         fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom
         bg-white/95 backdrop-blur-lg shadow-[0_-1px_3px_rgba(0,0,0,0.05)]
-        lg:bottom-20 lg:left-1/2 lg:-translate-x-1/2 lg:right-auto
-        lg:rounded-2xl lg:shadow-xl lg:ring-1 lg:ring-black/5
-        lg:px-2 lg:w-auto
-      "
+        ${isHomePage
+          ? 'lg:bottom-20 lg:left-1/2 lg:-translate-x-1/2 lg:right-auto lg:rounded-2xl lg:shadow-xl lg:ring-1 lg:ring-black/5 lg:px-2 lg:w-auto'
+          : 'lg:border-t lg:border-gray-200 lg:shadow-none'
+        }
+      `}
       aria-label="Main navigation"
     >
-      <div className="flex items-center justify-around lg:justify-center lg:gap-1 px-2">
+      <div className={`flex items-center justify-around px-2 ${isHomePage ? 'lg:justify-center lg:gap-1' : 'lg:justify-center lg:gap-1 lg:max-w-screen-md lg:mx-auto'}`}>
         {navItems.map((item) => {
           const active = isActive(item.href);
           const Icon = active ? item.activeIcon : item.icon;
