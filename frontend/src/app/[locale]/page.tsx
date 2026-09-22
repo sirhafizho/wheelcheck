@@ -667,7 +667,7 @@ export default function HomePage() {
 
       {/* Places count / loading / refresh banner */}
       {placesLoading && places.length > 0 && (
-        <div className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2">
+        <div className="absolute bottom-24 lg:bottom-36 left-1/2 z-[1000] -translate-x-1/2">
           <div className="flex items-center gap-2 rounded-full bg-gray-900/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md">
             <LoadingSpinner size="sm" />
             <span>{t('home.updatingPlaces')}</span>
@@ -675,7 +675,7 @@ export default function HomePage() {
         </div>
       )}
       {!placesLoading && showRefreshBanner && (
-        <div className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2">
+        <div className="absolute bottom-24 lg:bottom-36 left-1/2 z-[1000] -translate-x-1/2">
           <button
             onClick={() => { setShowRefreshBanner(false); prevPlacesCountRef.current = places.length; }}
             className="flex items-center gap-2 rounded-full bg-emerald-700/90 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md hover:bg-emerald-600 transition-colors"
@@ -686,7 +686,7 @@ export default function HomePage() {
         </div>
       )}
       {!placesLoading && !showRefreshBanner && (
-        <div className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2">
+        <div className="absolute bottom-24 lg:bottom-36 left-1/2 z-[1000] -translate-x-1/2">
           <div className="rounded-full bg-gray-900/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md">
             {places.length} {places.length === 1 ? (isSearching ? 'result' : 'place') : (isSearching ? 'results' : 'places')} {isSearching ? 'found' : 'nearby'}
           </div>
@@ -720,9 +720,8 @@ export default function HomePage() {
         loading={placesLoading}
       />
 
-      {/* Desktop: compact side panel (lg+) */}
       {selectedPlaceData && (
-        <div className="hidden lg:flex absolute right-3 top-[72px] z-[1000] w-[340px] max-h-[calc(100vh-160px)] flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden">
+        <div className="hidden lg:flex absolute right-3 top-1/2 -translate-y-1/2 z-[1000] w-[340px] max-h-[calc(100vh-160px)] flex-col rounded-2xl bg-white/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md overflow-hidden">
           {/* Header */}
           <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3 shrink-0">
             <div className="min-w-0">

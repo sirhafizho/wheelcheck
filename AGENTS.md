@@ -14,6 +14,33 @@ This file documents all infrastructure access, deployment procedures, and enviro
 
 ---
 
+## Local Environment Variables (for AI Agents)
+
+The following credentials are available as environment variables in `~/.zshrc`:
+
+| Variable | Purpose | Notes |
+|----------|---------|-------|
+| `GITHUB_PAT_TOKEN` | GitHub Personal Access Token | Push to repo, create issues/PRs |
+| `HF_TOKEN` | HuggingFace API token | Deploy backend to HF Spaces |
+| `HF_USERNAME` | HuggingFace username (`sirhafizho`) | |
+| `SUPABASE_HOST` | Supabase project host | Direct DB access |
+| `SUPABASE_ACCESS_TOKEN` | Supabase dashboard access | Manage project settings |
+| `SUPABASE_PASSWORD` | Supabase DB password | Connection string |
+
+Usage examples:
+```bash
+# GitHub
+export GITHUB_TOKEN=$GITHUB_PAT_TOKEN && gh repo view
+
+# HuggingFace
+git clone https://sirhafizho:$HF_TOKEN@huggingface.co/spaces/sirhafizho/wheelcheck-api
+
+# Supabase MCP (configured in ~/.config/devin/mcp_config.json)
+# Project ref: luiszfcgmpznsosddsaf
+```
+
+---
+
 ## GitHub Repository
 
 - **Repo:** https://github.com/sirhafizho/wheelcheck
