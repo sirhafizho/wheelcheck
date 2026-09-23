@@ -384,7 +384,19 @@ export default function HomePage() {
   };
 
   const handleMyLocation = () => {
+    if (!navigator.geolocation) return;
     getCurrentPosition();
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFlyToCoords({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          zoom: 16,
+        });
+      },
+      () => { /* error already handled by useGeolocation */ },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+    );
   };
 
   const handleViewportChange = useCallback((viewport: MapViewport) => {
