@@ -44,6 +44,7 @@ type FlyToCoordinates = {
   lat: number;
   lng: number;
   zoom?: number;
+  offset?: boolean; // if true, shift up to clear bottom sheet (place selection)
 };
 
 type MapViewport = {
@@ -355,6 +356,7 @@ export default function HomePage() {
       lat: place.latitude,
       lng: place.longitude,
       zoom: SEARCH_FLY_TO_ZOOM,
+      offset: true,
     });
   };
 
@@ -726,7 +728,7 @@ export default function HomePage() {
         places={places}
         onPlaceClick={(place) => {
           setSelectedPlace(place);
-          setFlyToCoords({ lat: place.latitude, lng: place.longitude, zoom: SEARCH_FLY_TO_ZOOM });
+          setFlyToCoords({ lat: place.latitude, lng: place.longitude, zoom: SEARCH_FLY_TO_ZOOM, offset: true });
         }}
         selectedPlaceId={selectedPlace?.id}
         loading={placesLoading}

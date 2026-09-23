@@ -135,6 +135,7 @@ interface FlyToCoordinates {
   lat: number;
   lng: number;
   zoom?: number;
+  offset?: boolean;
 }
 
 interface MapViewport {
@@ -167,50 +168,52 @@ function MapUpdater({
 }) {
   const map = useMap();
   const previousCenterRef = useRef(center);
-  const flyToRef = useRef(flyTo);
+  const lastFlyToRef = useRef<FlyToCoordinates | undefined>(undefined);
 
+  // Handle flyTo — only fires when flyTo reference changes
   useEffect(() => {
-    flyToRef.current = flyTo;
-  }, [flyTo]);
-
-  useEffect(() => {
-    const previousCenter = previousCenterRef.current;
-
-    // Skip setView if a flyTo is active — flyTo handles positioning already
-    if (flyToRef.current) {
-      previousCenterRef.current = center;
-      return;
-    }
-
-    if (previousCenter.lat !== center.lat || previousCenter.lng !== center.lng) {
-      map.setView([center.lat, center.lng], map.getZoom(), { animate: true });
-      previousCenterRef.current = center;
-    }
-  }, [center, map]);
-
-  useEffect(() => {
-    if (!flyTo) {
-      return;
-    }
+    if (!flyTo) return;
+    // Skip if same object already processed
+    if (lastFlyToRef.current === flyTo) return;
+    lastFlyToRef.current = flyTo;
 
     const targetZoom = flyTo.zoom ?? map.getZoom();
 
-    // Offset the target upward so the marker lands in the upper third of the viewport,
-    // above the bottom sheet which covers the lower ~40% of the screen.
-    const mapHeight = map.getSize().y;
-    const offsetPx = mapHeight * 0.25; // shift marker 25% up from center
-    const targetPoint = map.project([flyTo.lat, flyTo.lng], targetZoom);
-    const offsetTarget = map.unproject(
-      [targetPoint.x, targetPoint.y + offsetPx],
-      targetZoom
-    );
+    if (flyTo.offset) {
+      // Offset upward so marker clears the bottom sheet (place selection)
+      const mapHeight = map.getSize().y;
+      const offsetPx = mapHeight * 0.25;
+      const targetPoint = map.project([flyTo.lat, flyTo.lng], targetZoom);
+      const offsetTarget = map.unproject(
+        [targetPoint.x, targetPoint.y + offsetPx],
+        targetZoom
+      );
+      map.flyTo([offsetTarget.lat, offsetTarget.lng], targetZoom, {
+        animate: true,
+        duration: 1.2,
+      });
+    } else {
+      // Exact center — GPS button, search result, etc.
+      map.flyTo([flyTo.lat, flyTo.lng], targetZoom, {
+        animate: true,
+        duration: 1.0,
+      });
+    }
 
-    map.flyTo([offsetTarget.lat, offsetTarget.lng], targetZoom, {
-      animate: true,
-      duration: 1.2,
-    });
+    // Update previousCenter so setView doesn't re-fire after flyTo completes
     previousCenterRef.current = { lat: flyTo.lat, lng: flyTo.lng };
   }, [flyTo, map]);
+
+  // Handle programmatic center changes (e.g. geolocation hook update)
+  // Only fires when there is no active flyTo to avoid competing animations
+  useEffect(() => {
+    if (flyTo) return; // flyTo owns the animation
+    const previousCenter = previousCenterRef.current;
+    if (previousCenter.lat !== center.lat || previousCenter.lng !== center.lng) {
+      map.setView([center.lat, center.lng], map.getZoom(), { animate: false });
+      previousCenterRef.current = center;
+    }
+  }, [center, flyTo, map]);
 
   return null;
 }
