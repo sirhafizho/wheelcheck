@@ -391,7 +391,7 @@ export default function HomePage() {
         setFlyToCoords({
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-          zoom: 16,
+          zoom: 17,
         });
       },
       () => { /* error already handled by useGeolocation */ },

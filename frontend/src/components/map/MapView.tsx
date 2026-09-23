@@ -167,9 +167,20 @@ function MapUpdater({
 }) {
   const map = useMap();
   const previousCenterRef = useRef(center);
+  const flyToRef = useRef(flyTo);
+
+  useEffect(() => {
+    flyToRef.current = flyTo;
+  }, [flyTo]);
 
   useEffect(() => {
     const previousCenter = previousCenterRef.current;
+
+    // Skip setView if a flyTo is active — flyTo handles positioning already
+    if (flyToRef.current) {
+      previousCenterRef.current = center;
+      return;
+    }
 
     if (previousCenter.lat !== center.lat || previousCenter.lng !== center.lng) {
       map.setView([center.lat, center.lng], map.getZoom(), { animate: true });
@@ -182,8 +193,7 @@ function MapUpdater({
       return;
     }
 
-    // Never zoom out: use whichever is greater — requested zoom or current zoom
-    const targetZoom = Math.max(flyTo.zoom ?? map.getZoom(), map.getZoom());
+    const targetZoom = flyTo.zoom ?? map.getZoom();
 
     // Offset the target upward so the marker lands in the upper third of the viewport,
     // above the bottom sheet which covers the lower ~40% of the screen.
@@ -199,6 +209,7 @@ function MapUpdater({
       animate: true,
       duration: 1.2,
     });
+    previousCenterRef.current = { lat: flyTo.lat, lng: flyTo.lng };
   }, [flyTo, map]);
 
   return null;
@@ -308,7 +319,7 @@ export function MapView({
           spiderfyOnMaxZoom
           zoomToBoundsOnClick
           maxClusterRadius={50}
-          disableClusteringAtZoom={18}
+          disableClusteringAtZoom={16}
           iconCreateFunction={createClusterIcon}
         >
           {places.map((place) => {
